@@ -1,0 +1,51 @@
+---
+import { Image } from "astro:assets";
+import ImpactStackLogo from "@/assets/ingra_logo_pink_nopadding.png";
+---
+
+<header>
+	<div id="headerLeft">
+		<a
+			class="logo"
+			href="https://www.impact-stack.org/"
+			target="_blank"
+		>
+			<Image
+				class="logo"
+				src={ImpactStackLogo}
+				alt="More Onion logo"
+			/>
+		</a>
+		<p>By Impact Stack, for everyone</p>
+	</div>
+	<div>
+		<a
+			href="https://www.impact-stack.org/the-campaign-tactics-generator/"
+			target="_blank"
+			>About</a
+		>
+	</div>
+</header>
+<style>
+	header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1rem;
+
+		& #headerLeft {
+			display: flex;
+			flex-direction: column;
+			font-size: 0.75rem;
+			font-weight: 300;
+
+			& img {
+				margin: 0;
+			}
+
+			& p {
+				margin-bottom: 0;
+			}
+		}
+	}
+</style>

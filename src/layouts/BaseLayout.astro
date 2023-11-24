@@ -1,5 +1,6 @@
 ---
-
+import Header from "@/components/Header.astro";
+import { ViewTransitions } from "astro:transitions";
 ---
 
 <html lang="en">
@@ -23,8 +24,40 @@
 			rel="stylesheet"
 			href="https://assets.more-onion.com/ist/v1/impact-stack.css?rjzina"
 		/>
+		<ViewTransitions />
+		<style>
+			body {
+				display: grid;
+				grid-template-rows: auto 1fr auto;
+				min-height: 100vh;
+			}
+
+			main {
+				padding: 1rem 2rem;
+			}
+		</style>
 	</head>
 	<body>
-		<slot />
+		<Header />
+		<h1>Mobiliser's Toolkit</h1>
+
+		<nav>
+			<ul>
+				<li>
+					<a href="/">Home</a>
+				</li>
+
+				<li>
+					<a href="/about">About</a>
+				</li>
+			</ul>
+		</nav>
+
+		<main>
+			<slot />
+		</main>
+		<footer>
+			<p>Mobiliser's Toolkit</p>
+		</footer>
 	</body>
 </html>
