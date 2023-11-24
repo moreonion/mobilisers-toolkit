@@ -1,0 +1,28 @@
+---
+type Props = {
+	title: string;
+	link: string;
+};
+const { title, link } = Astro.props;
+---
+
+<article class="card">
+	<div class="card-divider">
+		<p>
+			<a href={link}>
+				{title}
+			</a>
+		</p>
+	</div>
+	<div class="card-section">
+		<slot />
+	</div>
+</article>
+
+<style>
+	.card-divider {
+		& p {
+			font-weight: 700;
+		}
+	}
+</style>

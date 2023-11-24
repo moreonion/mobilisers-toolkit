@@ -1,7 +1,57 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import Card from "@/components/Card.astro";
 ---
 
 <BaseLayout>
-	<p>Home page</p>
+	<h1>Mobiliser's Toolkit</h1>
+	<p>Tools for mobilisers</p>
+
+	<div class="grid-x grid-margin-x">
+		<div class="cell medium-6">
+			<Card
+				title="Clean up HTML"
+				link="/clean-html"
+			>
+				<p>
+					Remove all the extra colours, fonts etc when you copy your text out of
+					Word or Google Docs.
+				</p>
+			</Card>
+		</div>
+		<div class="cell medium-6">
+			<Card
+				title="Share Link Generator"
+				link="/clean-html"
+			>
+				<p>
+					Create share links to add to your actions to let your supporters
+					quickly share your action with their friends and family
+				</p>
+			</Card>
+		</div>
+		<div class="cell medium-6">
+			<Card
+				title="Tracking Link Generator"
+				link="/clean-html"
+			>
+				<p>
+					Create UTM tracking links to help you see how your supporters arrived
+					on your action pages
+				</p>
+			</Card>
+		</div>
+		<div class="cell medium-6">
+			<Card
+				title="Prepopulation Link Generator"
+				link="/clean-html"
+			>
+				<p>
+					Impact Stack lets you prefill your form. Quickly generate the link to
+					drop in your email marketing tool that will prefill your form with
+					your supporters' details
+				</p>
+			</Card>
+		</div>
+	</div>
 </BaseLayout>
