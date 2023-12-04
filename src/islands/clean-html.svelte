@@ -64,7 +64,7 @@
 
 			<div class="flex items-center">
 				<button
-					class="button"
+					class="button filled"
 					on:click|preventDefault={handleDirtyHTMLSubmit}
 					type="button">Clean →</button
 				>
@@ -86,19 +86,18 @@
 		<div class="flex flex-col gap-y-4">
 			<div>
 				<button
-					class="button small"
+					class="button small filled text-left"
 					disabled={cleanHTMLCopied}
 					on:click={() => {
 						copyCleanHTMLToClipboard();
 					}}
 				>
-					<span>
-						{#if cleanHTMLCopied === false}
-							Copy clean HTML to clipboard
-						{:else}
-							Copied!
-						{/if}
-					</span>
+					{#if cleanHTMLCopied === false}
+						Copy clean HTML to clipboard
+					{:else}
+						Copied!
+					{/if}
+
 					<!-- <span
 							class:inline={!cleanHTMLCopied}
 							class:hidden={cleanHTMLCopied}
@@ -122,7 +121,7 @@
 
 			<div>
 				<button
-					class="button small"
+					class="button small filled"
 					on:click={() => {
 						resetForm();
 					}}
@@ -147,5 +146,8 @@
 <style>
 	textarea#cleanHTML {
 		min-height: 50vh;
+	}
+	.text-left {
+		text-align: left;
 	}
 </style>
