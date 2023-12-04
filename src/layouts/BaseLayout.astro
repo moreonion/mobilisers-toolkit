@@ -1,6 +1,12 @@
 ---
+import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import { ViewTransitions } from "astro:transitions";
+type Props = {
+	title: string;
+};
+
+const { title } = Astro.props;
 ---
 
 <html lang="en">
@@ -19,7 +25,14 @@ import { ViewTransitions } from "astro:transitions";
 			name="generator"
 			content={Astro.generator}
 		/>
-		<title>Mobiliser's Toolkit</title>
+
+		{
+			Astro.url.pathname === "/" ? (
+				<title>Mobiliser's Toolkit</title>
+			) : (
+				<title>{title}: Mobiliser's Toolkit</title>
+			)
+		}
 		<link
 			rel="stylesheet"
 			href="https://assets.more-onion.com/ist/v1/impact-stack.css?rjzina"
@@ -30,33 +43,16 @@ import { ViewTransitions } from "astro:transitions";
 				display: grid;
 				grid-template-rows: auto 1fr auto;
 				min-height: 100vh;
-			}
-
-			main {
 				padding: 1rem 2rem;
-			}
-
-			footer {
-				padding: 1rem 2rem;
-
-				& p:last-of-type {
-					margin-bottom: 0;
-				}
 			}
 		</style>
 	</head>
 	<body>
-		<div>
-			<Header />
-		</div>
+		<Header title={title} />
+
 		<main>
 			<slot />
 		</main>
-		<footer>
-			<p>
-				Mobiliser's Toolkit is made by <em>more onion</em> – the people behind
-				<a href="https://www.impact-stack.org">Impact Stack</a>.
-			</p>
-		</footer>
+		<Footer />
 	</body>
 </html>
