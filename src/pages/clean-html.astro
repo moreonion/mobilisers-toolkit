@@ -8,6 +8,12 @@ import CleanHTMLIsland from "@/islands/clean-html.svelte";
 	description="A tool to instantly clean up your HTML"
 >
 	<div>
+		<p>
+			Remove all the extra colours, fonts etc when you copy your text out of
+			Word or Google Docs.
+		</p>
+	</div>
+	<div>
 		<CleanHTMLIsland client:load />
 	</div>
 </BaseLayout>
@@ -15,5 +21,9 @@ import CleanHTMLIsland from "@/islands/clean-html.svelte";
 <style>
 	div {
 		padding-top: 2rem;
+	}
+
+	div p {
+		margin-bottom: 0;
 	}
 </style>
