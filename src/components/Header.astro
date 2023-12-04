@@ -6,6 +6,23 @@ type Props = {
 const { title } = Astro.props;
 ---
 
+<style>
+	h1,
+	p {
+		margin-bottom: 0;
+	}
+</style>
+
 <header>
-	<h1>{title}</h1>
+	<h1 class="h2">{title}</h1>
+
+	{
+		Astro.url.pathname !== "/" ? (
+			<p>
+				<a href="/">← Home</a>
+			</p>
+		) : (
+			""
+		)
+	}
 </header>

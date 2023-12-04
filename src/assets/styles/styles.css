@@ -1,0 +1,40 @@
+.flex {
+	display: flex;
+}
+.flex-col {
+	flex-direction: column;
+}
+
+.gap-y-4 {
+	row-gap: 1rem;
+}
+
+.items-center {
+	align-items: center;
+}
+
+.m-0 {
+	margin: 0;
+}
+
+.mt-6 {
+	margin-top: 1.5rem; /* 24px */
+}
+
+.button {
+	margin: 0;
+}
+
+.button,
+.button.disabled,
+.button.disabled:focus,
+.button.disabled:hover,
+.button[disabled],
+.button[disabled]:focus,
+.button[disabled]:hover {
+	color: #8ac128;
+}
+
+summary {
+	cursor: pointer;
+}

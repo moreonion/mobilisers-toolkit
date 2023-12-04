@@ -1,5 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CleanHTMLIsland from "@/islands/clean-html.svelte";
 ---
 
-<BaseLayout title="Mobiliser's Toolkit">hi</BaseLayout>
+<BaseLayout title="Clean HTML">
+	<CleanHTMLIsland client:load />
+</BaseLayout>
