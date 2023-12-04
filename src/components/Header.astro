@@ -1,49 +1,11 @@
 ---
-import { Image } from "astro:assets";
-import ImpactStackLogo from "@/assets/ingra_logo_pink_nopadding.png";
+type Props = {
+	title: string;
+};
+
+const { title } = Astro.props;
 ---
 
 <header>
-	<div id="headerLeft">
-		<a
-			class="logo"
-			href="/"
-		>
-			<Image
-				class="logo"
-				src={ImpactStackLogo}
-				alt="More Onion logo"
-			/>
-		</a>
-		<p>
-			By <a href="https://www.impact-stack.org">Impact Stack</a>, for everyone
-		</p>
-	</div>
-	<div>
-		<a href="/about">About</a>
-	</div>
+	<h1>{title}</h1>
 </header>
-<style>
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1rem;
-
-		& #headerLeft {
-			display: flex;
-			flex-direction: column;
-			font-size: 0.75rem;
-			font-weight: 300;
-
-			& img {
-				margin: 0;
-			}
-
-			& p {
-				margin-bottom: 0;
-				padding: 4px 0;
-			}
-		}
-	}
-</style>
