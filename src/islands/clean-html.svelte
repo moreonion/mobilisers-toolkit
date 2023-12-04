@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { shortcut } from "@svelte-put/shortcut";
 	import { processHTML } from "@/functions/clean-html/processHTML";
-	import Clipboard from "@/assets/images/clipboard.svg";
-	import ClipboardSuccessful from "@/assets/images/clipboardSuccessful.svg";
 
 	let unprocessedHTML = "";
 	let processedHTML = "";
@@ -29,15 +26,15 @@
 		handleDirtyHTMLSubmit();
 	};
 
-	const handleCmdC = (): void => {
-		if (processedHTML === "") return; // only run on clean HTML view
-		copyCleanHTMLToClipboard();
-	};
+	// const handleCmdC = (): void => {
+	// 	if (processedHTML === "") return; // only run on clean HTML view
+	// 	copyCleanHTMLToClipboard();
+	// };
 
-	const handleCmdN = (): void => {
-		if (processedHTML === "") return; // only run on clean HTML view
-		resetForm();
-	};
+	// const handleCmdN = (): void => {
+	// 	if (processedHTML === "") return; // only run on clean HTML view
+	// 	resetForm();
+	// };
 </script>
 
 <svelte:window
@@ -50,7 +47,7 @@
 	}}
 />
 {#if processedHTML === ""}
-	<section>
+	<section class="p-0">
 		<div id="dirtyHTMLForm">
 			<div>
 				<label for="rawHTML"> Enter the HTML you want to clean</label>
@@ -77,10 +74,11 @@
 {/if}
 
 {#if processedHTML !== ""}
-	<section>
+	<section class="p-0">
 		<div>
 			<label for="cleanHTML"> Here's the clean HTML </label>
 			<textarea
+				class="h-full"
 				disabled
 				id="cleanHTML">{processedHTML}</textarea
 			>
@@ -145,3 +143,9 @@
 		</details>
 	</section>
 {/if}
+
+<style>
+	textarea#cleanHTML {
+		min-height: 50vh;
+	}
+</style>

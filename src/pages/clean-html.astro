@@ -3,6 +3,17 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import CleanHTMLIsland from "@/islands/clean-html.svelte";
 ---
 
-<BaseLayout title="Clean HTML">
-	<CleanHTMLIsland client:load />
+<BaseLayout
+	title="Clean HTML"
+	description="A tool to instantly clean up your HTML"
+>
+	<div>
+		<CleanHTMLIsland client:load />
+	</div>
 </BaseLayout>
+
+<style>
+	div {
+		padding-top: 2rem;
+	}
+</style>

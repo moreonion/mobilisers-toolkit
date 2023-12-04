@@ -3,77 +3,48 @@ import { Image } from "astro:assets";
 import ImpactStackLogo from "@/assets/images/ingra_logo_pink_nopadding.png";
 ---
 
-<!--
-<style>
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1rem;
-
-		& #headerLeft {
-			display: flex;
-			flex-direction: column;
-			font-size: 0.75rem;
-			font-weight: 300;
-
-			& img {
-				margin: 0;
-			}
-
-			& p {
-				margin-bottom: 0;
-				padding: 4px 0;
-			}
-		}
-	}
-</style> -->
 <style>
 	footer {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
-		border-top: 0.5px solid grey;
+		padding-top: 4rem;
+		row-gap: 1rem;
+	}
 
-		& #headerLeft {
-			display: flex;
-			flex-direction: column;
-			font-size: 0.75rem;
-			font-weight: 300;
+	footer a:has(> .logo) {
+		border-bottom: 0;
+		box-shadow: none;
+	}
 
-			& img {
-				margin: 0;
-			}
+	@media (min-width: 640px) {
+		footer {
+			flex-direction: row;
+			column-gap: 2rem;
+			align-items: start;
 		}
+	}
 
-		& p:last-of-type {
-			margin-bottom: 0;
-		}
+	.logo {
+		max-width: 200px;
 	}
 </style>
 
 <footer>
-	<div>
-		<div id="headerLeft">
-			<a
-				class="logo"
-				href="/"
-			>
-				<Image
-					class="logo"
-					src={ImpactStackLogo}
-					alt="More Onion logo"
-				/>
-			</a>
-		</div>
+	<a href="/">
+		<Image
+			class="logo"
+			src={ImpactStackLogo}
+			alt="More Onion logo"
+		/>
+	</a>
 
-		<p>
-			Mobiliser's Toolkit is made by <em>more onion</em> – the people behind
-			<a href="https://www.impact-stack.org">Impact Stack</a>.
-		</p>
-
-		<div>
-			<a href="/about">About</a>
-		</div>
-	</div>
+	<p>
+		Mobiliser's Toolkit is made by <a href="https://more-onion.com"
+			><em>more onion</em></a
+		> – the people behind
+		<a href="https://www.impact-stack.org">Impact Stack</a>. <a href="/about"
+			>Read more about Mobiliser's Toolkit</a
+		>.
+	</p>
 </footer>

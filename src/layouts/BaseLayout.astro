@@ -6,9 +6,10 @@ import Header from "@/components/Header.astro";
 import { ViewTransitions } from "astro:transitions";
 type Props = {
 	title: string;
+	description?: string;
 };
 
-const { title } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
 <html lang="en">
@@ -26,6 +27,42 @@ const { title } = Astro.props;
 		<meta
 			name="generator"
 			content={Astro.generator}
+		/>
+
+		{
+			Astro.url.pathname === "/" ? (
+				<>
+					<meta
+						name="title"
+						content="Mobiliser's Toolkit"
+					/>
+					<meta
+						property="og:title"
+						content="Mobiliser's Toolkit"
+					/>
+				</>
+			) : (
+				<>
+					<meta
+						name="title"
+						content={`${title} - Mobiliser's Toolkit`}
+					/>
+					<meta
+						property="og:title"
+						content={`${title} - Mobiliser's Toolkit`}
+					/>
+				</>
+			)
+		}
+
+		<meta
+			name="description"
+			content={description}
+		/>
+
+		<meta
+			property="og:description"
+			content={description}
 		/>
 
 		{
