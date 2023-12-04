@@ -11,11 +11,13 @@ const { title } = Astro.props;
 	p {
 		margin-bottom: 0;
 	}
+
+	h1 {
+		padding-top: 1rem;
+	}
 </style>
 
 <header>
-	<h1 class="h2">{title}</h1>
-
 	{
 		Astro.url.pathname !== "/" ? (
 			<p>
@@ -25,4 +27,5 @@ const { title } = Astro.props;
 			""
 		)
 	}
+	<h1 class="h2">{title}</h1>
 </header>
