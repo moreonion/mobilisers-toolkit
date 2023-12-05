@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CleanHTMLIsland from "@/islands/clean-html.svelte";
+import Feedback from "@/components/Feedback.astro";
 ---
 
 <BaseLayout
@@ -12,10 +13,17 @@ import CleanHTMLIsland from "@/islands/clean-html.svelte";
 		or Google Docs.
 	</p>
 
-	<CleanHTMLIsland client:load />
+	<div id="islandWrapper">
+		<CleanHTMLIsland client:load />
+	</div>
+	<Feedback />
 </BaseLayout>
 
 <style>
+	#islandWrapper {
+		max-width: 36rem;
+	}
+
 	div p {
 		margin-bottom: 0;
 	}

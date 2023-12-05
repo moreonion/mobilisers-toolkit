@@ -1,0 +1,4 @@
+- flesh out about page
+- add some copy to say it's in beta or testing mode
+- add a contact email address asking for feedback or report bugs
+- put it on an Impact Stack subdomain
