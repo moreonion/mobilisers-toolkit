@@ -51,6 +51,7 @@
 		<div id="dirtyHTMLForm">
 			<div>
 				<label for="rawHTML"> Enter the HTML you want to clean</label>
+				<!-- svelte-ignore a11y-autofocus -->
 				<textarea
 					name="rawHTML"
 					id="rawHTML"

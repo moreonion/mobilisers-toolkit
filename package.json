@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.3.1",
     "@astrojs/svelte": "^4.0.4",
     "astro": "^3.6.0",
+    "svelte-persisted-store": "^0.7.0",
     "typescript": "^5.3.2"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "js-beautify": "^1.14.11",
     "sanitize-html": "^2.11.0",
     "sharp": "^0.32.6",
-    "svelte": "^4.2.5"
+    "svelte": "^4.2.5",
+    "zod": "^3.22.4"
   }
 }
