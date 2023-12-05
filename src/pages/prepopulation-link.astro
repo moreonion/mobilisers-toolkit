@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CleanHTMLIsland from "@/islands/clean-html.svelte";
+import PrepopulationLinkIsland from "@/islands/prepopulation-link.svelte";
 import Feedback from "@/components/Feedback.astro";
 ---
 
@@ -10,9 +10,10 @@ import Feedback from "@/components/Feedback.astro";
 >
 	<div id="toolDescription">
 		<p>
-			Impact Stack lets you prefill your form. Generate the link to drop in your
-			email marketing tool that will prefill your form with your supporters'
-			details
+			Generate the link to put into your email marketing tool to <a
+				href="https://support.impact-stack.org/hc/en-us/articles/115001868166-How-to-pre-populate-forms-from-email-URLs"
+				>prefill your Impact Stack form with your supporters' details</a
+			>
 		</p>
 	</div>
 
@@ -20,7 +21,7 @@ import Feedback from "@/components/Feedback.astro";
 		id="islandWrapper"
 		class="mt-6"
 	>
-		<CleanHTMLIsland client:load />
+		<PrepopulationLinkIsland client:load />
 	</div>
 	<Feedback />
 </BaseLayout>
