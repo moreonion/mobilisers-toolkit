@@ -3,10 +3,9 @@
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
 	import { prepopulationLinkStore } from "@/data/prepopulation-link/store";
-	import {
-		emailMarketingProviders,
-		emailMarketingTokens,
-	} from "@/data/prepopulation-link/emailMarketingTokens";
+
+	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
+	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
 
 	function updateAllTags() {
 		// console.log("hi");
@@ -18,6 +17,8 @@
 	let formActionURL = "https://act.your-organisation.org/campaign-name";
 
 	$: formActionURLError = "";
+
+	let customiseFields = true;
 
 	function handleActionURLFormSubmit() {
 		if (isURL(formActionURL)) {
@@ -39,7 +40,7 @@
 	});
 </script>
 
-<section class="p-0">
+<section>
 	<form on:submit|preventDefault={handleActionURLFormSubmit}>
 		<label
 			for="actionPage"
@@ -73,59 +74,9 @@
 </section>
 
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
-	hi
+	<PrefillLink />
 {/if}
-<!--
-{#if $emailProvider !== "" && isURL($actionPageURL)}
-	<section class="mt-12">
-		<h2 class="text-xl mb-4">Select the fields you want to prefill</h2>
-		<table class="table-fixed">
-			<thead class="bg-slate-400 text-white">
-				<tr class="text-left">
-					<th class="table-cell max-w-[30px]">Prefill?</th>
-					<th class="table-cell px-10 min-w-[200px]">Label</th>
-					<th class="table-cell px-10 min-w-[200px]">Form Key</th>
-					<th class="table-cell pr-10 text-left">Tag</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each $formFields as field, index}
-					<tr class="">
-						<td class="text-left">
-							<input
-								type="checkbox"
-								bind:checked={field.prefilled}
-							/>
-						</td>
-						<td class="px-10 text-left">
-							{field.label}
-						</td>
-						<td class="px-10 text-left">
-							{#if field.label === "Custom field"}
-								<input
-									type="text"
-									id="customFormKeyInput"
-									on:keyup={updateFormFieldsWithCustomField(field, index)}
-								/>
-							{:else}
-								{field.formKey}
-							{/if}
-						</td>
-						<td class="text-left">
-							<input
-								type="text"
-								value={field.tag || ""}
-								on:keyup={updateFormFieldsTag(field)}
-							/>
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
 
-		<section class="flex flex-col gap-6 justify-between mt-4">
-			<AddNewFieldButton />
-			<ScrapeButton />
-		</section>
-	</section>
-{/if} -->
+{#if customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
+	<FieldSelector />
+{/if}

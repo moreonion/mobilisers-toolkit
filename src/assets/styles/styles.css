@@ -1,3 +1,27 @@
+section {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+summary {
+	cursor: pointer;
+}
+
+.button {
+	margin: 0;
+}
+
+.button,
+.button.disabled,
+.button.disabled:focus,
+.button.disabled:hover,
+.button[disabled],
+.button[disabled]:focus,
+.button[disabled]:hover {
+	color: #8ac128;
+}
+
+/* Some utility classes borrowed from Tailwind */
+
 .flex {
 	display: flex;
 }
@@ -22,31 +46,13 @@
 }
 
 .mt-6 {
-	margin-top: 1.5rem; /* 24px */
+	margin-top: 1.5rem;
 }
 
 .pt-6 {
-	padding-top: 1.5rem; /* 24px */
+	padding-top: 1.5rem;
 }
 
 .h-full {
 	height: 100%;
-}
-
-.button {
-	margin: 0;
-}
-
-.button,
-.button.disabled,
-.button.disabled:focus,
-.button.disabled:hover,
-.button[disabled],
-.button[disabled]:focus,
-.button[disabled]:hover {
-	color: #8ac128;
-}
-
-summary {
-	cursor: pointer;
 }

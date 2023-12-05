@@ -1,4 +1,29 @@
-export const emailMarketingProviders = [
+import { z } from "zod";
+export type EmailMarketingProviders =
+	| "Mailchimp"
+	| "DotDigital"
+	| "Optimizely"
+	| "CleverReach"
+	| "Other";
+
+type Tokens = {
+	[K in EmailMarketingProviders]: string;
+};
+export type EmailMarketingTokens = {
+	title: Tokens;
+	first_name: Tokens;
+	last_name: Tokens;
+	email: Tokens;
+	phone_number: Tokens;
+	mobile_number: Tokens;
+	street_address: Tokens;
+	city: Tokens;
+	state: Tokens;
+	postcode: Tokens;
+	country: Tokens;
+};
+
+export const emailMarketingProviders: EmailMarketingProviders[] = [
 	"Mailchimp",
 	"DotDigital",
 	"Optimizely",
@@ -6,7 +31,7 @@ export const emailMarketingProviders = [
 	"Other",
 ];
 
-export const emailMarketingTokens = {
+export const emailMarketingTokens: EmailMarketingTokens = {
 	title: {
 		Mailchimp: "",
 		DotDigital: "",
