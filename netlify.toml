@@ -3,6 +3,14 @@ command = "pnpm run build"
 functions = "netlify/functions"
 publish = "dist"
 
+[[headers]]
+for = "/*"
+[headers.values]
+Referrer-Policy = "same-origin"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
+
 ## Uncomment to use this redirect for Single Page Applications like create-react-app.
 ## Not needed for static site generators.
 #[[redirects]]
