@@ -14,7 +14,7 @@ const sanitise = (text: string) => {
 		},
 		transformTags: {
 			b: "strong",
-			span: (tagName, attribs) => {
+			span: (_, attribs) => {
 				const style = attribs.style || "";
 				if (style.includes("font-weight:700")) {
 					return {
