@@ -22,7 +22,7 @@ export type PrepopulationLinkStoreType = {
 export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>(
 	"prepopulationLinkStore",
 	{
-		selectedEmailProvider: "",
+		selectedEmailProvider: "Mailchimp",
 		actionPageURL: "",
 	}
 );
