@@ -54,19 +54,6 @@
 
 	$: selectedProvider =
 		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
-
-	// Sort the prefillFormFields array so fields where token is empty go to the end
-	$: sortedPrefillFormFields = [...$prefillFormFields].sort((a, b) => {
-		// First sort by token. If token is empty, put it to the end
-		if (a.token === "" && b.token !== "") {
-			return 1;
-		}
-		if (b.token === "" && a.token !== "") {
-			return -1;
-		}
-		// Then sort by field id
-		return a.id - b.id;
-	});
 </script>
 
 <section class="mt-6">
@@ -74,7 +61,8 @@
 		class="flex items-center"
 		style="column-gap: 1rem; padding-bottom: 1rem;"
 	>
-		<p class="h5 mb-0">Customise the fields you want to prefill</p>
+		<p class="h5 mb-0">Customise the fields you want to prefill.</p>
+
 		{#if $prepopulationLinkStore.selectedEmailProvider !== "Other"}
 			<button
 				style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
@@ -84,13 +72,24 @@
 			>
 		{/if}
 	</div>
+
+	{#if $prepopulationLinkStore.selectedEmailProvider === "Other"}
+		<p>
+			Add the <em>Token</em> for each form field from your email marketing provider.
+		</p>
+	{/if}
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
 			You'll make your prepopulation link using the <em
 				>{emailMarketingTokenDocumentation[selectedProvider]
 					?.tokenTerminology}s</em
 			>
-			for your supporters in your <em>{selectedProvider}</em> database.
+			for your supporters in your <em>{selectedProvider}</em> database. Add the
+			<em
+				>{emailMarketingTokenDocumentation[selectedProvider]
+					?.tokenTerminology}</em
+			>
+			for any other fields you like.
 			<small
 				><a href={emailMarketingTokenDocumentation[selectedProvider]?.link}
 					>See the {selectedProvider} documentation</a
@@ -114,7 +113,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each sortedPrefillFormFields as field (field.id)}
+			{#each $prefillFormFields as field (field.id)}
 				<tr>
 					<td>
 						<input
@@ -164,6 +163,7 @@
 <style>
 	input[type="checkbox"] {
 		position: relative;
+		transform: scale(1.5);
 	}
 
 	input[type="text"] {
