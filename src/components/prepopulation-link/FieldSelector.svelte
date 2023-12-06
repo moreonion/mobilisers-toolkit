@@ -76,16 +76,18 @@
 
 	{#if $prepopulationLinkStore.selectedEmailProvider === "Other"}
 		<p>
-			Add the <em>Token</em> for each form field from your email marketing provider.
+			Add the relevant token for each form field from your email marketing
+			provider.
 		</p>
 	{/if}
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
-			You'll make your prepopulation link using the <em
+			Make the prepopulation link using <em
 				>{emailMarketingTokenDocumentation[selectedProvider]
 					?.tokenTerminology}s</em
 			>
-			for your supporters in your <em>{selectedProvider}</em> database. Add the
+			for data about your supporters in your <em>{selectedProvider}</em>
+			database. Add the
 			<em
 				>{emailMarketingTokenDocumentation[selectedProvider]
 					?.tokenTerminology}</em
