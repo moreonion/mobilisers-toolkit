@@ -59,9 +59,11 @@
 	<p class="h5">Select the fields you want to prefill</p>
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
-			You'll make your prepopulation link using the {emailMarketingTokenDocumentation[
-				selectedProvider
-			]?.tokenTerminology}s for your supporters in your {selectedProvider} database.
+			You'll make your prepopulation link using the <em
+				>{emailMarketingTokenDocumentation[selectedProvider]
+					?.tokenTerminology}s</em
+			>
+			for your supporters in your <em>{selectedProvider}</em> database.
 			<small
 				><a href={emailMarketingTokenDocumentation[selectedProvider]?.link}
 					>See the {selectedProvider} documentation</a
@@ -76,6 +78,9 @@
 				<!-- <th>Label</th> -->
 				<th>Impact Stack Form Key</th>
 				<th>
+					{#if selectedProvider !== "Other"}
+						{selectedProvider}
+					{/if}
 					{emailMarketingTokenDocumentation[selectedProvider]
 						?.tokenTerminology || "Token"}</th
 				>

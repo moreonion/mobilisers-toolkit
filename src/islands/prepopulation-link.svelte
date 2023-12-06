@@ -8,22 +8,16 @@
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
 	import EmailProviderSelector from "@/components/prepopulation-link/EmailProviderSelector.svelte";
 
-	// We'll bind the current action URL on this page to this variable then keep it in the store if it's valid
-	// let formActionURL = "";
 	// For testing 👇
-	let formActionURL = "https://act.your-organisation.org/campaign-name";
+	// onMount(() => {
+	// 	let formActionURL = "https://act.your-organisation.org/campaign-name";
+	// 	$prepopulationLinkStore.actionPageURL = formActionURL;
+	// });
 
-	$: formActionURLError = "";
-
-	let customiseFields = true;
-
-	function handleActionURLFormSubmit() {
-		if (isURL(formActionURL)) {
-			$prepopulationLinkStore.actionPageURL = formActionURL;
-		} else {
-			formActionURLError = "Enter a valid URL";
-		}
-	}
+	/**
+	 * If true, the user can customise which fields they want to include
+	 */
+	$: customiseFields = false;
 
 	// Get any parameter called url from the URL and keep it in the store.
 	// If no `url` parameter then clear any value from the store
@@ -38,7 +32,7 @@
 </script>
 
 <section>
-	<form on:submit|preventDefault={handleActionURLFormSubmit}>
+	<form>
 		<label
 			for="actionPage"
 			class="flex flex-col"
@@ -48,24 +42,18 @@
 			>
 		</label>
 		<!-- svelte-ignore a11y-autofocus -->
-		<!-- bind:value={$prepopulationLinkStore.actionPageURL} -->
 		<input
 			type="text"
 			name="actionPage"
 			id="actionPage"
 			placeholder="Action page URL"
-			bind:value={formActionURL}
+			bind:value={$prepopulationLinkStore.actionPageURL}
 			autofocus
 		/>
 
-		{#if formActionURLError !== ""}
-			<p>{formActionURLError}</p>
+		{#if !isURL($prepopulationLinkStore.actionPageURL)}
+			<p>Add a valid URL</p>
 		{/if}
-
-		<button
-			class="button filled"
-			type="submit">Next</button
-		>
 	</form>
 </section>
 
@@ -73,12 +61,16 @@
 
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<PrefillLink />
+
+	{#if customiseFields === false}
+		<button
+			class="button tiny"
+			on:click={() => (customiseFields = true)}>Customise fields</button
+		>
+	{/if}
 {/if}
 
 {#if customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<FieldSelector />
-{/if}
-
-{#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<PrefillLink />
 {/if}
