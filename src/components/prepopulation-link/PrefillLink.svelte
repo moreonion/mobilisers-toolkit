@@ -28,7 +28,10 @@
 	<p class="h5 mb-0">Here's the link to put in your email to supporters</p>
 	<p>
 		Supporters clicking this link in an email from you will see an Impact Stack
-		form prefilled with the data you have about them in {selectedProvider}.
+		form prefilled with the data you have about them in {selectedProvider !==
+		"Other"
+			? selectedProvider
+			: "your email marketing tool"}.
 	</p>
 	<div id="prefillLinkWrapper">
 		<Tabs />
