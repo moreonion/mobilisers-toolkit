@@ -1,4 +1,3 @@
-import { z } from "zod";
 export type EmailMarketingProviders =
 	| "Mailchimp"
 	| "DotDigital"
@@ -6,21 +5,25 @@ export type EmailMarketingProviders =
 	| "CleverReach"
 	| "Other";
 
+export type EmailMarketingProviderFields =
+	| "title"
+	| "first_name"
+	| "last_name"
+	| "email"
+	| "phone_number"
+	| "mobile_number"
+	| "street_address"
+	| "city"
+	| "state"
+	| "postcode"
+	| "country";
+
+export type EmailMarketingProviderTokensType = {
+	[K in EmailMarketingProviders]: EmailMarketingProviderFields;
+};
+
 type Tokens = {
 	[K in EmailMarketingProviders]: string;
-};
-export type EmailMarketingTokens = {
-	title: Tokens;
-	first_name: Tokens;
-	last_name: Tokens;
-	email: Tokens;
-	phone_number: Tokens;
-	mobile_number: Tokens;
-	street_address: Tokens;
-	city: Tokens;
-	state: Tokens;
-	postcode: Tokens;
-	country: Tokens;
 };
 
 export const emailMarketingProviders: EmailMarketingProviders[] = [
@@ -31,6 +34,9 @@ export const emailMarketingProviders: EmailMarketingProviders[] = [
 	"Other",
 ];
 
+export type EmailMarketingTokens = {
+	[K in EmailMarketingProviderFields]: Tokens;
+};
 export const emailMarketingTokens: EmailMarketingTokens = {
 	title: {
 		Mailchimp: "",
@@ -110,3 +116,26 @@ export const emailMarketingTokens: EmailMarketingTokens = {
 		Other: "",
 	},
 };
+
+export type EmailMarketingTokenDocumentationType = {
+	[P in EmailMarketingProviders]?: {
+		tokenTerminology: string;
+		link: string;
+	};
+};
+
+export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationType =
+	{
+		Mailchimp: {
+			tokenTerminology: "Merge tag",
+			link: "https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/#Personalization",
+		},
+		DotDigital: {
+			tokenTerminology: "Data field",
+			link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page",
+		},
+		CleverReach: {
+			tokenTerminology: "Variable",
+			link: "https://support.cleverreach.de/hc/en-us/articles/360020682999-Newsletter-Editor-Personalize-Texts",
+		},
+	};

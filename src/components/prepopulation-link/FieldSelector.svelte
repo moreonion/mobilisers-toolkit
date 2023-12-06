@@ -1,8 +1,15 @@
 <script lang="ts">
-	import { prefillFormFields } from "@/data/prepopulation-link/store";
+	import {
+		prefillFormFields,
+		prepopulationLinkStore,
+	} from "@/data/prepopulation-link/store";
 	import type { PrefillFormFieldsType } from "@/data/prepopulation-link/store";
+	import {
+		emailMarketingTokenDocumentation,
+		type EmailMarketingProviders,
+	} from "@/data/prepopulation-link/emailMarketingTokens";
 
-	function updateFormFieldsTag(
+	function updateFormFieldsToken(
 		field: PrefillFormFieldsType,
 		{ custom = false } = {}
 	) {
@@ -14,9 +21,13 @@
 			// If no item found, just return the original state of items without making any changes
 			if (indexToUpdate === -1) return items;
 
-			const updatedField = custom
-				? { ...items[indexToUpdate], tag: field.tag, formKey: field.formKey }
-				: { ...items[indexToUpdate], tag: field.tag };
+			const updatedField: PrefillFormFieldsType = custom
+				? {
+						...items[indexToUpdate],
+						token: field.token,
+						formKey: field.formKey,
+				  }
+				: { ...items[indexToUpdate], token: field.token };
 
 			items[indexToUpdate] = updatedField;
 
@@ -32,24 +43,42 @@
 			label: "Custom field",
 			formKey: "",
 			prefilled: true,
-			tag: "",
+			token: "",
 		};
 
 		prefillFormFields.update((items) => {
 			return [...items, newField];
 		});
 	}
+
+	$: selectedProvider =
+		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
 </script>
 
 <section>
 	<p class="h5">Select the fields you want to prefill</p>
+	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
+		<p>
+			You'll make your prepopulation link using the {emailMarketingTokenDocumentation[
+				selectedProvider
+			]?.tokenTerminology}s for your supporters in your {selectedProvider} database.
+			<small
+				><a href={emailMarketingTokenDocumentation[selectedProvider]?.link}
+					>See the {selectedProvider} documentation</a
+				></small
+			>.
+		</p>
+	{/if}
 	<table>
 		<thead>
 			<tr>
 				<th>Prefill?</th>
-				<th>Label</th>
-				<th>Form Key</th>
-				<th>Tag</th>
+				<!-- <th>Label</th> -->
+				<th>Impact Stack Form Key</th>
+				<th>
+					{emailMarketingTokenDocumentation[selectedProvider]
+						?.tokenTerminology || "Token"}</th
+				>
 			</tr>
 		</thead>
 		<tbody>
@@ -61,15 +90,15 @@
 							bind:checked={field.prefilled}
 						/>
 					</td>
-					<td>
+					<!-- <td>
 						{field.label}
-					</td>
+					</td> -->
 					<td>
 						{#if field.label === "Custom field"}
 							<input
 								type="text"
 								bind:value={field.formKey}
-								on:keyup={() => updateFormFieldsTag(field, { custom: true })}
+								on:keyup={() => updateFormFieldsToken(field, { custom: true })}
 							/>
 						{:else}
 							{field.formKey}
@@ -78,8 +107,8 @@
 					<td>
 						<input
 							type="text"
-							bind:value={field.tag}
-							on:keyup={() => updateFormFieldsTag(field)}
+							bind:value={field.token}
+							on:keyup={() => updateFormFieldsToken(field)}
 						/>
 					</td>
 				</tr>

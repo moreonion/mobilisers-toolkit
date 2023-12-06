@@ -6,10 +6,7 @@
 
 	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
-
-	function updateAllTags() {
-		// console.log("hi");
-	}
+	import EmailProviderSelector from "@/components/prepopulation-link/EmailProviderSelector.svelte";
 
 	// We'll bind the current action URL on this page to this variable then keep it in the store if it's valid
 	// let formActionURL = "";
@@ -57,7 +54,6 @@
 			name="actionPage"
 			id="actionPage"
 			placeholder="Action page URL"
-			on:keyup={updateAllTags}
 			bind:value={formActionURL}
 			autofocus
 		/>
@@ -73,10 +69,16 @@
 	</form>
 </section>
 
+<EmailProviderSelector />
+
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<PrefillLink />
 {/if}
 
 {#if customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<FieldSelector />
+{/if}
+
+{#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
+	<PrefillLink />
 {/if}

@@ -15,8 +15,8 @@
 		});
 
 		prefillLinkPartsArray = checked
-			.filter((field) => field.formKey !== "" && field.tag !== "")
-			.map((field) => `${field.formKey}=${field.tag}`);
+			.filter((field) => field.formKey !== "" && field.token !== "")
+			.map((field) => `${field.formKey}=${field.token}`);
 
 		prefillLinkParts = prefillLinkPartsArray.join("&");
 	}
@@ -30,7 +30,7 @@
 		{/if}
 	</p>
 	<div>
-		<p>
+		<p style="word-break: break-all;">
 			{`${$prepopulationLinkStore.actionPageURL}#p:${prefillLinkParts}`}
 		</p>
 	</div>
