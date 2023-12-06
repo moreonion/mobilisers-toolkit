@@ -4,6 +4,7 @@
 		prefillFormFields,
 	} from "@/data/prepopulation-link/store";
 	import Tabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
+	import { emailMarketingTokenDocumentation } from "@/data/prepopulation-link/emailMarketingTokens";
 
 	let prefillLinkParts: string[] = [];
 
@@ -18,10 +19,17 @@
 			.filter((field) => field.formKey !== "" && field.token !== "")
 			.map((field) => `${field.formKey}=${field.token}`);
 	}
+
+	$: selectedProvider =
+		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
 </script>
 
 <section class="mt-6">
-	<p class="h5 mb-0">Here's your prefill link</p>
+	<p class="h5 mb-0">Here's the link to put in your email to supporters</p>
+	<p>
+		Supporters click this link in an email from you will see an Impact Stack
+		form prefilled with the data you have about them in {selectedProvider}.
+	</p>
 	<div id="prefillLinkWrapper">
 		<Tabs />
 

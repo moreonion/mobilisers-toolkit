@@ -64,6 +64,7 @@
 		<p class="h5 mb-0">Customise the fields you want to prefill.</p>
 
 		{#if $prepopulationLinkStore.selectedEmailProvider !== "Other"}
+			<!-- TODO: make this button look good -->
 			<button
 				style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
 				on:click={() => ($customiseFields = false)}
