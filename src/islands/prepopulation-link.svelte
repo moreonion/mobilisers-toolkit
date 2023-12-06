@@ -61,10 +61,12 @@
 	<PrefillLink />
 
 	{#if $customiseFields === false}
-		<button
-			class="button tiny"
-			on:click={() => ($customiseFields = true)}>Customise fields</button
-		>
+		<div class="mt-6">
+			<button
+				class="button tiny"
+				on:click={() => ($customiseFields = true)}>Customise fields</button
+			>
+		</div>
 	{/if}
 {/if}
 

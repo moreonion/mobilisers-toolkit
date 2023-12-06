@@ -27,23 +27,28 @@
 
 		<!-- prettier-ignore -->
 		<p class="mb-0">
-			{$prepopulationLinkStore.actionPageURL}#p:<wbr/>{#each prefillLinkParts as part, i}<span>{part}</span>{#if i < prefillLinkParts.length - 1}&<wbr/>{/if}{/each}
+			{$prepopulationLinkStore.actionPageURL}#p:<wbr/>{#each prefillLinkParts as part, index}<span>{part}</span>{#if index < prefillLinkParts.length - 1}&<wbr/>{/if}{/each}
 		</p>
 	</div>
 </section>
 
 <style>
 	#prefillLinkWrapper {
-		padding: 1rem 0;
+		margin-top: 0.5rem;
+		border: 1px solid #495057;
+		border-radius: 5px;
+		padding: 0.25rem 0.25rem;
 	}
 
 	#prefillLinkWrapper p {
 		padding: 1rem;
 		word-break: break-words;
+		line-height: 1.75;
 	}
 	#prefillLinkWrapper p span {
 		font-weight: 400;
 		text-decoration: underline;
-		text-underline-offset: 6px;
+		text-underline-offset: 8px;
+		text-decoration-thickness: 2px;
 	}
 </style>
