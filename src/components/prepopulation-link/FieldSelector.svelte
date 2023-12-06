@@ -57,13 +57,18 @@
 </script>
 
 <section class="mt-6">
-	<p class="h5">Select the fields you want to prefill</p>
-	<button
-		class="button tiny"
-		on:click={() => ($customiseFields = false)}
+	<div
+		class="flex items-center"
+		style="column-gap: 1rem; padding-bottom: 1rem;"
 	>
-		Hide
-	</button>
+		<p class="h5 mb-0">Customise the fields you want to prefill</p>
+		<button
+			style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
+			on:click={() => ($customiseFields = false)}
+		>
+			Hide ↑</button
+		>
+	</div>
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
 			You'll make your prepopulation link using the <em
