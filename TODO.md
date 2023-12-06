@@ -3,3 +3,6 @@
 
 prepopulation
 - maybe don't scrape the fields. keep it static.
+
+clean html
+- check the formatting logic. simplify and improve
