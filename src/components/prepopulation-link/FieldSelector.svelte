@@ -54,6 +54,19 @@
 
 	$: selectedProvider =
 		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
+
+	// Sort the prefillFormFields array so fields where token is empty go to the end
+	$: sortedPrefillFormFields = [...$prefillFormFields].sort((a, b) => {
+		// First sort by token. If token is empty, put it to the end
+		if (a.token === "" && b.token !== "") {
+			return 1;
+		}
+		if (b.token === "" && a.token !== "") {
+			return -1;
+		}
+		// Then sort by field id
+		return a.id - b.id;
+	});
 </script>
 
 <section class="mt-6">
@@ -62,12 +75,14 @@
 		style="column-gap: 1rem; padding-bottom: 1rem;"
 	>
 		<p class="h5 mb-0">Customise the fields you want to prefill</p>
-		<button
-			style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
-			on:click={() => ($customiseFields = false)}
-		>
-			Hide ↑</button
-		>
+		{#if $prepopulationLinkStore.selectedEmailProvider !== "Other"}
+			<button
+				style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
+				on:click={() => ($customiseFields = false)}
+			>
+				Hide ↑</button
+			>
+		{/if}
 	</div>
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
@@ -99,7 +114,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each $prefillFormFields as field (field.id)}
+			{#each sortedPrefillFormFields as field (field.id)}
 				<tr>
 					<td>
 						<input
@@ -114,6 +129,7 @@
 						{#if field.label === "Custom field"}
 							<input
 								type="text"
+								placeholder="Impact Stack form key"
 								bind:value={field.formKey}
 								on:keyup={() => updateFormFieldsToken(field, { custom: true })}
 							/>
@@ -124,6 +140,8 @@
 					<td>
 						<input
 							type="text"
+							placeholder={emailMarketingTokenDocumentation[selectedProvider]
+								?.tokenTerminology || "Token"}
 							bind:value={field.token}
 							on:keyup={() => updateFormFieldsToken(field)}
 						/>

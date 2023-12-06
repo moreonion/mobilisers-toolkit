@@ -3,7 +3,7 @@
 		prepopulationLinkStore,
 		prefillFormFields,
 	} from "@/data/prepopulation-link/store";
-	import Tags from "@/components/prepopulation-link/Tags.svelte";
+	import Tabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
 
 	let prefillLinkParts: string[] = [];
 
@@ -23,7 +23,7 @@
 <section class="mt-6">
 	<p class="h5 mb-0">Here's your prefill link</p>
 	<div id="prefillLinkWrapper">
-		<Tags />
+		<Tabs />
 
 		<!-- prettier-ignore -->
 		<p class="mb-0">

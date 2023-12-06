@@ -60,7 +60,7 @@
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<PrefillLink />
 
-	{#if $customiseFields === false}
+	{#if $customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
 		<div class="mt-6">
 			<button
 				class="button tiny"
@@ -70,7 +70,7 @@
 	{/if}
 {/if}
 
-{#if $customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
+{#if ($customiseFields === true || $prepopulationLinkStore.selectedEmailProvider === "Other") && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<FieldSelector />
 	<PrefillLink />
 {/if}
