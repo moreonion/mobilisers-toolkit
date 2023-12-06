@@ -54,10 +54,6 @@
 			bind:value={$prepopulationLinkStore.actionPageURL}
 			autofocus
 		/>
-
-		{#if !isURL($prepopulationLinkStore.actionPageURL)}
-			<p>Add a valid URL</p>
-		{/if}
 	</form>
 </section>
 
