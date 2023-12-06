@@ -4,7 +4,7 @@
 		prefillFormFields,
 	} from "@/data/prepopulation-link/store";
 	import Tabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
-	import { emailMarketingTokenDocumentation } from "@/data/prepopulation-link/emailMarketingTokens";
+	import type { EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
 	let prefillLinkParts: string[] = [];
 
