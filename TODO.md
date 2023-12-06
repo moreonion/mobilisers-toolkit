@@ -2,4 +2,8 @@
 - put it on an Impact Stack subdomain
 
 prepopulation
-- maybe don't scrape the fields. keep it static.
+- check optimizely tokens
+- improve ui and make it nice to look at
+
+clean html
+- check the formatting logic. simplify and improve

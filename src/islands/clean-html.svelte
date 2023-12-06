@@ -47,10 +47,11 @@
 	}}
 />
 {#if processedHTML === ""}
-	<section class="p-0">
+	<section>
 		<div id="dirtyHTMLForm">
 			<div>
 				<label for="rawHTML"> Enter the HTML you want to clean</label>
+				<!-- svelte-ignore a11y-autofocus -->
 				<textarea
 					name="rawHTML"
 					id="rawHTML"
@@ -74,7 +75,7 @@
 {/if}
 
 {#if processedHTML !== ""}
-	<section class="p-0">
+	<section>
 		<div>
 			<label for="cleanHTML"> Here's the clean HTML </label>
 			<textarea
