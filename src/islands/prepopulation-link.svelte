@@ -2,22 +2,26 @@
 	import { onMount } from "svelte";
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
-	import { prepopulationLinkStore } from "@/data/prepopulation-link/store";
+	import {
+		prefillFormFields,
+		prepopulationLinkStore,
+		customiseFields,
+	} from "@/data/prepopulation-link/store";
 
 	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
-	import EmailProviderSelector from "@/components/prepopulation-link/EmailProviderSelector.svelte";
+
+	import { activateTokenSync } from "@/functions/prepopulation-link/activateTokenSync";
+
+	onMount(() => {
+		activateTokenSync(prepopulationLinkStore, prefillFormFields);
+	});
 
 	// For testing 👇
 	// onMount(() => {
 	// 	let formActionURL = "https://act.your-organisation.org/campaign-name";
 	// 	$prepopulationLinkStore.actionPageURL = formActionURL;
 	// });
-
-	/**
-	 * If true, the user can customise which fields they want to include
-	 */
-	$: customiseFields = false;
 
 	// Get any parameter called url from the URL and keep it in the store.
 	// If no `url` parameter then clear any value from the store
@@ -57,20 +61,18 @@
 	</form>
 </section>
 
-<EmailProviderSelector />
-
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<PrefillLink />
 
-	{#if customiseFields === false}
+	{#if $customiseFields === false}
 		<button
 			class="button tiny"
-			on:click={() => (customiseFields = true)}>Customise fields</button
+			on:click={() => ($customiseFields = true)}>Customise fields</button
 		>
 	{/if}
 {/if}
 
-{#if customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
+{#if $customiseFields === true && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<FieldSelector />
 	<PrefillLink />
 {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		customiseFields,
 		prefillFormFields,
 		prepopulationLinkStore,
 	} from "@/data/prepopulation-link/store";
@@ -55,8 +56,14 @@
 		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
 </script>
 
-<section>
+<section class="mt-6">
 	<p class="h5">Select the fields you want to prefill</p>
+	<button
+		class="button tiny"
+		on:click={() => ($customiseFields = false)}
+	>
+		Hide
+	</button>
 	{#if emailMarketingTokenDocumentation[selectedProvider]?.tokenTerminology}
 		<p>
 			You'll make your prepopulation link using the <em

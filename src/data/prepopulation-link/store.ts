@@ -1,6 +1,11 @@
 import { persisted } from "svelte-persisted-store";
 import { writable } from "svelte/store";
 
+/**
+ * If true, the user can customise which fields they want to include
+ */
+export const customiseFields = writable(false);
+
 export type PrefillFormFieldsType = {
 	id: number;
 	label: string;

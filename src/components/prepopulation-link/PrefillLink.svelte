@@ -3,9 +3,9 @@
 		prepopulationLinkStore,
 		prefillFormFields,
 	} from "@/data/prepopulation-link/store";
+	import Tags from "@/components/prepopulation-link/Tags.svelte";
 
-	let prefillLinkParts = "";
-	let prefillLinkPartsArray: string[] = [];
+	let prefillLinkParts: string[] = [];
 
 	let checked = [];
 
@@ -14,24 +14,36 @@
 			return field.prefilled;
 		});
 
-		prefillLinkPartsArray = checked
+		prefillLinkParts = checked
 			.filter((field) => field.formKey !== "" && field.token !== "")
 			.map((field) => `${field.formKey}=${field.token}`);
-
-		prefillLinkParts = prefillLinkPartsArray.join("&");
 	}
 </script>
 
-<section>
-	<p class="h5">
-		Here's your prefill link
-		{#if $prepopulationLinkStore.selectedEmailProvider !== "Other" && $prepopulationLinkStore.selectedEmailProvider !== ""}
-			to drop into {$prepopulationLinkStore.selectedEmailProvider}
-		{/if}
-	</p>
-	<div>
-		<p style="word-break: break-all;">
-			{`${$prepopulationLinkStore.actionPageURL}#p:${prefillLinkParts}`}
+<section class="mt-6">
+	<p class="h5 mb-0">Here's your prefill link</p>
+	<div id="prefillLinkWrapper">
+		<Tags />
+
+		<!-- prettier-ignore -->
+		<p class="mb-0">
+			{$prepopulationLinkStore.actionPageURL}#p:<wbr/>{#each prefillLinkParts as part, i}<span>{part}</span>{#if i < prefillLinkParts.length - 1}&<wbr/>{/if}{/each}
 		</p>
 	</div>
 </section>
+
+<style>
+	#prefillLinkWrapper {
+		padding: 1rem 0;
+	}
+
+	#prefillLinkWrapper p {
+		padding: 1rem;
+		word-break: break-words;
+	}
+	#prefillLinkWrapper p span {
+		font-weight: 400;
+		text-decoration: underline;
+		text-underline-offset: 6px;
+	}
+</style>
