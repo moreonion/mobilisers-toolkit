@@ -3,7 +3,7 @@
 	import { prepopulationLinkStore } from "@/data/prepopulation-link/store";
 </script>
 
-<section>
+<section id="tabsWrapper">
 	{#each emailMarketingProviders as provider}
 		<button
 			class:active={$prepopulationLinkStore.selectedEmailProvider === provider}
@@ -16,9 +16,20 @@
 </section>
 
 <style>
-	section {
+	#tabsWrapper {
 		display: flex;
+		flex-direction: column;
 		column-gap: 0.5rem;
+	}
+
+	@media (min-width: 640px) {
+		#tabsWrapper {
+			flex-direction: row;
+		}
+
+		button {
+			text-align: center;
+		}
 	}
 
 	button {
@@ -32,6 +43,7 @@
 		padding: 0.5rem;
 		cursor: pointer;
 		font-size: 0.875rem;
+		text-align: left;
 	}
 
 	button:hover {
