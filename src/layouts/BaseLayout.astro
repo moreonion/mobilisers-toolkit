@@ -52,12 +52,22 @@ const siteURL = "https://mobilisers-toolkit.netlify.app";
 		/>
 
 		<meta
+			name="twitter:description"
+			content={description}
+		/>
+
+		<meta
 			property="og:image"
 			content={`${siteURL}/${socialImageFilename}`}
 		/>
 		<meta
 			name="twitter:image"
 			content={`${siteURL}/${socialImageFilename}`}
+		/>
+
+		<meta
+			name="twitter:card"
+			content="summary_large_image"
 		/>
 
 		<title>{pageTitle}</title>
@@ -67,6 +77,11 @@ const siteURL = "https://mobilisers-toolkit.netlify.app";
 		/>
 		<meta
 			property="og:title"
+			content={pageTitle}
+		/>
+
+		<meta
+			name="twitter:title"
 			content={pageTitle}
 		/>
 
