@@ -1,5 +1,5 @@
 ---
-import "@/assets/styles/mo_styles.css";
+import "@/assets/styles/ist_brand_styles.css";
 import "@/assets/styles/styles.css";
 
 import Footer from "@/components/Footer.astro";
@@ -8,9 +8,20 @@ import { ViewTransitions } from "astro:transitions";
 type Props = {
 	title: string;
 	description?: string;
+	socialImageFilename: string;
 };
 
-const { title, description } = Astro.props;
+const { title, description, socialImageFilename } = Astro.props;
+
+let pageTitle;
+
+if (Astro.url.pathname === "/") {
+	pageTitle = title;
+} else if (Astro.url.pathname !== "") {
+	pageTitle = `${title}: Mobiliser's Toolkit`;
+}
+
+const siteURL = "https://mobilisers-toolkit.netlify.app";
 ---
 
 <html lang="en">
@@ -30,32 +41,6 @@ const { title, description } = Astro.props;
 			content={Astro.generator}
 		/>
 
-		{
-			Astro.url.pathname === "/" ? (
-				<>
-					<meta
-						name="title"
-						content="Mobiliser's Toolkit"
-					/>
-					<meta
-						property="og:title"
-						content="Mobiliser's Toolkit"
-					/>
-				</>
-			) : (
-				<>
-					<meta
-						name="title"
-						content={`${title} - Mobiliser's Toolkit`}
-					/>
-					<meta
-						property="og:title"
-						content={`${title} - Mobiliser's Toolkit`}
-					/>
-				</>
-			)
-		}
-
 		<meta
 			name="description"
 			content={description}
@@ -66,17 +51,25 @@ const { title, description } = Astro.props;
 			content={description}
 		/>
 
-		{
-			Astro.url.pathname === "/" ? (
-				<title>Mobiliser's Toolkit</title>
-			) : (
-				<title>{title}: Mobiliser's Toolkit</title>
-			)
-		}
-		<!-- <link
-			rel="stylesheet"
-			href="https://assets.more-onion.com/ist/v1/impact-stack.css?rjzina"
-		/> -->
+		<meta
+			property="og:image"
+			content={`${siteURL}/${socialImageFilename}`}
+		/>
+		<meta
+			property="twitter:image"
+			content={`${siteURL}/${socialImageFilename}`}
+		/>
+
+		<title>{pageTitle}</title>
+		<meta
+			name="title"
+			content={pageTitle}
+		/>
+		<meta
+			property="og:title"
+			content={pageTitle}
+		/>
+
 		<ViewTransitions />
 
 		<style>
