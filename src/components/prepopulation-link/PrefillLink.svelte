@@ -3,7 +3,7 @@
 		prepopulationLinkStore,
 		prefillFormFields,
 	} from "@/data/prepopulation-link/store";
-	import Tabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
+	import EmailProviderTabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
 	import type { EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
 	let prefillLinkParts: string[] = [];
@@ -34,7 +34,7 @@
 			: "your email marketing tool"}.
 	</p>
 	<div id="prefillLinkWrapper">
-		<Tabs />
+		<EmailProviderTabs />
 
 		<!-- prettier-ignore -->
 		<p class="mb-0">

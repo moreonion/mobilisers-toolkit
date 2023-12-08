@@ -1,0 +1,37 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ShareLinkIsland from "@/islands/share-link.svelte";
+import Feedback from "@/components/Feedback.astro";
+---
+
+<BaseLayout
+	title="Share Link Generator"
+	description="Create share links for Facebook, WhatsApp, Twitter, Email, Facebook Messenger"
+	socialImageFilename="prepopulation_social.png"
+>
+	<div id="toolDescription">
+		<p>
+			Create share links to add to your actions to let your supporters quickly
+			share your action with their friends and family
+		</p>
+	</div>
+
+	<div
+		id="islandWrapper"
+		class="mt-6"
+	>
+		<ShareLinkIsland client:load />
+	</div>
+	<Feedback />
+</BaseLayout>
+
+<style>
+	#toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	}
+
+	div p {
+		margin-bottom: 0;
+	}
+</style>
