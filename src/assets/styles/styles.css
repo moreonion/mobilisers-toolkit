@@ -6,6 +6,11 @@ summary {
 	cursor: pointer;
 }
 
+input::placeholder,
+textarea::placeholder {
+	font-weight: 700;
+}
+
 .button {
 	margin: 0;
 }
