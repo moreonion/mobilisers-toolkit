@@ -41,10 +41,10 @@ function createTwitterParameters() {
 export const TwitterParameters = createTwitterParameters();
 
 // Writable store for Tags component to bind to
-export const InputHashtags = writable<string[]>([]);
+export const TwitterInputHashtags = writable<string[]>([]);
 
 // Update TwitterParameters when the InputHashtags change
-InputHashtags.subscribe((hashtags) => {
+TwitterInputHashtags.subscribe((hashtags) => {
 	TwitterParameters.setHashtags(hashtags);
 });
 
@@ -73,10 +73,6 @@ export const EmailParameters = writable<EmailParametersType>({
 	body: "",
 });
 
-// LinkToShare.subscribe((value) => {
-// 	EmailParameters.update((params) => ({ ...params, body: `\n\n${value}` }));
-// });
-
 export const emailParametersPartOfURL: Readable<string> = derived(
 	[EmailParameters, encodedLinkToShare],
 	([params, encodedLinkToShare]: [EmailParametersType, string]) => {
@@ -97,6 +93,41 @@ export const emailParametersPartOfURL: Readable<string> = derived(
 	}
 );
 
+type WhatsAppParametersType = {
+	text: string;
+};
+
+export const WhatsAppParameters = writable<WhatsAppParametersType>({
+	text: "",
+});
+
+// Writable store for user input text component to bind to
+export const WhatsAppInputText = writable<string>("");
+
+// Update WhatsAppParameters when the InputText change
+WhatsAppInputText.subscribe((text) => {
+	WhatsAppParameters.update((storeValue) => ({
+		...storeValue,
+		text: text,
+	}));
+});
+
+export const whatsAppParametersPartOfURL: Readable<string> = derived(
+	[WhatsAppParameters, encodedLinkToShare],
+	([params, encodedLinkToShare]: [WhatsAppParametersType, string]) => {
+		let parametersURL = "";
+
+		const textContent =
+			params.text !== ""
+				? `${params.text}\n\n${encodedLinkToShare}`
+				: `${encodedLinkToShare}`;
+
+		parametersURL += `${encodeURIComponent(textContent)}`;
+
+		return parametersURL;
+	}
+);
+
 type ShareLinkType = {
 	platform: ShareTargets;
 	shareLink: string;
@@ -105,12 +136,18 @@ type ShareLinkType = {
 type ShareLinkSchemaType = ShareLinkType[];
 
 export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
-	[encodedLinkToShare, twitterParametersPartOfURL, emailParametersPartOfURL],
-	([encodedLinkToShare, twitterParametersPartOfURL, emailParametersPartOfURL]: [
-		string,
-		string,
-		string
-	]) => [
+	[
+		encodedLinkToShare,
+		twitterParametersPartOfURL,
+		emailParametersPartOfURL,
+		whatsAppParametersPartOfURL,
+	],
+	([
+		encodedLinkToShare,
+		twitterParametersPartOfURL,
+		emailParametersPartOfURL,
+		whatsAppParametersPartOfURL,
+	]: [string, string, string, string]) => [
 		{
 			platform: "Facebook",
 			shareLink: `https://www.facebook.com/sharer/sharer.php?u=${encodedLinkToShare}`,
@@ -121,7 +158,7 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
 		},
 		{
 			platform: "WhatsApp",
-			shareLink: `whatsapp://send?text=${encodedLinkToShare}`,
+			shareLink: `whatsapp://?text=${whatsAppParametersPartOfURL}`,
 		},
 		{
 			platform: "Facebook Messenger",

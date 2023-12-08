@@ -9,7 +9,8 @@
 		allShareLinks,
 		TwitterParameters,
 		EmailParameters,
-		InputHashtags,
+		WhatsAppInputText,
+		TwitterInputHashtags,
 	} from "@/data/share-link/store";
 
 	import Tags from "svelte-tags-input";
@@ -60,48 +61,76 @@
 		in:fade={{ delay: 100 }}
 	>
 		<p class="h5 mb-0">Here are the share links</p>
+		<p>Copy and paste them wherever you need them.</p>
 
 		<div id="shareLinksWrapper">
 			{#each $allShareLinks as { platform, shareLink }}
-				<div>
+				<div
+					class="shareLinkSection"
+					id={platform.toLowerCase().replaceAll(" ", "-")}
+				>
 					<p class="mb-0"><strong>{platform}</strong></p>
-					<p>{shareLink}</p>
+					<p class="mb-0">{shareLink}</p>
 
 					{#if platform === "Twitter"}
-						<label>
-							<small
-								>Template text: {$TwitterParameters.text.length} characters</small
-							>
-							<textarea
-								maxlength="280"
-								rows="3"
-								bind:value={$TwitterParameters.text}
-							></textarea>
-						</label>
-						<div class="hashtagTags">
-							<label for="svelte-tags-input">
-								<small>Type any hashtags (Enter to add a hashtag)</small>
+						<div class="mt-6">
+							<label>
+								<small
+									>Enter template text (optional) (link already added)</small
+								>
+								<textarea
+									id="twitterTextarea"
+									maxlength="280"
+									rows="3"
+									bind:value={$TwitterParameters.text}
+									placeholder="Enter more template text"
+								></textarea>
 							</label>
-							<Tags
-								bind:tags={$InputHashtags}
-								placeholder={"Enter any hashtags for your Twitter share..."}
-								onlyUnique={true}
-							/>
+							<small>{$TwitterParameters.text.length} characters</small>
+							<div class="hashtagTags mt-6">
+								<label for="svelte-tags-input">
+									<small
+										>Type any hashtags (optional) – Enter to add a hashtag</small
+									>
+								</label>
+								<Tags
+									bind:tags={$TwitterInputHashtags}
+									placeholder={"Enter any hashtags for your Twitter share..."}
+									onlyUnique={true}
+								/>
+							</div>
 						</div>
 					{/if}
 
+					{#if platform === "WhatsApp"}
+						<label class="mt-6">
+							<small>Add template text (link already added)</small>
+							<textarea
+								rows="3"
+								bind:value={$WhatsAppInputText}
+								placeholder="Enter template text for WhatsApp"
+							></textarea>
+						</label>
+					{/if}
+
 					{#if platform === "Email"}
-						<label>
-							<small>Subject</small>
-							<input
-								type="text"
-								bind:value={$EmailParameters.subject}
-							/>
-						</label>
-						<label>
-							<small>Body (Link already added)</small>
-							<textarea bind:value={$EmailParameters.body}></textarea>
-						</label>
+						<div class="mt-6">
+							<label>
+								<small>Subject</small>
+								<input
+									type="text"
+									bind:value={$EmailParameters.subject}
+									placeholder="Add a subject line (optional)"
+								/>
+							</label>
+							<label>
+								<small>Body (link already added)</small>
+								<textarea
+									bind:value={$EmailParameters.body}
+									placeholder="Add body text (optional)"
+								></textarea>
+							</label>
+						</div>
 					{/if}
 				</div>
 			{/each}
@@ -168,14 +197,20 @@
 	#shareLinksWrapper {
 		display: flex;
 		flex-direction: column;
-		row-gap: 2rem;
+		row-gap: 2.5rem;
 		margin-top: 0.5rem;
-		border: 1px solid #495057;
-		border-radius: 5px;
 		padding: 0.25rem 0.25rem;
+	}
+
+	.shareLinkSection {
+		padding: 1rem;
+		box-shadow: 0 0 5px #e6e6e6;
 	}
 
 	#shareLinksWrapper p {
 		word-break: break-words;
+	}
+	#twitterTextarea {
+		margin-bottom: 0;
 	}
 </style>
