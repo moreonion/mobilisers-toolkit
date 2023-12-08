@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { fade } from "svelte/transition";
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
 	import {
@@ -51,7 +52,9 @@
 </section>
 
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
-	<PrefillLink />
+	<div in:fade={{ delay: 100 }}>
+		<PrefillLink />
+	</div>
 
 	{#if $customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
 		<div class="mt-6">
@@ -64,6 +67,8 @@
 {/if}
 
 {#if ($customiseFields === true || $prepopulationLinkStore.selectedEmailProvider === "Other") && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
-	<FieldSelector />
+	<div in:fade={{ delay: 100 }}>
+		<FieldSelector />
+	</div>
 	<PrefillLink />
 {/if}

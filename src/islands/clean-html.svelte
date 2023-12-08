@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from "svelte/transition";
 	import { shortcut } from "@svelte-put/shortcut";
 	import { processHTML } from "@/functions/clean-html/processHTML";
 
@@ -75,7 +76,7 @@
 {/if}
 
 {#if processedHTML !== ""}
-	<section>
+	<section in:fade={{ delay: 100 }}>
 		<div>
 			<label for="cleanHTML"> Here's the clean HTML </label>
 			<textarea
