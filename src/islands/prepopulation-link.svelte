@@ -3,19 +3,12 @@
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
 	import {
-		prefillFormFields,
 		prepopulationLinkStore,
 		customiseFields,
 	} from "@/data/prepopulation-link/store";
 
 	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
-
-	import { activateTokenSync } from "@/functions/prepopulation-link/activateTokenSync";
-
-	onMount(() => {
-		activateTokenSync(prepopulationLinkStore, prefillFormFields);
-	});
 
 	// For testing 👇
 	// onMount(() => {

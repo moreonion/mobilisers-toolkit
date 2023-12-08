@@ -1,5 +1,11 @@
 import { persisted } from "svelte-persisted-store";
 import { writable } from "svelte/store";
+import { emailMarketingTokens } from "@/data/prepopulation-link/emailMarketingTokens";
+import type {
+	EmailMarketingProviderFields,
+	EmailMarketingProviders,
+	EmailMarketingTokens,
+} from "@/data/prepopulation-link/emailMarketingTokens";
 
 /**
  * If true, the user can customise which fields they want to include
@@ -15,10 +21,13 @@ export type PrefillFormFieldsType = {
 };
 
 export type PrepopulationLinkStoreType = {
-	selectedEmailProvider: string;
+	selectedEmailProvider: EmailMarketingProviders;
 	actionPageURL: string;
 };
 
+/**
+ * A store that's written to local storage to keep the user's selected email provider and the url they're working with
+ */
 export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>(
 	"prepopulationLinkStore",
 	{
@@ -26,7 +35,11 @@ export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>(
 		actionPageURL: "",
 	}
 );
-export const prefillFormFields = writable<PrefillFormFieldsType[]>([
+
+/**
+ * Initial state for "prefillFormFields" store
+ */
+const initialPrefillFormFields: PrefillFormFieldsType[] = [
 	{
 		id: 1,
 		label: "First Name",
@@ -104,4 +117,48 @@ export const prefillFormFields = writable<PrefillFormFieldsType[]>([
 		prefilled: false,
 		token: "",
 	},
-]);
+];
+
+/**
+ * Svelte store for maintaining state of the form fields that need to be prefilled.
+ */
+export const prefillFormFields = writable<PrefillFormFieldsType[]>(
+	initialPrefillFormFields
+);
+
+/**
+ * Returns the token for given email marketing provider and field.
+ */
+function getToken(
+	emailMarketingTokens: EmailMarketingTokens,
+	key: EmailMarketingProviderFields,
+	selectedEmailProvider: EmailMarketingProviders
+) {
+	if (Object.prototype.hasOwnProperty.call(emailMarketingTokens, key)) {
+		return emailMarketingTokens[key][selectedEmailProvider];
+	}
+	return null;
+}
+export function updatePrefillFormFields(provider: EmailMarketingProviders) {
+	prefillFormFields.update((items) => {
+		return items.map((field) => {
+			const key = field.formKey as EmailMarketingProviderFields;
+
+			if (Object.prototype.hasOwnProperty.call(emailMarketingTokens, key)) {
+				return {
+					...field,
+					token: getToken(emailMarketingTokens, key, provider) ?? "",
+				};
+			}
+
+			return field;
+		});
+	});
+}
+
+/**
+ * Automatically updates all form fields with their appropriate tokens for the specified provider whenever the selectedEmailProvider updates
+ */
+prepopulationLinkStore.subscribe(({ selectedEmailProvider }) => {
+	updatePrefillFormFields(selectedEmailProvider);
+});
