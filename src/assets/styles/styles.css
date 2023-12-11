@@ -30,6 +30,7 @@ textarea::placeholder {
 .flex {
 	display: flex;
 }
+
 .flex-col {
 	flex-direction: column;
 }

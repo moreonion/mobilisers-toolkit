@@ -128,6 +128,8 @@ export const whatsAppParametersPartOfURL: Readable<string> = derived(
 	}
 );
 
+export const useUTMParameters = writable<boolean>(true);
+
 type ShareLinkType = {
 	platform: ShareTargets;
 	shareLink: string;

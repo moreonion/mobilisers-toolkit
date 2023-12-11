@@ -11,15 +11,16 @@
 		EmailParameters,
 		WhatsAppInputText,
 		TwitterInputHashtags,
+		useUTMParameters,
 	} from "@/data/share-link/store";
 
 	import Tags from "svelte-unstyled-tags";
 
 	// For testing 👇
-	// onMount(() => {
-	// 	let link = "https://act.your-organisation.org/campaign-name";
-	// 	$LinkToShare = link;
-	// });
+	onMount(() => {
+		let link = "https://act.your-organisation.org/campaign-name";
+		$LinkToShare = link;
+	});
 
 	// Get any parameter called url from the URL and keep it in the store.
 	// If no `url` parameter then clear any value from the store
@@ -33,7 +34,7 @@
 	});
 </script>
 
-<section>
+<div>
 	<form>
 		<label
 			for="actionPage"
@@ -52,8 +53,18 @@
 			bind:value={$LinkToShare}
 			autofocus
 		/>
+
+		<label for="utmParametersCheckbox">
+			Use some default UTM parameters?
+
+			<input
+				type="checkbox"
+				id="utmParametersCheckbox"
+				bind:value={$useUTMParameters}
+			/>
+		</label>
 	</form>
-</section>
+</div>
 
 {#if $LinkToShare !== "" && isURL($LinkToShare)}
 	<section
@@ -185,6 +196,12 @@
 		row-gap: 2.5rem;
 		margin-top: 0.5rem;
 		padding: 0.25rem 0.25rem;
+	}
+
+	#utmParametersCheckbox {
+		transform: scale(1.5);
+		margin-top: 8px;
+		margin-left: 0.5rem;
 	}
 
 	.shareLinkSection {
