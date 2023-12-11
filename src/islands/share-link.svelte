@@ -13,7 +13,7 @@
 		TwitterInputHashtags,
 	} from "@/data/share-link/store";
 
-	import Tags from "svelte-tags-input";
+	import Tags from "svelte-unstyled-tags";
 
 	// For testing 👇
 	// onMount(() => {
@@ -87,7 +87,7 @@
 								></textarea>
 							</label>
 							<small>{$TwitterParameters.text.length} characters</small>
-							<div class="hashtagTags mt-6">
+							<div class="mt-6">
 								<label for="svelte-tags-input">
 									<small
 										>Type any hashtags (optional) – Enter to add a hashtag</small
@@ -95,7 +95,7 @@
 								</label>
 								<Tags
 									bind:tags={$TwitterInputHashtags}
-									placeholder={"Enter any hashtags for your Twitter share..."}
+									inputPlaceholderText={"Enter any hashtags for your Twitter share..."}
 									onlyUnique={true}
 								/>
 							</div>
@@ -139,59 +139,44 @@
 {/if}
 
 <style>
-	.hashtagTags :global(div.svelte-tags-input-layout) {
-		border: none;
-		padding: 0;
+	:global(.svelteUnstyledTagsWrapper .allTagsWrapper) {
 		display: flex;
 		flex-wrap: wrap;
-	}
-	.hashtagTags :global(div.svelte-tags-input-layout:hover) {
-		border: none;
-	}
-	.hashtagTags :global(div.svelte-tags-input-layout:focus-within) {
-		outline: none;
-	}
-	.hashtagTags :global(input.svelte-tags-input) {
-		flex: 1 0 100%;
-		height: auto;
-		font-size: 100%;
-		font-family: ingra, sans-serif;
-		border-radius: 0;
-		border: 2px solid #2f2f2f;
-		margin-bottom: 0.75rem;
-		padding: 0.625rem;
+		column-gap: 1rem;
+		row-gap: 1rem;
 	}
 
-	.hashtagTags :global(input.svelte-tags-input::placeholder) {
-		font-weight: 700;
+	:global(.svelteUnstyledTagsWrapper .tagsInputWrapper) {
+		display: flex;
+		flex-direction: column;
+		row-gap: 1rem;
 	}
 
-	.hashtagTags :global(input.svelte-tags-input:focus) {
-		border: 2px solid #90c92a;
-		-webkit-box-shadow: 0 0 2px #b8e16e;
-		box-shadow: 0 0 2px #b8e16e;
-	}
-	.hashtagTags :global(div.svelte-tags-input-layout label) {
-		font-size: 80%;
-		font-weight: 700;
-		font-family: inherit;
-	}
-
-	.hashtagTags :global(button.svelte-tags-input-tag) {
+	:global(.svelteUnstyledTagsWrapper .tagWrapper) {
 		display: flex;
 		align-items: center;
-		padding: 0.5rem 1rem;
+		padding: 0.5rem;
 		background-color: #90c92a;
+		color: #ffffff;
 		font-family: inherit;
 		font-size: 80%;
 		font-weight: 700;
+		border-radius: 5px;
 	}
 
-	.hashtagTags
-		:global(button.svelte-tags-input-tag span.svelte-tags-input-tag-remove) {
-		margin: 0;
-		padding-left: 1rem;
-		font-size: 22px;
+	:global(.svelteUnstyledTagsWrapper .removeTagButton) {
+		color: #ffffff;
+		cursor: pointer;
+		margin-left: 1rem;
+		padding: 4px;
+	}
+
+	:global(.svelteUnstyledTagsWrapper .removeTagButton:hover) {
+		outline: 1px solid;
+	}
+
+	:global(.svelteUnstyledTagsWrapper .tagsInput) {
+		flex: 1 0 100%;
 	}
 
 	#shareLinksWrapper {
