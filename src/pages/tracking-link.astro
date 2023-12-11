@@ -1,0 +1,37 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import TrackingLinkIsland from "@/islands/tracking-link.svelte";
+import Feedback from "@/components/Feedback.astro";
+---
+
+<BaseLayout
+	title="Tracking (utm) Link Generator"
+	description="Create UTM tracking links"
+	socialImageFilename="tracking-link.png"
+>
+	<div id="toolDescription">
+		<p>
+			Create UTM tracking links to help you see how your supporters arrived on
+			your action pages
+		</p>
+	</div>
+
+	<div
+		id="islandWrapper"
+		class="mt-6"
+	>
+		<TrackingLinkIsland client:load />
+	</div>
+	<Feedback />
+</BaseLayout>
+
+<style>
+	#toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	}
+
+	div p {
+		margin-bottom: 0;
+	}
+</style>

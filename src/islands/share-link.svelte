@@ -22,7 +22,6 @@
 	// });
 
 	// Get any parameter called url from the URL and keep it in the store.
-	// If no `url` parameter then clear any value from the store
 	let urlParameter: string | null = null;
 
 	onMount(() => {
