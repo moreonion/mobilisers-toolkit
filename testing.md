@@ -1,15 +1,13 @@
 ## Prepopulation link generator
 
 ### test url parameter
-http://localhost:4321/prepopulation-link?url=https%3A%2F%2Fact.your-organisation.org%2Fcampaign-name
-
-### testing JS injection
-http://localhost:4321/prepopulation-link?url=%3Cscript%3Ealert(%27Hi%27)%3C%2Fscript%3E
+https://mobilisers-toolkit.netlify.app/prepopulation-link?url=https%3A%2F%2Fact.your-organisation.org%2Fcampaign-name
 
 ## Share link generator
 
 ### test url parameter
-http://localhost:4321/share-link?url=https%3A%2F%2Fact.your-organisation.org%2Fcampaign-name
+https://mobilisers-toolkit.netlify.app/share-link?url=https%3A%2F%2Fact.your-organisation.org%2Fcampaign-name
 
-### testing JS injection
-http://localhost:4321/share-link?url=%3Cscript%3Ealert(%27Hi%27)%3C%2Fscript%3E
+
+## Tracking link generator
+https://mobilisers-toolkit.netlify.app/tracking-link/?url=https://act.your-organisation.org/campaign-name

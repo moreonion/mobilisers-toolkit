@@ -4,8 +4,8 @@
 prepopulation
 - check optimizely tokens
 
-clean html
-- check the formatting logic. simplify and improve
-
 share link
 - think about how to help people add utm parameters to the share links
+
+tracking link
+- improve descriptions of the utm fields

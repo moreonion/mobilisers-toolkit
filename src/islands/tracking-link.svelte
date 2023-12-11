@@ -57,87 +57,87 @@
 			</section>
 		{/if}
 
-		<label
-			for="utmId"
-			class="flex flex-col"
-			>UTM ID
-			<span> Identify a specific ads campaign </span>
-		</label>
-		<input
-			type="text"
-			name="utmId"
-			id="utmId"
-			bind:value={$utmFormData.UTMID}
-		/>
-
-		<label
-			for="utmSource"
-			class="flex flex-col"
-		>
-			UTM Source
-			<span>Identify a traffic source</span>
-		</label>
-
-		<input
-			type="text"
-			name="utmSource"
-			id="utmSource"
-			bind:value={$utmFormData.UTMSource}
-		/>
-
-		<label
-			for="utmMedium"
-			class="flex flex-col"
-			>UTM Medium <span> Identify a medium such as email</span></label
-		>
-		<input
-			type="text"
-			name="utmMedium"
-			id="utmMedium"
-			bind:value={$utmFormData.UTMMedium}
-		/>
-
-		<label
-			for="utmCampaign"
-			class="flex flex-col"
-			>UTM Campaign
-			<span> Identify a specific product promotion or strategic campaign </span>
-		</label>
-		<input
-			type="text"
-			name="utmCampaign"
-			id="utmCampaign"
-			bind:value={$utmFormData.UTMCampaign}
-		/>
-
-		<label
-			for="utmContent"
-			class="flex flex-col"
-			>UTM Content
-			<span>
-				Used for A/B testing and content-targeted ads. Differentiate ads or
-				links that point to the same URL.
-			</span>
-		</label>
-		<input
-			type="text"
-			name="utmContent"
-			id="utmContent"
-			bind:value={$utmFormData.UTMContent}
-		/>
-
-		<label
-			for="utmTerm"
-			class="flex flex-col"
-			>UTM Term
-			<span> Note the keywords for an ad </span>
-		</label>
-		<input
-			type="text"
-			name="utmTerm"
-			id="utmTerm"
-			bind:value={$utmFormData.UTMTerm}
-		/>
+		{#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)}
+			<div in:fade={{ delay: 100 }}>
+				<label
+					for="utmId"
+					class="flex flex-col"
+					>UTM ID
+					<span> Identify a specific ads campaign </span>
+				</label>
+				<input
+					type="text"
+					name="utmId"
+					id="utmId"
+					bind:value={$utmFormData.UTMID}
+				/>
+				<label
+					for="utmSource"
+					class="flex flex-col"
+				>
+					UTM Source
+					<span>Identify a traffic source</span>
+				</label>
+				<input
+					type="text"
+					name="utmSource"
+					id="utmSource"
+					bind:value={$utmFormData.UTMSource}
+				/>
+				<label
+					for="utmMedium"
+					class="flex flex-col"
+					>UTM Medium <span> Identify a medium such as email</span></label
+				>
+				<input
+					type="text"
+					name="utmMedium"
+					id="utmMedium"
+					bind:value={$utmFormData.UTMMedium}
+				/>
+				<label
+					for="utmCampaign"
+					class="flex flex-col"
+					>UTM Campaign
+					<span>
+						Identify a specific product promotion or strategic campaign
+					</span>
+				</label>
+				<input
+					type="text"
+					name="utmCampaign"
+					id="utmCampaign"
+					bind:value={$utmFormData.UTMCampaign}
+				/>
+				<label
+					for="utmContent"
+					class="flex flex-col"
+					>UTM Content
+					<span>
+						Used for A/B testing and content-targeted ads. Differentiate ads or
+						links that point to the same URL.
+					</span>
+				</label>
+				<input
+					type="text"
+					name="utmContent"
+					id="utmContent"
+					bind:value={$utmFormData.UTMContent}
+				/>
+				<label
+					for="utmTerm"
+					class="flex flex-col"
+					>UTM Term
+					<span> Note the keywords for an ad </span>
+				</label>
+				<input
+					type="text"
+					name="utmTerm"
+					id="utmTerm"
+					bind:value={$utmFormData.UTMTerm}
+				/>
+			</div>
+		{/if}
 	</form>
 </section>
 
