@@ -60,18 +60,6 @@
 		{#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)}
 			<div in:fade={{ delay: 100 }}>
 				<label
-					for="utmId"
-					class="flex flex-col"
-					>UTM ID
-					<span> Identify a specific ads campaign </span>
-				</label>
-				<input
-					type="text"
-					name="utmId"
-					id="utmId"
-					bind:value={$utmFormData.UTMID}
-				/>
-				<label
 					for="utmSource"
 					class="flex flex-col"
 				>
@@ -136,6 +124,19 @@
 					id="utmTerm"
 					bind:value={$utmFormData.UTMTerm}
 				/>
+
+				<label
+					for="utmId"
+					class="flex flex-col"
+					>UTM ID
+					<span> Identify a specific ads campaign </span>
+				</label>
+				<input
+					type="text"
+					name="utmId"
+					id="utmId"
+					bind:value={$utmFormData.UTMID}
+				/>
 			</div>
 		{/if}
 	</form>
@@ -173,12 +174,15 @@
 		display: flex;
 		flex-direction: column;
 		row-gap: 2.5rem;
-		margin-top: 0.5rem;
-		padding: 0.25rem 0.25rem;
+		margin: 1rem 0.5rem;
+		/* padding: 0.25rem 0.25rem; */
+		padding: 1rem;
+		box-shadow: 0 0 5px #e6e6e6;
 	}
 	#trackingLinkWrapper p {
-		padding: 1rem;
+		/* padding: 1rem; */
 		word-break: break-words;
 		line-height: 1.75;
+		margin-bottom: 0;
 	}
 </style>

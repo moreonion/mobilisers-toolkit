@@ -54,9 +54,8 @@
 	<div in:fade={{ delay: 100 }}>
 		<PrefillLink />
 	</div>
-
 	{#if $customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
-		<div class="mt-6">
+		<div class="mt-6 pt-2">
 			<button
 				class="button tiny"
 				on:click={() => ($customiseFields = true)}>Customise fields</button

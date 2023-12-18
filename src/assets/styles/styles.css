@@ -58,6 +58,10 @@ textarea::placeholder {
 	margin-top: 1.5rem;
 }
 
+.pt-2 {
+	padding-top: 0.5rem;
+}
+
 .pt-6 {
 	padding-top: 1.5rem;
 }
