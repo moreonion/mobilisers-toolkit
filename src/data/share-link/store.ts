@@ -149,23 +149,23 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
 		whatsAppParametersPartOfURL,
 	]: [string, string, string, string]) => [
 		{
-			platform: "Facebook",
+			platform: "Facebook" as ShareTargets,
 			shareLink: `https://www.facebook.com/sharer/sharer.php?u=${encodedLinkToShare}`,
 		},
 		{
-			platform: "Twitter",
+			platform: "Twitter" as ShareTargets,
 			shareLink: `https://twitter.com/intent/tweet?url=${encodedLinkToShare}${twitterParametersPartOfURL}`,
 		},
 		{
-			platform: "WhatsApp",
+			platform: "WhatsApp" as ShareTargets,
 			shareLink: `whatsapp://?text=${whatsAppParametersPartOfURL}`,
 		},
 		{
-			platform: "Facebook Messenger",
+			platform: "Facebook Messenger" as ShareTargets,
 			shareLink: `fb-messenger://share?link=${encodedLinkToShare}`,
 		},
 		{
-			platform: "Email",
+			platform: "Email" as ShareTargets,
 			shareLink: `mailto:${emailParametersPartOfURL}`,
 		},
 	]
