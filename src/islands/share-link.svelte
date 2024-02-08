@@ -195,7 +195,7 @@
 	}
 
 	#shareLinksWrapper p {
-		word-break: break-words;
+		word-break: break-word;
 	}
 	#twitterTextarea {
 		margin-bottom: 0;
