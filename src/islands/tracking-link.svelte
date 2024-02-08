@@ -12,12 +12,11 @@
 	// 	$utmFormData.LinkToTrack = link;
 	// });
 
-	// Get any parameter called url from the URL and keep it in the store.
 	let urlParameter: string | null = null;
-
 	onMount(() => {
 		urlParameter = getURLSearchParameter("url");
-		if (urlParameter && isURL(urlParameter)) {
+
+		if (urlParameter !== null && isURL(urlParameter)) {
 			$utmFormData.LinkToTrack = urlParameter;
 		}
 	});
@@ -43,7 +42,8 @@
 			autofocus
 		/>
 
-		{#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)}
+		{#if $utmFormData.LinkToTrack !== ""}
+			<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 			<section
 				class="mt-6"
 				in:fade={{ delay: 100 }}
@@ -57,7 +57,8 @@
 			</section>
 		{/if}
 
-		{#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)}
+		{#if $utmFormData.LinkToTrack !== ""}
+			<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 			<div in:fade={{ delay: 100 }}>
 				<label
 					for="utmSource"
@@ -142,7 +143,8 @@
 	</form>
 </section>
 
-{#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)}
+{#if $utmFormData.LinkToTrack !== ""}
+	<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 	<section
 		class="mt-6"
 		in:fade={{ delay: 100 }}

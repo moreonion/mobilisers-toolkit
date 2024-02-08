@@ -54,7 +54,8 @@
 	</form>
 </section>
 
-{#if $LinkToShare !== "" && isURL($LinkToShare)}
+<!-- {#if $LinkToShare !== "" && isURL($LinkToShare)} -->
+{#if $LinkToShare !== ""}
 	<section
 		class="mt-6"
 		in:fade={{ delay: 100 }}
@@ -70,9 +71,6 @@
 				>
 					<p class="mb-0"><strong>{platform}</strong></p>
 					<p class="mb-0">{shareLink}</p>
-					<div class="pt-2">
-						<a href={`/tracking-link?url=${shareLink}`}>Add tracking</a>
-					</div>
 
 					{#if platform === "Twitter"}
 						<div class="mt-6">
