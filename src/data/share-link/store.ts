@@ -74,8 +74,8 @@ export const EmailParameters = writable<EmailParametersType>({
 });
 
 export const emailParametersPartOfURL: Readable<string> = derived(
-	[EmailParameters, encodedLinkToShare],
-	([params, encodedLinkToShare]: [EmailParametersType, string]) => {
+	[EmailParameters, LinkToShare],
+	([params, LinkToShare]: [EmailParametersType, string]) => {
 		let parametersURL = "";
 
 		if (params.subject !== "") {
@@ -84,8 +84,8 @@ export const emailParametersPartOfURL: Readable<string> = derived(
 
 		const bodyContent =
 			params.body !== ""
-				? `${params.body}\n\n${encodedLinkToShare}`
-				: `${encodedLinkToShare}`;
+				? `${params.body}\n\n${LinkToShare}`
+				: `${LinkToShare}`;
 
 		parametersURL += `&body=${encodeURIComponent(bodyContent)}`;
 
@@ -113,14 +113,14 @@ WhatsAppInputText.subscribe((text) => {
 });
 
 export const whatsAppParametersPartOfURL: Readable<string> = derived(
-	[WhatsAppParameters, encodedLinkToShare],
-	([params, encodedLinkToShare]: [WhatsAppParametersType, string]) => {
+	[WhatsAppParameters, LinkToShare],
+	([params, LinkToShare]: [WhatsAppParametersType, string]) => {
 		let parametersURL = "";
 
 		const textContent =
 			params.text !== ""
-				? `${params.text}\n\n${encodedLinkToShare}`
-				: `${encodedLinkToShare}`;
+				? `${params.text}\n\n${LinkToShare}`
+				: `${LinkToShare}`;
 
 		parametersURL += `${encodeURIComponent(textContent)}`;
 
@@ -158,7 +158,7 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
 		},
 		{
 			platform: "WhatsApp" as ShareTargets,
-			shareLink: `whatsapp://?text=${whatsAppParametersPartOfURL}`,
+			shareLink: `whatsapp://send?text=${whatsAppParametersPartOfURL}`,
 		},
 		{
 			platform: "Facebook Messenger" as ShareTargets,
@@ -166,7 +166,7 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
 		},
 		{
 			platform: "Email" as ShareTargets,
-			shareLink: `mailto:${emailParametersPartOfURL}`,
+			shareLink: `mailto:?${emailParametersPartOfURL}`,
 		},
 	]
 );
