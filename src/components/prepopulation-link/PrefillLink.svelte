@@ -61,7 +61,7 @@
 
 	#prefillLinkWrapper p {
 		padding: 1rem;
-		word-break: break-words;
+		word-break: break-word;
 		line-height: 1.75;
 	}
 	#prefillLinkWrapper p span {
