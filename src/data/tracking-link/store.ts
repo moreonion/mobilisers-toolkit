@@ -24,19 +24,26 @@ export const utmFormData: Writable<UTMFormType> = writable({
 export const OutputLinkToTrack: Readable<string> = derived(
 	utmFormData,
 	($utmFormData: UTMFormType, set: (value: string) => void) => {
-		const {
-			LinkToTrack,
-			UTMSource,
-			UTMID,
-			UTMMedium,
-			UTMCampaign,
-			UTMContent,
-			UTMTerm,
-		} = $utmFormData;
+		const { UTMSource, UTMID, UTMMedium, UTMCampaign, UTMContent, UTMTerm } =
+			$utmFormData;
 
-		let outputLink = LinkToTrack;
+		let { LinkToTrack } = $utmFormData;
+
+		// Ensure LinkToTrack starts with 'https://' if it's not one of the excluded schemes
+		if (
+			!LinkToTrack.startsWith("http://") &&
+			!LinkToTrack.startsWith("https://") &&
+			!LinkToTrack.startsWith("fb-messenger://") &&
+			!LinkToTrack.startsWith("mailto:") &&
+			!LinkToTrack.startsWith("whatsapp://")
+		) {
+			LinkToTrack = `https://${LinkToTrack}`;
+		}
+
 		const paramsArray = [];
 		const hasExistingParams = LinkToTrack.includes("?");
+
+		let outputLink = LinkToTrack;
 
 		if (UTMSource.trim() !== "")
 			paramsArray.push(`utm_source=${encodeURIComponent(UTMSource)}`);
