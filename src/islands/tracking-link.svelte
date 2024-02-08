@@ -181,7 +181,7 @@
 	}
 	#trackingLinkWrapper p {
 		/* padding: 1rem; */
-		word-break: break-words;
+		word-break: break-word;
 		line-height: 1.75;
 		margin-bottom: 0;
 	}
