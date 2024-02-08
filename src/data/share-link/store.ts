@@ -76,18 +76,16 @@ export const EmailParameters = writable<EmailParametersType>({
 export const emailParametersPartOfURL: Readable<string> = derived(
 	[EmailParameters, LinkToShare],
 	([params, LinkToShare]: [EmailParametersType, string]) => {
-		let parametersURL = "";
-
-		if (params.subject !== "") {
-			parametersURL += `&subject=${encodeURIComponent(params.subject)}`;
-		}
-
 		const bodyContent =
 			params.body !== ""
 				? `${params.body}\n\n${LinkToShare}`
 				: `${LinkToShare}`;
 
-		parametersURL += `&body=${encodeURIComponent(bodyContent)}`;
+		let parametersURL = `body=${encodeURIComponent(bodyContent)}`;
+
+		if (params.subject !== "") {
+			parametersURL += `&subject=${encodeURIComponent(params.subject)}`;
+		}
 
 		return parametersURL;
 	}
