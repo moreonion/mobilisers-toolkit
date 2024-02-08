@@ -10,9 +10,23 @@ export type ShareTargets =
 
 export const LinkToShare = writable("");
 
+// Ensure LinkToTrack starts with 'https://' if it's not one of the excluded schemes
+const prefixedLinkToShare = derived(LinkToShare, ($LinkToShare) => {
+	if (
+		!$LinkToShare.startsWith("http://") &&
+		!$LinkToShare.startsWith("https://") &&
+		!$LinkToShare.startsWith("fb-messenger://") &&
+		!$LinkToShare.startsWith("mailto:") &&
+		!$LinkToShare.startsWith("whatsapp://")
+	) {
+		return `https://${$LinkToShare}`;
+	}
+	return $LinkToShare;
+});
+
 const encodedLinkToShare: Readable<string> = derived(
-	LinkToShare,
-	(LinkToShare: string) => encodeURIComponent(LinkToShare)
+	prefixedLinkToShare,
+	(prefixedLinkToShare: string) => encodeURIComponent(prefixedLinkToShare)
 );
 
 type TwitterParametersType = {
@@ -111,14 +125,14 @@ WhatsAppInputText.subscribe((text) => {
 });
 
 export const whatsAppParametersPartOfURL: Readable<string> = derived(
-	[WhatsAppParameters, LinkToShare],
-	([params, LinkToShare]: [WhatsAppParametersType, string]) => {
+	[WhatsAppParameters, prefixedLinkToShare],
+	([params, prefixedLinkToShare]: [WhatsAppParametersType, string]) => {
 		let parametersURL = "";
 
 		const textContent =
 			params.text !== ""
-				? `${params.text}\n\n${LinkToShare}`
-				: `${LinkToShare}`;
+				? `${params.text}\n\n${prefixedLinkToShare}`
+				: `${prefixedLinkToShare}`;
 
 		parametersURL += `${encodeURIComponent(textContent)}`;
 
