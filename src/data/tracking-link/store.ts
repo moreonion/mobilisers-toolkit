@@ -35,19 +35,26 @@ export const OutputLinkToTrack: Readable<string> = derived(
 		} = $utmFormData;
 
 		let outputLink = LinkToTrack;
-		let params = "";
+		const paramsArray = [];
+		const hasExistingParams = LinkToTrack.includes("?");
 
-		if (UTMSource.trim() !== "") params += `utm_source=${UTMSource}&`;
-		if (UTMID.trim() !== "") params += `utm_id=${UTMID}&`;
-		if (UTMMedium.trim() !== "") params += `utm_medium=${UTMMedium}&`;
-		if (UTMCampaign.trim() !== "") params += `utm_campaign=${UTMCampaign}&`;
-		if (UTMContent.trim() !== "") params += `utm_content=${UTMContent}&`;
-		if (UTMTerm.trim() !== "") params += `utm_term=${UTMTerm}&`;
+		if (UTMSource.trim() !== "")
+			paramsArray.push(`utm_source=${encodeURIComponent(UTMSource)}`);
+		if (UTMID.trim() !== "")
+			paramsArray.push(`utm_id=${encodeURIComponent(UTMID)}`);
+		if (UTMMedium.trim() !== "")
+			paramsArray.push(`utm_medium=${encodeURIComponent(UTMMedium)}`);
+		if (UTMCampaign.trim() !== "")
+			paramsArray.push(`utm_campaign=${encodeURIComponent(UTMCampaign)}`);
+		if (UTMContent.trim() !== "")
+			paramsArray.push(`utm_content=${encodeURIComponent(UTMContent)}`);
+		if (UTMTerm.trim() !== "")
+			paramsArray.push(`utm_term=${encodeURIComponent(UTMTerm)}`);
 
-		// Remove trailing '&' and prepend '?'
-		if (params !== "") {
-			params = params.slice(0, -1);
-			outputLink += `?${params}`;
+		// Join parameters with '&' and prepend with '?' or '&' depending on existing parameters
+		if (paramsArray.length > 0) {
+			const params = paramsArray.join("&");
+			outputLink += (hasExistingParams ? "&" : "?") + params;
 		}
 
 		set(outputLink);
