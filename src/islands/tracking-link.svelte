@@ -130,7 +130,10 @@
 					for="utmId"
 					class="flex flex-col"
 					>UTM ID
-					<span> Identify a specific ads campaign </span>
+					<span>
+						Identify a specific ads campaign (not recorded by Impact Stack but
+						might be helpful elsewhere)
+					</span>
 				</label>
 				<input
 					type="text"
