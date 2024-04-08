@@ -76,7 +76,7 @@
 						<div class="mt-6">
 							<label>
 								<small
-									>Enter template text (optional) (link already added)</small
+									>Enter template text (optional – link already added)</small
 								>
 								<textarea
 									id="twitterTextarea"
@@ -104,7 +104,7 @@
 
 					{#if platform === "WhatsApp"}
 						<label class="mt-6">
-							<small>Add template text (link already added)</small>
+							<small>Add template text (optional – link already added)</small>
 							<textarea
 								rows="3"
 								bind:value={$WhatsAppInputText}
@@ -116,7 +116,7 @@
 					{#if platform === "Email"}
 						<div class="mt-6">
 							<label>
-								<small>Subject</small>
+								<small>Subject (optional)</small>
 								<input
 									type="text"
 									bind:value={$EmailParameters.subject}
@@ -124,7 +124,7 @@
 								/>
 							</label>
 							<label>
-								<small>Body (link already added)</small>
+								<small>Body (optional – link already added)</small>
 								<textarea
 									bind:value={$EmailParameters.body}
 									placeholder="Add body text (optional)"
