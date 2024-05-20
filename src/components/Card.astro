@@ -1,32 +1,32 @@
 ---
 type Props = {
-	title: string;
-	link?: string;
+    title: string;
+    link?: string;
 };
 const { title, link } = Astro.props;
 ---
 
 <article class="card h-full">
-	<div class="card-divider">
-		{
-			link ? (
-				<p>
-					<a href={link}>{title}</a>{" "}
-				</p>
-			) : (
-				<p>{title}</p>
-			)
-		}
-	</div>
-	<div class="card-section">
-		<slot />
-	</div>
+    <div class="card-divider">
+        {
+            link ? (
+                <p>
+                    <a href={link}>{title}</a>{" "}
+                </p>
+            ) : (
+                <p>{title}</p>
+            )
+        }
+    </div>
+    <div class="card-section">
+        <slot />
+    </div>
 </article>
 
 <style>
-	.card-divider {
-		& p {
-			font-weight: 700;
-		}
-	}
+    .card-divider {
+        & p {
+            font-weight: 700;
+        }
+    }
 </style>
