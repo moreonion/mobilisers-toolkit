@@ -1,5 +1,10 @@
+#p:first_name=ed
+
+make it so a fragment of an input url goes at the end of the output url on utm tool
+https://demo2.impact-stack.org/petition-test-ty-page-save#p:first_name=ed?utm_source=twitter
+
 - flesh out about page
-- put it on an Impact Stack subdomain and change siteurl in BaseLayout.astro when done
+
 
 prepopulation link
 - check optimizely token name and find docs
