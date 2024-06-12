@@ -46,7 +46,7 @@ function createTwitterParameters() {
 		setHashtags: (hashtags: string[]) =>
 			update((storeValue) => ({
 				...storeValue,
-				hashtags: hashtags.map((hashtag) => hashtag.replace(/\s/g, "_")), // replace spaces
+				hashtags: hashtags.map((hashtag) => hashtag.replace(/[\s-]/g, "_")), // replace spaces and dashes
 			})),
 	};
 }
