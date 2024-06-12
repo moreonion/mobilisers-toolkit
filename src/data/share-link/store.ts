@@ -3,7 +3,7 @@ import type { Readable } from "svelte/store";
 
 export type ShareTargets =
 	| "Facebook"
-	| "Twitter"
+	| "Twitter / X"
 	| "WhatsApp"
 	| "Facebook Messenger"
 	| "Email";
@@ -16,8 +16,7 @@ const prefixedLinkToShare = derived(LinkToShare, ($LinkToShare) => {
 		!$LinkToShare.startsWith("http://") &&
 		!$LinkToShare.startsWith("https://") &&
 		!$LinkToShare.startsWith("fb-messenger://") &&
-		!$LinkToShare.startsWith("mailto:") &&
-		!$LinkToShare.startsWith("whatsapp://")
+		!$LinkToShare.startsWith("mailto:")
 	) {
 		return `https://${$LinkToShare}`;
 	}
@@ -165,12 +164,12 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
 			shareLink: `https://www.facebook.com/sharer/sharer.php?u=${encodedLinkToShare}`,
 		},
 		{
-			platform: "Twitter" as ShareTargets,
-			shareLink: `https://twitter.com/intent/tweet?url=${encodedLinkToShare}${twitterParametersPartOfURL}`,
+			platform: "Twitter / X" as ShareTargets,
+			shareLink: `https://x.com/intent/tweet?url=${encodedLinkToShare}${twitterParametersPartOfURL}`,
 		},
 		{
 			platform: "WhatsApp" as ShareTargets,
-			shareLink: `whatsapp://send?text=${whatsAppParametersPartOfURL}`,
+			shareLink: `https://wa.me/?text=${whatsAppParametersPartOfURL}`,
 		},
 		{
 			platform: "Facebook Messenger" as ShareTargets,

@@ -24,7 +24,7 @@ export const utmFormData: Writable<UTMFormType> = writable({
 export const OutputLinkToTrack: Readable<string> = derived(
 	utmFormData,
 	($utmFormData: UTMFormType, set: (value: string) => void) => {
-		let {
+		const {
 			UTMSource,
 			UTMID,
 			UTMMedium,
@@ -51,8 +51,7 @@ export const OutputLinkToTrack: Readable<string> = derived(
 			linkAsURLObject.protocol !== "http:" &&
 			linkAsURLObject.protocol !== "https:" &&
 			linkAsURLObject.protocol !== "fb-messenger:" &&
-			linkAsURLObject.protocol !== "mailto:" &&
-			linkAsURLObject.protocol !== "whatsapp:"
+			linkAsURLObject.protocol !== "mailto:"
 		) {
 			console.error("Invalid URL scheme:", linkAsURLObject.protocol);
 			return;

@@ -72,7 +72,7 @@
 					<p class="mb-0"><strong>{platform}</strong></p>
 					<p class="mb-0">{shareLink}</p>
 
-					{#if platform === "Twitter"}
+					{#if platform === "Twitter / X"}
 						<div class="mt-6">
 							<label>
 								<small
