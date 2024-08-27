@@ -1,4 +1,8 @@
 ---
+import cleanHTMLImage from '@/assets/images/clean-html.png';
+import prepopulationLinkImage from '@/assets/images/prepopulation-link.png';
+import shareLinkImage from '@/assets/images/share-link.png';
+import trackingLinkImage from '@/assets/images/tracking-link.png';
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/Card.astro";
 ---
@@ -14,8 +18,10 @@ import Card from "@/components/Card.astro";
 	<div class="grid-x grid-margin-x grid-margin-y">
 		<div class="cell medium-6">
 			<Card
-				title="Clean up HTML"
+				title="Clean HTML"
 				link="/clean-html"
+				image={cleanHTMLImage}
+				imageAlt="A shower cleaning the word HTML"
 			>
 				<p>
 					Remove unwanted colours, fonts etc when you copy your text out of Word
@@ -25,8 +31,10 @@ import Card from "@/components/Card.astro";
 		</div>
 		<div class="cell medium-6">
 			<Card
-				title="Prepopulation Link Generator"
+				title="Link Generator to prepopulate forms"
 				link="prepopulation-link"
+				image={prepopulationLinkImage}
+				imageAlt="A chain link"
 			>
 				<p>
 					Impact Stack lets you prefill your form. Quickly generate the link to
@@ -39,7 +47,9 @@ import Card from "@/components/Card.astro";
 			<Card
 				title="Share Link Generator"
 				link="share-link"
-			>
+				image={shareLinkImage}
+				imageAlt="An arrow point up to the word Link"
+				>
 				<p>
 					Create share links for your thank you pages and emails to let your
 					supporters quickly share your action with their friends and family
@@ -48,8 +58,10 @@ import Card from "@/components/Card.astro";
 		</div>
 		<div class="cell medium-6">
 			<Card
-				title="Tracking Link Generator"
+				title="Tracking link generator"
 				link="tracking-link"
+				image={trackingLinkImage}
+				imageAlt="An archery target"
 			>
 				<p>
 					Create UTM tracking links to help you see how your supporters arrived
@@ -59,10 +71,3 @@ import Card from "@/components/Card.astro";
 		</div>
 	</div>
 </BaseLayout>
-
-<style>
-	.soon {
-		font-weight: 700;
-		font-size: 0.85rem;
-	}
-</style>

@@ -22,16 +22,13 @@ const { title } = Astro.props;
 
 <header>
 	{
-		Astro.url.pathname !== "/" ? (
+		Astro.url.pathname !== "/" && (
 			<p>
 				<a href="/">← Home</a>
 			</p>
-		) : (
-			""
 		)
 	}
 	<div id="titleWrapper">
 		<h1 class="h2">{title}</h1>
-		{Astro.url.pathname !== "/about" && <small>(Beta)</small>}
 	</div>
 </header>
