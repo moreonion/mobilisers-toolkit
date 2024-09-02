@@ -1,32 +1,45 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
 type Props = {
-    title: string;
-    link?: string;
+	title: string;
+	link?: string;
+	image?: ImageMetadata;
+	imageAlt: string;
 };
-const { title, link } = Astro.props;
+const { title, link, image, imageAlt } = Astro.props;
 ---
 
 <article class="card h-full">
-    <div class="card-divider">
-        {
-            link ? (
-                <p>
-                    <a href={link}>{title}</a>{" "}
-                </p>
-            ) : (
-                <p>{title}</p>
-            )
-        }
-    </div>
-    <div class="card-section">
-        <slot />
-    </div>
+	{ image && (
+	<div class="card-image">
+		{ link ? (
+		<a href={link}>
+			<Image src={image} alt={imageAlt} />
+		</a>
+		) : (
+		<Image src={image} alt={imageAlt} />
+		) }
+	</div>
+	) }
+
+	<div class="card-section">
+		{ link ? (
+		<h2>
+			<a href={link}>{title}</a>
+		</h2>
+		) : (
+		<h2>{title}</h2>
+		) }
+		<slot />
+	</div>
 </article>
 
 <style>
-    .card-divider {
-        & p {
-            font-weight: 700;
-        }
-    }
+	.card-divider {
+		& p {
+			font-weight: 700;
+		}
+	}
 </style>
