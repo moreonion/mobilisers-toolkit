@@ -11449,7 +11449,7 @@ textarea {
 	-webkit-text-fill-color: transparent;
 	background-size: cover;
 }
-.pink-filled {
+/* .pink-filled {
 	background-image: url(pink_large_background.8e9bb0ec.png);
 }
 .green-filled {
@@ -11457,7 +11457,7 @@ textarea {
 }
 .black-filled {
 	background-image: url(background_dark_image.f65518c2.png);
-}
+} */
 .fieldset.first {
 	padding-left: 0;
 	padding-right: 0;
