@@ -3,6 +3,10 @@ command = "pnpm run build"
 functions = "netlify/functions"
 publish = "dist"
 
+[[edge_functions]]
+function = "block-bots"
+path = "/*"
+
 [[headers]]
 for = "/*"
 [headers.values]
