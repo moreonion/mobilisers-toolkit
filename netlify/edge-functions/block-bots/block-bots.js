@@ -4,7 +4,7 @@ const botUserAgents = [
     "SplitSignalBot",
     "AhrefsBot",
     "Bytespider",
-    "Googlebot",
+    // "Googlebot",
     "AdsBot-Google",
     "Amazonbot",
     "anthropic-ai",
