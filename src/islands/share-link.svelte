@@ -152,7 +152,7 @@
             </label>
             <p>
               <small
-                >LinkedIn appears to change the format for its share links quite
+                >LinkedIn appears to change the format of its share links quite
                 often. Let us know if a LinkedIn link stops working.
               </small>
             </p>
