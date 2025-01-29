@@ -9,7 +9,7 @@ export const SHARE_TARGETS = [
   "Email",
   "Blue Sky",
   "LinkedIn",
-  "Threads",
+  // "Threads",
 ] as const;
 
 type ShareTargets = (typeof SHARE_TARGETS)[number];
@@ -218,39 +218,39 @@ export const linkedInParametersPartOfURL: Readable<string> = derived(
 // Threads docs suggest they support a separate url parameter, but it doesn't seem to work
 // https://developers.facebook.com/docs/threads/threads-web-intents
 
-type ThreadsParametersType = {
-  text: string;
-  // Keeping url in type but not using it currently
-  // url: string;
-};
+// type ThreadsParametersType = {
+//   text: string;
+//   // Keeping url in type but not using it currently
+//   // url: string;
+// };
 
-export const ThreadsParameters = writable<ThreadsParametersType>({
-  text: "",
-  // url: "", // Keeping for future if url parameter support is fixed
-});
+// export const ThreadsParameters = writable<ThreadsParametersType>({
+//   text: "",
+//   // url: "", // Keeping for future if url parameter support is fixed
+// });
 
-export const threadsParametersPartOfURL: Readable<string> = derived(
-  [ThreadsParameters, LinkToShare],
-  ([params, LinkToShare]: [ThreadsParametersType, string]) => {
-    // Combine text and link with newlines between if there's text
-    const combinedText =
-      params.text !== "" ? `${params.text}\n\n${LinkToShare}` : LinkToShare;
+// export const threadsParametersPartOfURL: Readable<string> = derived(
+//   [ThreadsParameters, LinkToShare],
+//   ([params, LinkToShare]: [ThreadsParametersType, string]) => {
+//     // Combine text and link with newlines between if there's text
+//     const combinedText =
+//       params.text !== "" ? `${params.text}\n\n${LinkToShare}` : LinkToShare;
 
-    return `text=${encodeURIComponent(combinedText)}`;
+//     return `text=${encodeURIComponent(combinedText)}`;
 
-    /* Original url parameter implementation - kept for reference
-	  let parametersURL = "";
-	  if (params.text !== "") {
-		parametersURL += `text=${encodeURIComponent(params.text)}`;
-	  }
-	  if (parametersURL !== "") {
-		parametersURL += "&";
-	  }
-	  parametersURL += `url=${encodeURIComponent(LinkToShare)}`;
-	  return parametersURL;
-	  */
-  }
-);
+//     /* Original url parameter implementation - kept for reference
+// 	  let parametersURL = "";
+// 	  if (params.text !== "") {
+// 		parametersURL += `text=${encodeURIComponent(params.text)}`;
+// 	  }
+// 	  if (parametersURL !== "") {
+// 		parametersURL += "&";
+// 	  }
+// 	  parametersURL += `url=${encodeURIComponent(LinkToShare)}`;
+// 	  return parametersURL;
+// 	  */
+//   }
+// );
 
 type ShareLinkType = {
   platform: ShareTargets;
@@ -267,7 +267,7 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
     whatsAppParametersPartOfURL,
     blueSkyParametersPartOfURL,
     linkedInParametersPartOfURL,
-    threadsParametersPartOfURL,
+    // threadsParametersPartOfURL,
   ],
   ([
     encodedLinkToShare,
@@ -276,8 +276,8 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
     whatsAppParametersPartOfURL,
     blueSkyParametersPartOfURL,
     linkedInParametersPartOfURL,
-    threadsParametersPartOfURL,
-  ]: [string, string, string, string, string, string, string]) => [
+  ]: // threadsParametersPartOfURL,
+  [string, string, string, string, string, string]) => [
     {
       platform: "Facebook" as ShareTargets,
       shareLink: `https://www.facebook.com/sharer/sharer.php?u=${encodedLinkToShare}`,
@@ -306,9 +306,9 @@ export const allShareLinks: Readable<ShareLinkSchemaType> = derived(
       platform: "LinkedIn" as ShareTargets,
       shareLink: `https://www.linkedin.com/feed/?shareActive=true&text=${linkedInParametersPartOfURL}`,
     },
-    {
-      platform: "Threads" as ShareTargets,
-      shareLink: `https://www.threads.net/intent/post?${threadsParametersPartOfURL}`,
-    },
+    // {
+    //   platform: "Threads" as ShareTargets,
+    //   shareLink: `https://www.threads.net/intent/post?${threadsParametersPartOfURL}`,
+    // },
   ]
 );

@@ -13,7 +13,7 @@
     TwitterInputHashtags,
     BlueSkyInputText,
     LinkedInInputText,
-    ThreadsParameters,
+    // ThreadsParameters,
   } from "@/data/share-link/store";
 
   import Tags from "svelte-unstyled-tags";
@@ -158,7 +158,7 @@
             </p>
           {/if}
 
-          {#if platform === "Threads"}
+          <!-- {#if platform === "Threads"}
             <div class="mt-6">
               <label>
                 <small>Text (optional – link already added)</small>
@@ -169,7 +169,7 @@
                 />
               </label>
             </div>
-          {/if}
+          {/if} -->
         </div>
       {/each}
     </div>
