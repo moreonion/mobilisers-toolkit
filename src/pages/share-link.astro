@@ -4,11 +4,11 @@ import ShareLinkIsland from "@/islands/share-link.svelte";
 import Feedback from "@/components/Feedback.astro";
 import { SHARE_TARGETS } from "@/data/share-link/store";
 
-const formatter = new Intl.ListFormat('en', { 
+const commaListFormatter = new Intl.ListFormat('en', { 
 	type: 'conjunction', // end with 'and'
 	style: 'long',  // use 'and', not '&'
 });
-const formattedShareTargetsList = formatter.format(SHARE_TARGETS);
+const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
 ---
 
 <BaseLayout
