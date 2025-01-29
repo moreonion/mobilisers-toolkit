@@ -2,17 +2,24 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ShareLinkIsland from "@/islands/share-link.svelte";
 import Feedback from "@/components/Feedback.astro";
+import { SHARE_TARGETS } from "@/data/share-link/store";
+
+const formatter = new Intl.ListFormat('en', { 
+	type: 'conjunction', // end with 'and'
+	style: 'long',  // use 'and', not '&'
+});
+const formattedShareTargetsList = formatter.format(SHARE_TARGETS);
 ---
 
 <BaseLayout
 	title="Share Link Generator"
-	description="Create share links for Facebook, WhatsApp, Twitter, Email, Facebook Messenger"
+	description=`Create share links for ${formattedShareTargetsList}`
 	socialImageFilename="share-link.png"
 >
 	<div id="toolDescription">
+		<p>Create share links for {formattedShareTargetsList}</p>
 		<p>
-			Create share links for your thank you pages and emails to let your
-			supporters quickly share your action with their friends and family.
+			Let your supporters quickly share your action with their friends and family on thank you pages and emails
 		</p>
 		<p>See the Help Centre for more information about how you might <a href="https://support.impact-stack.org/hc/en-us/articles/360018432999-Styling-your-content#your-own-share-button">use these to create custom share buttons in thank you emails</a>.</p>
 	</div>
