@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/svelte": "^5.7.2",
-    "astro": "^4.16.18",
-    "svelte": "^4.2.8",
+    "@astrojs/svelte": "^7.0.4",
+    "astro": "^5.2.5",
+    "svelte": "^5.19.9",
     "svelte-persisted-store": "^0.7.0",
     "svelte-unstyled-tags": "^0.0.13",
-    "typescript": "^5.3.2"
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "@svelte-put/shortcut": "^3.0.0",
@@ -26,5 +26,6 @@
     "sanitize-html": "^2.11.0",
     "sharp": "^0.32.6",
     "zod": "^3.22.4"
-  }
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }

@@ -4,7 +4,7 @@ import "@/assets/styles/styles.css";
 
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 type Props = {
 	title: string;
 	description?: string;
@@ -85,7 +85,7 @@ const siteURL = "https://mobilisers-toolkit.netlify.app";
 			content={pageTitle}
 		/>
 
-		<ViewTransitions />
+		<ClientRouter />
 
 		<style>
 			body {
