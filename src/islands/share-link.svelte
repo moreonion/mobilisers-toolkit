@@ -24,6 +24,23 @@
       shareLinkState.LinkToShare = urlParameter;
     }
   });
+
+  // AI-NOTE: Sync input values to parameter values used in URL generation
+  $effect(() => {
+    shareLinkState.TwitterParameters.hashtags = [...shareLinkState.TwitterInputHashtags];
+  });
+
+  $effect(() => {
+    shareLinkState.WhatsAppParameters.text = shareLinkState.WhatsAppInputText;
+  });
+
+  $effect(() => {
+    shareLinkState.BlueSkyParameters.text = shareLinkState.BlueSkyInputText;
+  });
+
+  $effect(() => {
+    shareLinkState.LinkedInParameters.text = shareLinkState.LinkedInInputText;
+  });
 </script>
 
 <section>

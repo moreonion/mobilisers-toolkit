@@ -1,20 +1,22 @@
 <script lang="ts">
 	import {
 		prepopulationState,
-		prefillFormFields,
 		prepopulationLinkStore,
+		type PrefillFormFieldsType,
 	} from "@/data/prepopulation-link/store.svelte";
-	import type { PrefillFormFieldsType } from "@/data/prepopulation-link/store.svelte";
-	import {
+	import { 
 		emailMarketingTokenDocumentation,
-		type EmailMarketingProviders,
+		type EmailMarketingProviders 
 	} from "@/data/prepopulation-link/emailMarketingTokens";
+
+	// AI-NOTE: Accept form fields from parent component
+	let { formFields = $bindable() }: { formFields: PrefillFormFieldsType[] } = $props();
 
 	function updateFormFieldsToken(
 		field: PrefillFormFieldsType,
 		{ custom = false } = {}
 	) {
-		const indexToUpdate = prefillFormFields.findIndex(
+		const indexToUpdate = formFields.findIndex(
 			(currentField) => currentField.formKey === field.formKey
 		);
 
@@ -23,31 +25,36 @@
 
 		const updatedField: PrefillFormFieldsType = custom
 			? {
-					...prefillFormFields[indexToUpdate],
+					...formFields[indexToUpdate],
 					token: field.token,
 					formKey: field.formKey,
 			  }
-			: { ...prefillFormFields[indexToUpdate], token: field.token };
+			: { ...formFields[indexToUpdate], token: field.token };
 
-		prefillFormFields[indexToUpdate] = updatedField;
+		formFields[indexToUpdate] = updatedField;
 	}
 
-	let lastID = prefillFormFields.length;
+	// AI-NOTE: Get the next ID based on current maximum ID in the array
+	const getNextID = () => {
+		if (formFields.length === 0) return 1;
+		return Math.max(...formFields.map(field => field.id)) + 1;
+	};
 
 	function addExtraField() {
 		const newField: PrefillFormFieldsType = {
-			id: ++lastID,
+			id: getNextID(),
 			label: "Custom field",
 			formKey: "",
 			prefilled: true,
 			token: "",
 		};
 
-		prefillFormFields.push(newField);
+		formFields.push(newField);
 	}
 
-	$: selectedProvider =
-		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
+	const selectedProvider = $derived(
+		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders
+	);
 </script>
 
 <section class="mt-6">
@@ -61,7 +68,7 @@
 			<!-- TODO: make this button look good -->
 			<button
 				style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
-				on:click={() => (prepopulationState.customiseFields = false)}
+				onclick={() => (prepopulationState.customiseFields = false)}
 			>
 				Hide ↑</button
 			>
@@ -110,7 +117,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each prefillFormFields as field (field.id)}
+			{#each formFields as field (field.id)}
 				<tr>
 					<td>
 						<input
@@ -127,7 +134,7 @@
 								type="text"
 								placeholder="Impact Stack form key"
 								bind:value={field.formKey}
-								on:keyup={() => updateFormFieldsToken(field, { custom: true })}
+								onkeyup={() => updateFormFieldsToken(field, { custom: true })}
 							/>
 						{:else}
 							{field.formKey}
@@ -139,7 +146,7 @@
 							placeholder={emailMarketingTokenDocumentation[selectedProvider]
 								?.tokenTerminology || "Token"}
 							bind:value={field.token}
-							on:keyup={() => updateFormFieldsToken(field)}
+							onkeyup={() => updateFormFieldsToken(field)}
 						/>
 					</td>
 				</tr>
@@ -151,7 +158,7 @@
 		<div>
 			<button
 				class="button tiny"
-				on:click={addExtraField}>Add a field</button
+				onclick={addExtraField}>Add a field</button
 			>
 		</div>
 	</section>

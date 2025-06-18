@@ -1,31 +1,32 @@
 <script lang="ts">
 	import {
 		prepopulationLinkStore,
-		prefillFormFields,
+		type PrefillFormFieldsType,
 	} from "@/data/prepopulation-link/store.svelte";
+	import { type EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 	import EmailProviderTabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
-	import type { EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
-	let prefillLinkParts: string[] = [];
+	// AI-NOTE: Accept form fields from parent component
+	let { formFields = $bindable() }: { formFields: PrefillFormFieldsType[] } = $props();
 
-	let checked = [];
-
-	$: {
-		checked = prefillFormFields.filter((field) => {
-			return field.prefilled;
-		});
-
-		prefillLinkParts = checked
+	// AI-NOTE: Convert $: reactive statements to $derived
+	const checked = $derived(formFields.filter((field) => field.prefilled));
+	
+	const prefillLinkParts = $derived(
+		checked
 			.filter((field) => field.formKey !== "" && field.token !== "")
-			.map((field) => `${field.formKey}=${field.token}`);
-	}
+			.map((field) => `${field.formKey}=${field.token}`)
+	);
 
-	$: selectedProvider =
-		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders;
+	const selectedProvider = $derived(
+		$prepopulationLinkStore.selectedEmailProvider as EmailMarketingProviders
+	);
 
-	$: trackingUrl = `/tracking-link?url=${encodeURIComponent(
-		$prepopulationLinkStore.actionPageURL + "#p:" + prefillLinkParts.join("&")
-	)}`;
+	const trackingUrl = $derived(
+		`/tracking-link?url=${encodeURIComponent(
+			$prepopulationLinkStore.actionPageURL + "#p:" + prefillLinkParts.join("&")
+		)}`
+	);
 </script>
 
 <section class="mt-6">

@@ -5,7 +5,11 @@
 	import {
 		prepopulationLinkStore,
 		prepopulationState,
+		createInitialFormFields,
+		basePrefillFormFields,
+		type PrefillFormFieldsType,
 	} from "@/data/prepopulation-link/store.svelte";
+	import { emailMarketingTokens, type EmailMarketingProviderFields, type EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
 	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
@@ -22,6 +26,44 @@
 		const urlParameter = getURLSearchParameter("url");
 		if (urlParameter && isURL(urlParameter)) {
 			$prepopulationLinkStore.actionPageURL = urlParameter;
+		}
+	});
+
+	// AI-NOTE: Helper function to get token for a field and provider
+	function getToken(key: EmailMarketingProviderFields, provider: EmailMarketingProviders): string {
+		if (Object.prototype.hasOwnProperty.call(emailMarketingTokens, key)) {
+			return emailMarketingTokens[key][provider] ?? "";
+		}
+		return "";
+	}
+
+	// AI-NOTE: Create shared mutable form fields for editing, initialized with tokens
+	let sharedFormFields = $state(
+		basePrefillFormFields.map((field) => {
+			const key = field.formKey as EmailMarketingProviderFields;
+			const currentProvider = $prepopulationLinkStore.selectedEmailProvider;
+			
+			return {
+				...field,
+				token: getToken(key, currentProvider),
+			};
+		})
+	);
+
+	// AI-NOTE: Update tokens when provider changes
+	let lastProvider = $state($prepopulationLinkStore.selectedEmailProvider);
+	$effect(() => {
+		const currentProvider = $prepopulationLinkStore.selectedEmailProvider;
+		if (currentProvider !== lastProvider) {
+			lastProvider = currentProvider;
+			// Reset form fields with new tokens
+			sharedFormFields = basePrefillFormFields.map((field) => {
+				const key = field.formKey as EmailMarketingProviderFields;
+				return {
+					...field,
+					token: getToken(key, currentProvider),
+				};
+			});
 		}
 	});
 
@@ -51,7 +93,7 @@
 
 {#if $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<div in:fade={{ delay: 100 }}>
-		<PrefillLink />
+		<PrefillLink bind:formFields={sharedFormFields} />
 	</div>
 	{#if prepopulationState.customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
 		<div class="mt-6 pt-2">
@@ -65,7 +107,7 @@
 
 {#if (prepopulationState.customiseFields === true || $prepopulationLinkStore.selectedEmailProvider === "Other") && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<div in:fade={{ delay: 100 }}>
-		<FieldSelector />
+		<FieldSelector bind:formFields={sharedFormFields} />
 	</div>
-	<PrefillLink />
+	<PrefillLink bind:formFields={sharedFormFields} />
 {/if}

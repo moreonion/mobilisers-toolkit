@@ -7,7 +7,7 @@
 	{#each emailMarketingProviders as provider}
 		<button
 			class:active={$prepopulationLinkStore.selectedEmailProvider === provider}
-			on:click={() =>
+			onclick={() =>
 				($prepopulationLinkStore.selectedEmailProvider = provider)}
 		>
 			{provider}
