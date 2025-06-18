@@ -2,11 +2,8 @@
 // AI-NOTE: Maintaining persisted storage functionality and form field token management
 
 import { persisted } from "svelte-persisted-store";
-import { emailMarketingTokens } from "@/data/prepopulation-link/emailMarketingTokens";
 import type {
-	EmailMarketingProviderFields,
 	EmailMarketingProviders,
-	EmailMarketingTokens,
 } from "@/data/prepopulation-link/emailMarketingTokens";
 
 /**
@@ -123,39 +120,20 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 ];
 
 /**
- * Reactive state for maintaining the form fields that need to be prefilled.
- * AI-NOTE: Using $state with initialization function to avoid circular derivation issues
+ * Base form fields without tokens - to be used in components for deriving final fields
+ * AI-NOTE: Moved derivation to component level where store can be properly accessed
  */
-export const prefillFormFields = $state<PrefillFormFieldsType[]>([...initialPrefillFormFields]);
+export const basePrefillFormFields = [...initialPrefillFormFields];
 
 /**
- * Updates prefill form fields with tokens for the specified provider
- * AI-NOTE: Manual update function for when provider changes or component initializes
+ * Helper function to create initial form fields 
+ * AI-NOTE: Used to initialize shared state in the main component
  */
-export function updatePrefillFormFields(provider: EmailMarketingProviders) {
-	prefillFormFields.forEach((field, index) => {
-		const key = field.formKey as EmailMarketingProviderFields;
-		
-		if (Object.prototype.hasOwnProperty.call(emailMarketingTokens, key)) {
-			prefillFormFields[index] = {
-				...field,
-				token: getToken(emailMarketingTokens, key, provider) ?? "",
-			};
-		}
-	});
+export function createInitialFormFields(): PrefillFormFieldsType[] {
+	return basePrefillFormFields.map((field) => ({
+		...field,
+		token: "", // Will be populated by the component
+	}));
 }
 
-/**
- * Returns the token for given email marketing provider and field.
- */
-function getToken(
-	emailMarketingTokens: EmailMarketingTokens,
-	key: EmailMarketingProviderFields,
-	selectedEmailProvider: EmailMarketingProviders
-) {
-	if (Object.prototype.hasOwnProperty.call(emailMarketingTokens, key)) {
-		return emailMarketingTokens[key][selectedEmailProvider];
-	}
-	return null;
-}
 

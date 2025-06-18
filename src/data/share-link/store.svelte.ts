@@ -78,7 +78,7 @@ export const shareLinkState = $state({
   },
 });
 
-// AI-NOTE: Effects will be handled in components that use this state
+// AI-NOTE: Synchronization effects will be handled in components that use this state
 
 // AI-NOTE: Computed functions that return reactive values based on current state
 export function getPrefixedLinkToShare(): string {
