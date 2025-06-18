@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { emailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
-	import { prepopulationLinkStore } from "@/data/prepopulation-link/store";
+	import { prepopulationLinkStore } from "@/data/prepopulation-link/store.svelte";
 </script>
 
 <section id="tabsWrapper">

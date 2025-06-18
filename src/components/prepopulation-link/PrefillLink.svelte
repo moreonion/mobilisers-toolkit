@@ -2,7 +2,7 @@
 	import {
 		prepopulationLinkStore,
 		prefillFormFields,
-	} from "@/data/prepopulation-link/store";
+	} from "@/data/prepopulation-link/store.svelte";
 	import EmailProviderTabs from "@/components/prepopulation-link/EmailProviderTabs.svelte";
 	import type { EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
@@ -11,7 +11,7 @@
 	let checked = [];
 
 	$: {
-		checked = $prefillFormFields.filter((field) => {
+		checked = prefillFormFields.filter((field) => {
 			return field.prefilled;
 		});
 

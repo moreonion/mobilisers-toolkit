@@ -1,23 +1,22 @@
 <script lang="ts">
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
-	import { onMount } from "svelte";
 	import { fade } from "svelte/transition";
 
-	import { OutputLinkToTrack, utmFormData } from "@/data/tracking-link/store";
+	import { getOutputLinkToTrack, utmFormData } from "@/data/tracking-link/store.svelte";
 
 	// For testing 👇
-	// onMount(() => {
+	// $effect(() => {
 	// 	let link = "https://act.your-organisation.org/campaign-name";
-	// 	$utmFormData.LinkToTrack = link;
+	// 	utmFormData.LinkToTrack = link;
 	// });
 
-	let urlParameter: string | null = null;
-	onMount(() => {
-		urlParameter = getURLSearchParameter("url");
+	// AI-NOTE: Converted from onMount to $effect for Svelte 5 runes
+	$effect(() => {
+		const urlParameter = getURLSearchParameter("url");
 
 		if (urlParameter !== null && isURL(urlParameter)) {
-			$utmFormData.LinkToTrack = urlParameter;
+			utmFormData.LinkToTrack = urlParameter;
 		}
 	});
 </script>
@@ -32,17 +31,17 @@
 				>https://act.your-organisation.org/campaign-name</small
 			>
 		</label>
-		<!-- svelte-ignore a11y-autofocus -->
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="text"
 			name="trackingLink"
 			id="trackingLink"
 			placeholder="Enter the link you want to add tracking to"
-			bind:value={$utmFormData.LinkToTrack}
+			bind:value={utmFormData.LinkToTrack}
 			autofocus
 		/>
 
-		{#if $utmFormData.LinkToTrack !== ""}
+		{#if utmFormData.LinkToTrack !== ""}
 			<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 			<section
 				class="mt-6"
@@ -52,12 +51,12 @@
 				<p>The link will automatically update as you fill in the form</p>
 
 				<div id="trackingLinkWrapper">
-					<p>{$OutputLinkToTrack}</p>
+					<p>{getOutputLinkToTrack()}</p>
 				</div>
 			</section>
 		{/if}
 
-		{#if $utmFormData.LinkToTrack !== ""}
+		{#if utmFormData.LinkToTrack !== ""}
 			<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 			<div in:fade={{ delay: 100 }}>
 				<label
@@ -71,7 +70,7 @@
 					type="text"
 					name="utmSource"
 					id="utmSource"
-					bind:value={$utmFormData.UTMSource}
+					bind:value={utmFormData.UTMSource}
 				/>
 				<label
 					for="utmMedium"
@@ -82,7 +81,7 @@
 					type="text"
 					name="utmMedium"
 					id="utmMedium"
-					bind:value={$utmFormData.UTMMedium}
+					bind:value={utmFormData.UTMMedium}
 				/>
 				<label
 					for="utmCampaign"
@@ -96,7 +95,7 @@
 					type="text"
 					name="utmCampaign"
 					id="utmCampaign"
-					bind:value={$utmFormData.UTMCampaign}
+					bind:value={utmFormData.UTMCampaign}
 				/>
 				<label
 					for="utmContent"
@@ -111,7 +110,7 @@
 					type="text"
 					name="utmContent"
 					id="utmContent"
-					bind:value={$utmFormData.UTMContent}
+					bind:value={utmFormData.UTMContent}
 				/>
 				<label
 					for="utmTerm"
@@ -123,7 +122,7 @@
 					type="text"
 					name="utmTerm"
 					id="utmTerm"
-					bind:value={$utmFormData.UTMTerm}
+					bind:value={utmFormData.UTMTerm}
 				/>
 
 				<label
@@ -139,14 +138,14 @@
 					type="text"
 					name="utmId"
 					id="utmId"
-					bind:value={$utmFormData.UTMID}
+					bind:value={utmFormData.UTMID}
 				/>
 			</div>
 		{/if}
 	</form>
 </section>
 
-{#if $utmFormData.LinkToTrack !== ""}
+{#if utmFormData.LinkToTrack !== ""}
 	<!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
 	<section
 		class="mt-6"
@@ -156,7 +155,7 @@
 		<p>Copy and paste it wherever you need it.</p>
 
 		<div id="trackingLinkWrapper">
-			<p>{$OutputLinkToTrack}</p>
+			<p>{getOutputLinkToTrack()}</p>
 		</div>
 	</section>
 {/if}

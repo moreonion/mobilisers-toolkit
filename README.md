@@ -1,6 +1,6 @@
 # Mobiliser's Toolkit
-A collection of useful tools to make life easier for mobilisers
 
+A collection of useful tools to make life easier for mobilisers
 
 Uses Astro for the site builder
 <https://docs.astro.build/en/getting-started>

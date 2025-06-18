@@ -1,10 +1,10 @@
 <script lang="ts">
 	import {
-		customiseFields,
+		prepopulationState,
 		prefillFormFields,
 		prepopulationLinkStore,
-	} from "@/data/prepopulation-link/store";
-	import type { PrefillFormFieldsType } from "@/data/prepopulation-link/store";
+	} from "@/data/prepopulation-link/store.svelte";
+	import type { PrefillFormFieldsType } from "@/data/prepopulation-link/store.svelte";
 	import {
 		emailMarketingTokenDocumentation,
 		type EmailMarketingProviders,
@@ -14,29 +14,25 @@
 		field: PrefillFormFieldsType,
 		{ custom = false } = {}
 	) {
-		prefillFormFields.update((items) => {
-			const indexToUpdate = items.findIndex(
-				(currentField) => currentField.formKey === field.formKey
-			);
+		const indexToUpdate = prefillFormFields.findIndex(
+			(currentField) => currentField.formKey === field.formKey
+		);
 
-			// If no item found, just return the original state of items without making any changes
-			if (indexToUpdate === -1) return items;
+		// If no item found, just return without making any changes
+		if (indexToUpdate === -1) return;
 
-			const updatedField: PrefillFormFieldsType = custom
-				? {
-						...items[indexToUpdate],
-						token: field.token,
-						formKey: field.formKey,
-				  }
-				: { ...items[indexToUpdate], token: field.token };
+		const updatedField: PrefillFormFieldsType = custom
+			? {
+					...prefillFormFields[indexToUpdate],
+					token: field.token,
+					formKey: field.formKey,
+			  }
+			: { ...prefillFormFields[indexToUpdate], token: field.token };
 
-			items[indexToUpdate] = updatedField;
-
-			return items;
-		});
+		prefillFormFields[indexToUpdate] = updatedField;
 	}
 
-	let lastID = $prefillFormFields.length;
+	let lastID = prefillFormFields.length;
 
 	function addExtraField() {
 		const newField: PrefillFormFieldsType = {
@@ -47,9 +43,7 @@
 			token: "",
 		};
 
-		prefillFormFields.update((items) => {
-			return [...items, newField];
-		});
+		prefillFormFields.push(newField);
 	}
 
 	$: selectedProvider =
@@ -67,7 +61,7 @@
 			<!-- TODO: make this button look good -->
 			<button
 				style="border: 1px solid black; padding: 0.5rem 1rem; cursor: pointer;"
-				on:click={() => ($customiseFields = false)}
+				on:click={() => (prepopulationState.customiseFields = false)}
 			>
 				Hide ↑</button
 			>
@@ -116,7 +110,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each $prefillFormFields as field (field.id)}
+			{#each prefillFormFields as field (field.id)}
 				<tr>
 					<td>
 						<input

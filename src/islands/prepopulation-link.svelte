@@ -1,31 +1,30 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { fade } from "svelte/transition";
 	import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
 	import { isURL } from "@/functions/isURL";
 	import {
 		prepopulationLinkStore,
-		customiseFields,
-	} from "@/data/prepopulation-link/store";
+		prepopulationState,
+	} from "@/data/prepopulation-link/store.svelte";
 
 	import PrefillLink from "@/components/prepopulation-link/PrefillLink.svelte";
 	import FieldSelector from "@/components/prepopulation-link/FieldSelector.svelte";
 
 	// For testing 👇
-	// onMount(() => {
+	// $effect(() => {
 	// 	let formActionURL = "https://act.your-organisation.org/campaign-name";
 	// 	$prepopulationLinkStore.actionPageURL = formActionURL;
 	// });
 
 	// Get any parameter called url from the URL and keep it in the store.
-	let urlParameter: string | null = null;
-
-	onMount(() => {
-		urlParameter = getURLSearchParameter("url");
+	// AI-NOTE: Converted from onMount to $effect for Svelte 5 runes
+	$effect(() => {
+		const urlParameter = getURLSearchParameter("url");
 		if (urlParameter && isURL(urlParameter)) {
 			$prepopulationLinkStore.actionPageURL = urlParameter;
 		}
 	});
+
 </script>
 
 <section>
@@ -38,7 +37,7 @@
 				>https://act.your-organisation.org/campaign-name</small
 			>
 		</label>
-		<!-- svelte-ignore a11y-autofocus -->
+		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="text"
 			name="actionPage"
@@ -54,17 +53,17 @@
 	<div in:fade={{ delay: 100 }}>
 		<PrefillLink />
 	</div>
-	{#if $customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
+	{#if prepopulationState.customiseFields === false && $prepopulationLinkStore.selectedEmailProvider !== "Other"}
 		<div class="mt-6 pt-2">
 			<button
 				class="button tiny"
-				on:click={() => ($customiseFields = true)}>Customise fields</button
+				onclick={() => { prepopulationState.customiseFields = true; }}>Customise fields</button
 			>
 		</div>
 	{/if}
 {/if}
 
-{#if ($customiseFields === true || $prepopulationLinkStore.selectedEmailProvider === "Other") && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
+{#if (prepopulationState.customiseFields === true || $prepopulationLinkStore.selectedEmailProvider === "Other") && $prepopulationLinkStore.actionPageURL !== "" && isURL($prepopulationLinkStore.actionPageURL)}
 	<div in:fade={{ delay: 100 }}>
 		<FieldSelector />
 	</div>
