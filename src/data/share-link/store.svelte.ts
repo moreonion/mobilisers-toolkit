@@ -1,6 +1,3 @@
-// AI-NOTE: Svelte 5 runes-based shared state for share-link functionality
-// AI-NOTE: Using reactive state objects that can be imported and used directly
-
 export const SHARE_TARGETS = [
   "Facebook",
   "Twitter / X",
@@ -48,27 +45,22 @@ type ShareLinkType = {
 
 type ShareLinkSchemaType = ShareLinkType[];
 
-// AI-NOTE: Shared reactive state objects using $state
 export const shareLinkState = $state({
   LinkToShare: "",
   TwitterParameters: {
     text: "",
     hashtags: [] as string[],
   },
-  TwitterInputHashtags: [] as string[],
   EmailParameters: {
     subject: "",
     body: "",
   },
-  WhatsAppInputText: "",
   WhatsAppParameters: {
     text: "",
   },
-  BlueSkyInputText: "",
   BlueSkyParameters: {
     text: "",
   },
-  LinkedInInputText: "",
   LinkedInParameters: {
     text: "",
   },
@@ -78,9 +70,7 @@ export const shareLinkState = $state({
   },
 });
 
-// AI-NOTE: Synchronization effects will be handled in components that use this state
 
-// AI-NOTE: Computed functions that return reactive values based on current state
 export function getPrefixedLinkToShare(): string {
   const link = shareLinkState.LinkToShare;
   if (

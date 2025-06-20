@@ -1,15 +1,8 @@
-// AI-NOTE: Svelte 5 runes-based shared state for prepopulation-link functionality
-// AI-NOTE: Maintaining persisted storage functionality and form field token management
-
 import { persisted } from "svelte-persisted-store";
 import type {
 	EmailMarketingProviders,
 } from "@/data/prepopulation-link/emailMarketingTokens";
 
-/**
- * Shared reactive state for prepopulation functionality
- * AI-NOTE: Using state object pattern to allow mutations from imports
- */
 export const prepopulationState = $state({
 	customiseFields: false,
 });
@@ -33,10 +26,7 @@ export type PrepopulationLinkStoreType = {
 	actionPageURL: string;
 };
 
-/**
- * A persisted store that's written to local storage to keep the user's selected email provider and the url they're working with
- * AI-NOTE: Keeping persisted store for localStorage functionality - uses traditional $ prefix syntax in components
- */
+
 export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>("prepopulationLinkStore", {
 	selectedEmailProvider: "Mailchimp",
 	actionPageURL: "",
@@ -147,14 +137,11 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 
 /**
  * Base form fields without tokens - to be used in components for deriving final fields
- * AI-NOTE: Moved derivation to component level where store can be properly accessed
  */
 export const basePrefillFormFields = [...initialPrefillFormFields];
 
 /**
- * Helper function to create initial form fields 
- * AI-NOTE: Used to initialize shared state in the main component
- */
+ * Helper function to create initial form fields */
 export function createInitialFormFields(): PrefillFormFieldsType[] {
 	return basePrefillFormFields.map((field) => ({
 		...field,

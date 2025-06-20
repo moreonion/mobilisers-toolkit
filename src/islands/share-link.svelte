@@ -17,7 +17,6 @@
   //   });
 
   // Get any parameter called url from the URL and keep it in the store.
-  // AI-NOTE: Converted from onMount to $effect for Svelte 5 runes
   $effect(() => {
     const urlParameter = getURLSearchParameter("url");
     if (urlParameter && isURL(urlParameter)) {
@@ -25,22 +24,6 @@
     }
   });
 
-  // AI-NOTE: Sync input values to parameter values used in URL generation
-  $effect(() => {
-    shareLinkState.TwitterParameters.hashtags = [...shareLinkState.TwitterInputHashtags];
-  });
-
-  $effect(() => {
-    shareLinkState.WhatsAppParameters.text = shareLinkState.WhatsAppInputText;
-  });
-
-  $effect(() => {
-    shareLinkState.BlueSkyParameters.text = shareLinkState.BlueSkyInputText;
-  });
-
-  $effect(() => {
-    shareLinkState.LinkedInParameters.text = shareLinkState.LinkedInInputText;
-  });
 </script>
 
 <section>
@@ -91,7 +74,9 @@
                   placeholder="Enter more template text"
                 ></textarea>
               </label>
-              <small>{shareLinkState.TwitterParameters.text.length} characters</small>
+              <small
+                >{shareLinkState.TwitterParameters.text.length} characters</small
+              >
               <div class="mt-6">
                 <label for="svelte-tags-input">
                   <small
@@ -99,7 +84,7 @@
                   >
                 </label>
                 <Tags
-                  bind:tags={shareLinkState.TwitterInputHashtags}
+                  bind:tags={shareLinkState.TwitterParameters.hashtags}
                   inputPlaceholderText={"Enter any hashtags for your Twitter share..."}
                   onlyUnique={true}
                 />
@@ -112,7 +97,7 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={shareLinkState.WhatsAppInputText}
+                bind:value={shareLinkState.WhatsAppParameters.text}
                 placeholder="Enter template text for WhatsApp"
               ></textarea>
             </label>
@@ -143,7 +128,7 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={shareLinkState.BlueSkyInputText}
+                bind:value={shareLinkState.BlueSkyParameters.text}
                 placeholder="Enter template text for Blue Sky"
               ></textarea>
             </label>
@@ -154,8 +139,8 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={shareLinkState.LinkedInInputText}
-                placeholder="Enter template text for Blue Sky"
+                bind:value={shareLinkState.LinkedInParameters.text}
+                placeholder="Enter template text for LinkedIn"
               ></textarea>
             </label>
             <p>

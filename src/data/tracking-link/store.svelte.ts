@@ -1,6 +1,3 @@
-// AI-NOTE: Svelte 5 runes-based shared state for tracking-link functionality
-// AI-NOTE: Using reactive state objects that can be imported and used directly
-
 type UTMFormType = {
 	LinkToTrack: string;
 	UTMSource: string;
@@ -11,7 +8,6 @@ type UTMFormType = {
 	UTMTerm: string;
 };
 
-// AI-NOTE: Shared reactive state object using $state
 export const utmFormData = $state<UTMFormType>({
 	LinkToTrack: "",
 	UTMSource: "",
@@ -22,7 +18,7 @@ export const utmFormData = $state<UTMFormType>({
 	UTMTerm: "",
 });
 
-// AI-NOTE: Complex URL processing function - returns computed tracking URL based on current form state
+// URL processing function - returns computed tracking URL based on current form state
 export function getOutputLinkToTrack(): string {
 	const {
 		UTMSource,
@@ -36,6 +32,7 @@ export function getOutputLinkToTrack(): string {
 
 	let linkAsURLObject;
 
+	// Supports URLs with or without a scheme (e.g., 'google.com' or 'https://google.com')
 	try {
 		linkAsURLObject = new URL(LinkToTrack);
 	} catch (e) {
@@ -43,7 +40,7 @@ export function getOutputLinkToTrack(): string {
 			try {
 				linkAsURLObject = new URL(`https://${LinkToTrack}`);
 			} catch (secondError) {
-				// AI-NOTE: Return empty string for invalid URLs to maintain UI consistency
+				// Return empty string for invalid URLs to maintain UI consistency
 				return "";
 			}
 		} else {
@@ -90,6 +87,3 @@ export function getOutputLinkToTrack(): string {
 
 	return linkAsURLObject.toString();
 }
-
-// AI-NOTE: Compatibility export with old name for existing components
-export const OutputLinkToTrack = getOutputLinkToTrack;

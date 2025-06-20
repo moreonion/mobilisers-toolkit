@@ -11,7 +11,8 @@
     "typecheck": "astro check",
     "test": "playwright test",
     "test:quick": "playwright test tests/quick-check.spec.ts",
-    "test:prepopulation": "playwright test tests/prepopulation-link.spec.ts --reporter=list"
+    "test:prepopulation": "playwright test tests/prepopulation-link.spec.ts --reporter=list",
+    "test:share": "playwright test tests/share-link.spec.ts --reporter=list"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
