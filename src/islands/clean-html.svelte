@@ -1,6 +1,5 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import { shortcut } from "@svelte-put/shortcut";
   import { processHTML } from "@/functions/clean-html/processHTML";
 
   let unprocessedHTML = $state("");
@@ -21,32 +20,8 @@
     unprocessedHTML = "";
     cleanHTMLCopied = false;
   };
-
-  const handleCmdEnter = (): void => {
-    if (processedHTML !== "") return; // only run on dirty HTML view
-    handleDirtyHTMLSubmit();
-  };
-
-  // const handleCmdC = (): void => {
-  // 	if (processedHTML === "") return; // only run on clean HTML view
-  // 	copyCleanHTMLToClipboard();
-  // };
-
-  // const handleCmdN = (): void => {
-  // 	if (processedHTML === "") return; // only run on clean HTML view
-  // 	resetForm();
-  // };
 </script>
 
-<svelte:window
-  use:shortcut={{
-    trigger: {
-      key: "Enter",
-      modifier: ["ctrl", "meta"],
-      callback: handleCmdEnter,
-    },
-  }}
-/>
 {#if processedHTML === ""}
   <section>
     <div id="dirtyHTMLForm">

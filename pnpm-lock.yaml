@@ -33,9 +33,6 @@ importers:
       '@playwright/test':
         specifier: ^1.48.0
         version: 1.53.0
-      '@svelte-put/shortcut':
-        specifier: ^3.0.0
-        version: 3.2.0(svelte@5.34.5)
       '@types/js-beautify':
         specifier: ^1.14.3
         version: 1.14.3
@@ -700,11 +697,6 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
-
-  '@svelte-put/shortcut@3.2.0':
-    resolution: {integrity: sha512-3VFU6TX4DwXT7vrtKGqwWa5WqEsFWQVZMSffE0owCwKUIBAhjGtZGy69G4+2quGhl/r+qi4jLrXkE00xw38M7g==}
-    peerDependencies:
-      svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
 
   '@sveltejs/acorn-typescript@1.0.5':
     resolution: {integrity: sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==}
@@ -2774,10 +2766,6 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
-
-  '@svelte-put/shortcut@3.2.0(svelte@5.34.5)':
-    dependencies:
-      svelte: 5.34.5
 
   '@sveltejs/acorn-typescript@1.0.5(acorn@8.15.0)':
     dependencies:

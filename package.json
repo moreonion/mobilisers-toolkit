@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "@svelte-put/shortcut": "^3.0.0",
     "@types/js-beautify": "^1.14.3",
     "@types/sanitize-html": "^2.9.5",
     "js-beautify": "^1.14.11",
