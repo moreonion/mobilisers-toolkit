@@ -20,6 +20,12 @@ export type PrefillFormFieldsType = {
 	formKey: string;
 	prefilled: boolean;
 	token: string;
+	fieldType?: "text" | "select" | "number";
+	options?: string[];
+	validation?: {
+		min?: number;
+		required?: boolean;
+	};
 };
 
 export type PrepopulationLinkStoreType = {
@@ -63,55 +69,75 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 	},
 	{
 		id: 4,
+		label: "Donation Interval",
+		formKey: "donation_interval",
+		prefilled: false,
+		token: "",
+		fieldType: "select",
+		options: ["Single", "Monthly", "Annual"],
+	},
+	{
+		id: 5,
+		label: "Donation Amount",
+		formKey: "donation_amount",
+		prefilled: false,
+		token: "",
+		fieldType: "number",
+		validation: {
+			min: 1,
+		},
+	},
+	{
+		id: 6,
 		label: "Postcode",
 		formKey: "postcode",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 5,
+		id: 7,
 		label: "Street Address",
 		formKey: "street_address",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 6,
+		id: 8,
 		label: "City",
 		formKey: "city",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 7,
+		id: 9,
 		label: "Country",
 		formKey: "country",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 8,
+		id: 10,
 		label: "Title",
 		formKey: "title",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 9,
+		id: 11,
 		label: "Phone Number",
 		formKey: "phone_number",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 10,
+		id: 12,
 		label: "Mobile Number",
 		formKey: "mobile_number",
 		prefilled: false,
 		token: "",
 	},
 	{
-		id: 11,
+		id: 13,
 		label: "State",
 		formKey: "state",
 		prefilled: false,
