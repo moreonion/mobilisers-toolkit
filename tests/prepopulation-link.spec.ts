@@ -94,7 +94,6 @@ test.describe('Prepopulation Link Generator', () => {
     
     // Test that negative numbers don't work (should be cleared by oninput)
     await numberInput.fill('-5');
-    await page.waitForTimeout(100);
     // Should be cleared and checkbox unchecked
     await expect(checkbox).not.toBeChecked();
   });
@@ -225,13 +224,11 @@ test.describe('Prepopulation Link Generator', () => {
     
     // Switch to DotDigital
     await page.getByRole('button', { name: 'DotDigital' }).first().click();
-    await page.waitForTimeout(100); // Allow time for provider switch
     await expect(page.getByText('first_name=@FIRSTNAME@', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('last_name=@LASTNAME@', { exact: false }).first()).toBeVisible();
     
     // Switch back to Mailchimp
     await page.getByRole('button', { name: 'Mailchimp' }).first().click();
-    await page.waitForTimeout(100); // Allow time for provider switch
     await expect(page.getByText('first_name=*|FNAME|*', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('last_name=*|LNAME|*', { exact: false }).first()).toBeVisible();
     
@@ -247,7 +244,6 @@ test.describe('Prepopulation Link Generator', () => {
     
     // Switch providers - custom values should be preserved
     await page.getByRole('button', { name: 'DotDigital' }).first().click();
-    await page.waitForTimeout(100);
     await expect(donationCheckbox).toBeChecked(); // Value is preserved
     await expect(page.getByText('donation_amount=50', { exact: false }).first()).toBeVisible();
   });
