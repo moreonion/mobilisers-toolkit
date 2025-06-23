@@ -11,9 +11,10 @@
     "typecheck": "astro check",
     "test": "playwright test",
     "test:quick": "playwright test tests/quick-check.spec.ts",
-    "test:prepopulation": "playwright test tests/prepopulation-link.spec.ts --reporter=list",
-    "test:share": "playwright test tests/share-link.spec.ts --reporter=list",
-    "test:tracking": "playwright test tests/tracking-link.spec.ts --reporter=list"
+    "test:clean-html": "playwright test tests/clean-html.spec.ts",
+    "test:prepopulation": "playwright test tests/prepopulation-link.spec.ts",
+    "test:share": "playwright test tests/share-link.spec.ts",
+    "test:tracking": "playwright test tests/tracking-link.spec.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
