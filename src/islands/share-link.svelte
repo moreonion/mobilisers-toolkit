@@ -1,38 +1,29 @@
 <script lang="ts">
   import { getURLSearchParameter } from "@/functions/getURLSearchParameter";
   import { isURL } from "@/functions/isURL";
-  import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
   import {
-    LinkToShare,
-    allShareLinks,
-    TwitterParameters,
-    EmailParameters,
-    WhatsAppInputText,
-    TwitterInputHashtags,
-    BlueSkyInputText,
-    LinkedInInputText,
-    ThreadsParameters,
-  } from "@/data/share-link/store";
+    shareLinkState,
+    getAllShareLinks,
+  } from "@/data/share-link/store.svelte";
 
   import Tags from "svelte-unstyled-tags";
 
   // For testing 👇
-  //   onMount(() => {
+  //   $effect(() => {
   //     let link = "https://act.your-organisation.org/campaign-name";
-  //     $LinkToShare = link;
+  //     LinkToShare = link;
   //   });
 
   // Get any parameter called url from the URL and keep it in the store.
-  let urlParameter: string | null = null;
-
-  onMount(() => {
-    urlParameter = getURLSearchParameter("url");
+  $effect(() => {
+    const urlParameter = getURLSearchParameter("url");
     if (urlParameter && isURL(urlParameter)) {
-      $LinkToShare = urlParameter;
+      shareLinkState.LinkToShare = urlParameter;
     }
   });
+
 </script>
 
 <section>
@@ -42,36 +33,39 @@
         >https://act.your-organisation.org/campaign-name</small
       >
     </label>
-    <!-- svelte-ignore a11y-autofocus -->
+    <!-- svelte-ignore a11y_autofocus -->
     <input
       type="text"
       name="actionPage"
       id="actionPage"
       placeholder="Enter the link you want people to share"
-      bind:value={$LinkToShare}
+      aria-label="Enter the link you want to be shareable"
+      bind:value={shareLinkState.LinkToShare}
       autofocus
     />
   </form>
 </section>
 
-<!-- {#if $LinkToShare !== "" && isURL($LinkToShare)} -->
-{#if $LinkToShare !== ""}
-  <section class="mt-6" in:fade={{ delay: 100 }}>
+<!-- {#if LinkToShare !== "" && isURL(LinkToShare)} -->
+{#if shareLinkState.LinkToShare !== ""}
+  <section class="mt-6" in:fade={{ delay: 100 }} aria-label="Generated share links">
     <p class="h5 mb-0">Here are the share links</p>
     <p>Copy and paste them wherever you need them.</p>
 
     <div id="shareLinksWrapper">
-      {#each $allShareLinks as { platform, shareLink }}
+      {#each getAllShareLinks() as { platform, shareLink }}
         <div
           class="shareLinkSection"
           id={platform.toLowerCase().replaceAll(" ", "-")}
+          role="region"
+          aria-label="{platform} share options"
         >
           <p class="mb-0"><strong>{platform}</strong></p>
           <p class="mb-0">{shareLink}</p>
 
           {#if platform === "Twitter / X"}
             <div class="mt-6">
-              <label>
+              <label for="twitterTextarea">
                 <small
                   >Enter template text (optional – link already added)</small
                 >
@@ -79,11 +73,14 @@
                   id="twitterTextarea"
                   maxlength="280"
                   rows="3"
-                  bind:value={$TwitterParameters.text}
+                  bind:value={shareLinkState.TwitterParameters.text}
                   placeholder="Enter more template text"
+                  aria-label="Twitter template text"
                 ></textarea>
               </label>
-              <small>{$TwitterParameters.text.length} characters</small>
+              <small
+                >{shareLinkState.TwitterParameters.text.length} characters</small
+              >
               <div class="mt-6">
                 <label for="svelte-tags-input">
                   <small
@@ -91,7 +88,7 @@
                   >
                 </label>
                 <Tags
-                  bind:tags={$TwitterInputHashtags}
+                  bind:tags={shareLinkState.TwitterParameters.hashtags}
                   inputPlaceholderText={"Enter any hashtags for your Twitter share..."}
                   onlyUnique={true}
                 />
@@ -104,8 +101,9 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={$WhatsAppInputText}
+                bind:value={shareLinkState.WhatsAppParameters.text}
                 placeholder="Enter template text for WhatsApp"
+                aria-label="WhatsApp template text"
               ></textarea>
             </label>
           {/if}
@@ -116,15 +114,17 @@
                 <small>Subject (optional)</small>
                 <input
                   type="text"
-                  bind:value={$EmailParameters.subject}
+                  bind:value={shareLinkState.EmailParameters.subject}
                   placeholder="Add a subject line (optional)"
+                  aria-label="Email subject"
                 />
               </label>
               <label>
                 <small>Body (optional – link already added)</small>
                 <textarea
-                  bind:value={$EmailParameters.body}
+                  bind:value={shareLinkState.EmailParameters.body}
                   placeholder="Add body text (optional)"
+                  aria-label="Email body text"
                 ></textarea>
               </label>
             </div>
@@ -135,8 +135,9 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={$BlueSkyInputText}
+                bind:value={shareLinkState.BlueSkyParameters.text}
                 placeholder="Enter template text for Blue Sky"
+                aria-label="Blue Sky template text"
               ></textarea>
             </label>
           {/if}
@@ -146,8 +147,9 @@
               <small>Add template text (optional – link already added)</small>
               <textarea
                 rows="3"
-                bind:value={$LinkedInInputText}
-                placeholder="Enter template text for Blue Sky"
+                bind:value={shareLinkState.LinkedInParameters.text}
+                placeholder="Enter template text for LinkedIn"
+                aria-label="LinkedIn template text"
               ></textarea>
             </label>
             <p>
@@ -164,8 +166,9 @@
                 <small>Text (optional – link already added)</small>
                 <input
                   type="text"
-                  bind:value={$ThreadsParameters.text}
+                  bind:value={shareLinkState.ThreadsParameters.text}
                   placeholder="Add template text"
+                  aria-label="Threads template text"
                 />
               </label>
             </div>
