@@ -95,6 +95,7 @@
       name="actionPage"
       id="actionPage"
       placeholder="Action page URL"
+      aria-label="Enter your Impact Stack action URL"
       bind:value={$prepopulationLinkStore.actionPageURL}
       autofocus
     />
@@ -111,7 +112,8 @@
         class="button tiny"
         onclick={() => {
           prepopulationState.customiseFields = true;
-        }}>Customise fields</button
+        }}
+        aria-label="Customise prepopulation fields">Customise fields</button
       >
     </div>
   {/if}

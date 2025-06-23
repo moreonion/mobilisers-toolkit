@@ -39,6 +39,7 @@
       name="actionPage"
       id="actionPage"
       placeholder="Enter the link you want people to share"
+      aria-label="Enter the link you want to be shareable"
       bind:value={shareLinkState.LinkToShare}
       autofocus
     />
@@ -47,7 +48,7 @@
 
 <!-- {#if LinkToShare !== "" && isURL(LinkToShare)} -->
 {#if shareLinkState.LinkToShare !== ""}
-  <section class="mt-6" in:fade={{ delay: 100 }}>
+  <section class="mt-6" in:fade={{ delay: 100 }} aria-label="Generated share links">
     <p class="h5 mb-0">Here are the share links</p>
     <p>Copy and paste them wherever you need them.</p>
 
@@ -56,13 +57,15 @@
         <div
           class="shareLinkSection"
           id={platform.toLowerCase().replaceAll(" ", "-")}
+          role="region"
+          aria-label="{platform} share options"
         >
           <p class="mb-0"><strong>{platform}</strong></p>
           <p class="mb-0">{shareLink}</p>
 
           {#if platform === "Twitter / X"}
             <div class="mt-6">
-              <label>
+              <label for="twitterTextarea">
                 <small
                   >Enter template text (optional – link already added)</small
                 >
@@ -72,6 +75,7 @@
                   rows="3"
                   bind:value={shareLinkState.TwitterParameters.text}
                   placeholder="Enter more template text"
+                  aria-label="Twitter template text"
                 ></textarea>
               </label>
               <small
@@ -99,6 +103,7 @@
                 rows="3"
                 bind:value={shareLinkState.WhatsAppParameters.text}
                 placeholder="Enter template text for WhatsApp"
+                aria-label="WhatsApp template text"
               ></textarea>
             </label>
           {/if}
@@ -111,6 +116,7 @@
                   type="text"
                   bind:value={shareLinkState.EmailParameters.subject}
                   placeholder="Add a subject line (optional)"
+                  aria-label="Email subject"
                 />
               </label>
               <label>
@@ -118,6 +124,7 @@
                 <textarea
                   bind:value={shareLinkState.EmailParameters.body}
                   placeholder="Add body text (optional)"
+                  aria-label="Email body text"
                 ></textarea>
               </label>
             </div>
@@ -130,6 +137,7 @@
                 rows="3"
                 bind:value={shareLinkState.BlueSkyParameters.text}
                 placeholder="Enter template text for Blue Sky"
+                aria-label="Blue Sky template text"
               ></textarea>
             </label>
           {/if}
@@ -141,6 +149,7 @@
                 rows="3"
                 bind:value={shareLinkState.LinkedInParameters.text}
                 placeholder="Enter template text for LinkedIn"
+                aria-label="LinkedIn template text"
               ></textarea>
             </label>
             <p>
@@ -159,6 +168,7 @@
                   type="text"
                   bind:value={shareLinkState.ThreadsParameters.text}
                   placeholder="Add template text"
+                  aria-label="Threads template text"
                 />
               </label>
             </div>
