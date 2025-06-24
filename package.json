@@ -14,12 +14,16 @@
     "test:clean-html": "playwright test tests/clean-html.spec.ts",
     "test:prepopulation": "playwright test tests/prepopulation-link.spec.ts",
     "test:share": "playwright test tests/share-link.spec.ts",
-    "test:tracking": "playwright test tests/tracking-link.spec.ts"
+    "test:tracking": "playwright test tests/tracking-link.spec.ts",
+    "test:unit": "vitest",
+    "test:unit:run": "vitest run",
+    "test:unit:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/svelte": "^7.1.0",
     "astro": "^5.9.4",
+    "jstat": "^1.9.6",
     "svelte": "^5.34.1",
     "svelte-persisted-store": "^0.7.0",
     "svelte-unstyled-tags": "^0.0.15",
@@ -32,6 +36,7 @@
     "js-beautify": "^1.14.11",
     "sanitize-html": "^2.11.0",
     "sharp": "^0.34.2",
+    "vitest": "^3.2.4",
     "zod": "^3.22.4"
   }
 }

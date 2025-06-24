@@ -23,7 +23,7 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 playwright-report/
-docs
+# docs
 .claude
 test-results
 .serena
