@@ -1,6 +1,6 @@
 import jStat from 'jstat';
-import type { TwoProportionTestData, TwoProportionResult, ChiSquareResult } from '../../types/statistical-results';
-import type { TestVariation } from '../../types/ab-testing';
+import type { TwoProportionResult, ChiSquareResult } from '../../types/statistical-results';
+import type { TestVariation, TwoProportionTestData } from '../../types/ab-testing';
 
 /**
  * Performs a two-proportion z-test to compare conversion rates between control and variation
