@@ -128,7 +128,7 @@ describe('Two-Proportion Z-Test', () => {
 
 		expect(result.control.conversionRate).toBe(0);
 		expect(result.variation.conversionRate).toBeCloseTo(0.05, 2);
-		expect(result.improvement.relative).toBe(0); // undefined relative improvement handled as 0
+		expect(result.improvement.relative).toBe(null); // Cannot calculate relative improvement from 0% baseline
 		expect(result.pValue).toBeGreaterThan(0); // should produce valid p-value
 		expect(result.pValue).toBeLessThan(1); // p-value should be valid range
 		expect(typeof result.isSignificant).toBe('boolean');

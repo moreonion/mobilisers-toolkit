@@ -194,7 +194,7 @@ describe('Multi-Variation A/B Testing - Complete Workflow', () => {
 		console.log(`Winner: ${winner.variation.name}`);
 		console.log(`Original p-value: ${winner.originalPValue.toFixed(6)}`);
 		console.log(`Corrected p-value: ${winner.correctedPValue.toFixed(6)}`);
-		console.log(`Improvement: ${winner.improvement.relative.toFixed(1)}%`);
+		console.log(`Improvement: ${winner.improvement.relative !== null ? winner.improvement.relative.toFixed(1) + '%' : 'N/A'}`);
 	});
 
 	/**
@@ -220,12 +220,14 @@ describe('Multi-Variation A/B Testing - Complete Workflow', () => {
 		// But no individual variations should beat control
 		bonferroniResults.forEach(result => {
 			// All improvements should be negative (worse than control)
-			expect(result.improvement.relative).toBeLessThan(0);
+			if (result.improvement.relative !== null) {
+				expect(result.improvement.relative).toBeLessThan(0);
+			}
 		});
 
 		console.log('All Variations Worse Test:');
 		bonferroniResults.forEach(result => {
-			console.log(`${result.variation.name}: ${result.improvement.relative.toFixed(1)}% change`);
+			console.log(`${result.variation.name}: ${result.improvement.relative !== null ? result.improvement.relative.toFixed(1) + '% change' : 'N/A'}`);
 		});
 	});
 });
