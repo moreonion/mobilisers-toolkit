@@ -1,0 +1,36 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ABTestingIsland from "@/islands/ab-testing.svelte";
+import Feedback from "@/components/Feedback.astro";
+---
+
+<BaseLayout
+	title="A/B Testing Statistical Significance Calculator"
+	description="Calculate statistical significance for your A/B tests with proper multiple testing corrections"
+	socialImageFilename="ab_testing_social.png"
+>
+	<div id="toolDescription">
+		<p>
+			Determine if your A/B test results are statistically significant.
+		</p>
+	</div>
+
+	<div
+		id="islandWrapper"
+		class="mt-6"
+	>
+		<ABTestingIsland client:load />
+	</div>
+	<Feedback />
+</BaseLayout>
+
+<style>
+	#toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	}
+
+	div p {
+		margin-bottom: 0;
+	}
+</style>
