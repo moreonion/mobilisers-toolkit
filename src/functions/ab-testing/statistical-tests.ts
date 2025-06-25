@@ -80,7 +80,7 @@ export function twoProportionTest(
 		},
 		improvement: {
 			absolute: difference, // raw percentage point difference (e.g., 0.02 for 2 percentage points)
-			relative: p1 > 0 ? (difference / p1) * 100 : 0, // relative improvement as % (e.g., 40% improvement)
+			relative: p1 > 0 ? (difference / p1) * 100 : null, // relative improvement as % (null when control is 0)
 			confidenceInterval: {
 				lower: difference - marginOfError,
 				upper: difference + marginOfError

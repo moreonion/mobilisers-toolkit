@@ -53,8 +53,8 @@ export interface TwoProportionResult extends StatisticalTestResult {
 	improvement: {
 		/** Absolute difference in conversion rates (variation - control) */
 		absolute: number;
-		/** Relative improvement as a percentage (e.g., 20.5 for 20.5% improvement) */
-		relative: number;
+		/** Relative improvement as a percentage (e.g., 20.5 for 20.5% improvement), or null if control has 0 conversions */
+		relative: number | null;
 		/** Confidence interval for the improvement estimate */
 		confidenceInterval: {
 			/** Lower bound of the confidence interval */
