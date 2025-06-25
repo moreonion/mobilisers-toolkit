@@ -114,7 +114,16 @@ export interface MultiVariationResult {
 	 * This keeps your overall false positive rate at the desired 5%
 	 */
 	bonferroniAlpha?: number;
-	/** The best performing variation if one exists */
+	/** All winning variations (those with the highest significant improvement) */
+	winningVariations?: Array<{
+		/** Name of the winning variation */
+		name: string;
+		/** Conversion rate of the winning variation */
+		conversionRate: number;
+		/** Percentage improvement over control */
+		improvement: number;
+	}>;
+	/** The best performing variation if one exists (kept for backwards compatibility) */
 	winningVariation?: {
 		/** Name of the winning variation */
 		name: string;

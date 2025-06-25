@@ -36,6 +36,22 @@
       : null
   );
 
+  // Properly typed derived variable for multi-variation results
+  const multiVariationResult = $derived(
+    results && isMultiVariation && "overallTest" in results
+      ? (results as MultiVariationResult)
+      : null
+  );
+
+  // Helper for checking if winners are tied
+  const areWinnersTied = $derived(
+    multiVariationResult?.winningVariations && multiVariationResult.winningVariations.length > 1
+      ? multiVariationResult.winningVariations.every(w => 
+          Math.abs(w.improvement - multiVariationResult.winningVariations![0].improvement) < 0.1
+        )
+      : false
+  );
+
   const calculateResults = (): void => {
     validationErrors = [];
 
@@ -130,24 +146,37 @@
           pValue: correctedResults[index].correctedPValue,
         }));
 
-        // Find the winning variation
-        const winner = correctedPairwise.find(
+        // Find all winning variations (significantly better than control)
+        const winners = correctedPairwise.filter(
           (result) =>
             result.isSignificant &&
             result.improvement.relative !== null &&
             result.improvement.relative > 0
         );
 
+        // Determine the best winner(s) - those with highest improvement
+        let bestWinners: TwoProportionResult[] = [];
+        if (winners.length > 0) {
+          const maxImprovement = Math.max(...winners.map(w => w.improvement.relative!));
+          bestWinners = winners.filter(w => w.improvement.relative === maxImprovement);
+        }
+
         results = {
           overallTest,
           pairwiseComparisons: correctedPairwise,
           bonferroniCorrected: true,
           bonferroniAlpha: correctedResults[0].correctedAlpha,
-          winningVariation: winner
+          winningVariations: bestWinners.map(winner => ({
+            name: winner.variation.name,
+            conversionRate: winner.variation.conversionRate,
+            improvement: winner.improvement.relative!,
+          })),
+          // Keep single winner for backwards compatibility (use first best winner)
+          winningVariation: bestWinners.length > 0
             ? {
-                name: winner.variation.name,
-                conversionRate: winner.variation.conversionRate,
-                improvement: winner.improvement.relative!,
+                name: bestWinners[0].variation.name,
+                conversionRate: bestWinners[0].variation.conversionRate,
+                improvement: bestWinners[0].improvement.relative!,
               }
             : undefined,
         };
@@ -209,6 +238,30 @@
 
   const removeVariation = (index: number): void => {
     additionalVariations = additionalVariations.filter((_, i) => i !== index);
+  };
+
+  const removeControl = (): void => {
+    if (additionalVariations.length > 0) {
+      // Move variation B to control position
+      controlData = { ...variationData };
+      // Move first additional variation to variation B position  
+      variationData = { ...additionalVariations[0] };
+      // Remove the first additional variation
+      additionalVariations = additionalVariations.slice(1);
+      // Clear results since data structure changed
+      results = null;
+    }
+  };
+
+  const removeVariation1 = (): void => {
+    if (additionalVariations.length > 0) {
+      // Move first additional variation to variation B position
+      variationData = { ...additionalVariations[0] };
+      // Remove the first additional variation
+      additionalVariations = additionalVariations.slice(1);
+      // Clear results since data structure changed
+      results = null;
+    }
   };
 
   const resetForm = (): void => {
@@ -278,7 +331,18 @@
                   : "0.00%"}
               </span>
             </td>
-            <td></td>
+            <td>
+              {#if additionalVariations.length > 0}
+                <button
+                  type="button"
+                  class="button tiny alert hollow"
+                  onclick={removeControl}
+                  aria-label="Remove variant {controlData.name}"
+                >
+                  ❌
+                </button>
+              {/if}
+            </td>
           </tr>
 
           <!-- Variation Row -->
@@ -287,7 +351,8 @@
             class:winner-row={twoProportionResult &&
               twoProportionResult.isSignificant &&
               twoProportionResult.improvement.relative !== null &&
-              twoProportionResult.improvement.relative > 0}
+              twoProportionResult.improvement.relative > 0 ||
+              (multiVariationResult?.winningVariations?.some(w => w.name === variationData.name))}
           >
             <td>
               <input
@@ -329,20 +394,25 @@
                   : "0.00%"}
               </span>
             </td>
-            <td></td>
+            <td>
+              {#if additionalVariations.length > 0}
+                <button
+                  type="button"
+                  class="button tiny alert hollow"
+                  onclick={removeVariation1}
+                  aria-label="Remove variant {variationData.name}"
+                >
+                  ❌
+                </button>
+              {/if}
+            </td>
           </tr>
 
           <!-- Additional Variations -->
           {#each additionalVariations as variation, index}
             <tr
               class="data-row"
-              class:winner-row={results &&
-                "pairwiseComparisons" in results &&
-                results.pairwiseComparisons[index + 1]?.isSignificant &&
-                results.pairwiseComparisons[index + 1]?.improvement.relative !==
-                  null &&
-                results.pairwiseComparisons[index + 1]?.improvement.relative! >
-                  0}
+              class:winner-row={multiVariationResult?.winningVariations?.some(w => w.name === variation.name)}
             >
               <td>
                 <input
@@ -446,22 +516,32 @@
             </h4>
             {#if results.overallTest.isSignificant}
               <p>
-                At least one variant performs significantly different from the
-                others.
+                Your test found meaningful differences between your variants - at least one version is genuinely performing differently than the others.
               </p>
             {:else}
-              <p>No significant differences found between variants.</p>
+              <p>The differences you're seeing could just be random chance. None of your variants are performing significantly better or worse than the others.</p>
             {/if}
 
-            {#if results.winningVariation}
+            {#if multiVariationResult?.winningVariations && multiVariationResult.winningVariations.length > 0}
               <div class="winner-callout">
-                <strong
-                  >🏆 Winner: Variant {results.winningVariation.name}</strong
-                ><br />
-                {(results.winningVariation.conversionRate * 100).toFixed(2)}%
-                conversion rate (+{results.winningVariation.improvement.toFixed(
-                  1
-                )}% improvement)
+                {#if multiVariationResult.winningVariations.length === 1}
+                  <strong>🏆 Clear Winner: Variant {multiVariationResult.winningVariations[0].name}</strong><br />
+                  {(multiVariationResult.winningVariations[0].conversionRate * 100).toFixed(2)}%
+                  conversion rate (+{multiVariationResult.winningVariations[0].improvement.toFixed(1)}% improvement)
+                {:else}
+                  {#if areWinnersTied}
+                    <strong>🤝 Statistical Tie: {multiVariationResult.winningVariations.length} equally strong performers</strong><br />
+                    <small style="color: rgba(255,255,255,0.9);">These variants have virtually identical performance - you can confidently choose any of them:</small><br />
+                  {:else}
+                    <strong>🥇 Multiple Winners: {multiVariationResult.winningVariations.length} top performers</strong><br />
+                    <small style="color: rgba(255,255,255,0.9);">All of these variants significantly outperform your control:</small><br />
+                  {/if}
+                  {#each multiVariationResult.winningVariations as winner, i}
+                    Variant {winner.name}: {(winner.conversionRate * 100).toFixed(2)}% 
+                    (+{winner.improvement.toFixed(1)}% improvement)
+                    {#if i < multiVariationResult.winningVariations.length - 1}<br />{/if}
+                  {/each}
+                {/if}
               </div>
             {/if}
           </div>
@@ -532,10 +612,6 @@
                   {/if}
                 </div>
               </div>
-              <div class="stat-box">
-                <div class="stat-label">P-value</div>
-                <div class="stat-value">{results.pValue.toFixed(4)}</div>
-              </div>
             </div>
           </div>
         {/if}
@@ -557,38 +633,53 @@
 
         {#if results}
           <div class="callout secondary">
-            <h5>Technical Details</h5>
+            <h5>Statistical Details</h5>
             {#if "overallTest" in results}
               <p>
-                <strong>Chi-square statistic:</strong>
+                <strong>Test strength:</strong>
                 {results.overallTest.testStatistic.toFixed(2)}
+                <small style="display: block; color: #6c757d;">Higher numbers mean stronger evidence of real differences</small>
               </p>
               <p>
-                <strong>Degrees of freedom:</strong>
+                <strong>Data points analysed:</strong>
                 {results.overallTest.degreesOfFreedom}
+                <small style="display: block; color: #6c757d;">More data points generally mean more reliable results</small>
               </p>
               <p>
-                <strong>Overall p-value:</strong>
+                <strong>Overall confidence score:</strong>
                 {results.overallTest.pValue.toFixed(4)}
+                <small style="display: block; color: #6c757d;">Lower numbers mean we're more confident in the results</small>
               </p>
               {#if results.bonferroniCorrected}
                 <p>
-                  <strong>Bonferroni correction applied:</strong> α = {results.bonferroniAlpha?.toFixed(
-                    4
-                  )}
+                  <strong>Multiple comparison adjustment:</strong> Applied
+                  <small style="display: block; color: #6c757d;">We used stricter criteria because multiple variants were tested together</small>
                 </p>
               {/if}
             {:else}
               <p>
-                <strong>Test statistic:</strong>
-                {results.testStatistic.toFixed(2)}
+                <strong>Confidence score:</strong>
+                {results.pValue.toFixed(4)}
+                <small style="display: block; color: #6c757d; margin-top: 0.25rem;">
+                  Lower numbers indicate stronger evidence. Values below {(1 - confidenceLevel).toFixed(2)} are considered reliable.
+                </small>
               </p>
               <p>
-                <strong>Confidence interval:</strong>
+                <strong>Expected improvement range:</strong>
                 {results.improvement.confidenceInterval.lower.toFixed(1)}% to {results.improvement.confidenceInterval.upper.toFixed(
                   1
                 )}%
+                <small style="display: block; color: #6c757d;">We're {confidenceLevel * 100}% confident the true improvement falls within this range</small>
               </p>
+              
+              <details style="margin-top: 1rem;">
+                <summary style="cursor: pointer; color: #6c757d; font-size: 0.875rem;">Show additional technical details</summary>
+                <p style="margin-top: 0.5rem;">
+                  <strong>Test statistic:</strong>
+                  {results.testStatistic.toFixed(2)}
+                  <small style="display: block; color: #6c757d;">Statistical measure of difference strength</small>
+                </p>
+              </details>
             {/if}
           </div>
         {/if}
@@ -749,15 +840,92 @@
 
   /* Responsive adjustments */
   @media screen and (max-width: 40em) {
-    .button-group .button {
-      display: block;
-      width: 100%;
-      margin-right: 0;
-      margin-bottom: 0.5rem;
+    /* Make table responsive by allowing horizontal scroll */
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
+    /* Ensure table headers are visible and properly sized */
+    thead th {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+      min-width: 80px;
+    }
+
+    /* Adjust table cell padding for mobile */
+    .data-row td {
+      padding: 0.75rem 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* Make inputs more mobile-friendly */
+    .variant-input,
+    .number-input {
+      padding: 0.75rem 0.5rem;
+      font-size: 16px; /* Prevents zoom on iOS */
+      min-width: 80px;
+      max-width: 120px;
+    }
+
+    /* Better conversion rate display on mobile */
+    .conversion-rate-cell {
+      font-size: 0.875rem;
+      min-width: 90px;
+    }
+
+    /* Stack buttons vertically on mobile */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .button-group .button {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 0;
+    }
+
+    /* Adjust stats grid for mobile */
     .stats-grid {
       grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .stat-box {
+      padding: 0.75rem;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+    }
+
+    /* Better callout spacing on mobile */
+    .callout {
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .winner-callout {
+      padding: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    /* Advanced settings improvements */
+    .advanced-content {
+      padding: 0.75rem 0;
+    }
+
+    .advanced-content label {
+      font-size: 0.875rem;
+    }
+
+    /* Ensure select dropdowns are properly sized */
+    #confidenceLevel {
+      width: 100%;
+      max-width: 200px;
     }
   }
 </style>

@@ -8,7 +8,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "typecheck": "astro check",
+    "typecheck": "astro check && pnpx sv check",
     "test": "playwright test",
     "test:quick": "playwright test tests/quick-check.spec.ts",
     "test:clean-html": "playwright test tests/clean-html.spec.ts",
@@ -36,6 +36,7 @@
     "js-beautify": "^1.14.11",
     "sanitize-html": "^2.11.0",
     "sharp": "^0.34.2",
+    "svelte-check": "^4.2.2",
     "vitest": "^3.2.4",
     "zod": "^3.22.4"
   }
