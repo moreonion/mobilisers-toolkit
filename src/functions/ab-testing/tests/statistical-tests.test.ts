@@ -49,9 +49,9 @@ describe('Two-Proportion Z-Test', () => {
 		expect(result.pValue).toBeCloseTo(0.046, 2);
 		expect(result.isSignificant).toBe(true); // p < 0.05
 		
-		// Confidence interval should contain the true difference
-		expect(result.improvement.confidenceInterval.lower).toBeLessThan(-0.01);
-		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(-0.09);
+		// Confidence interval for relative improvement should be reasonable for -14.29% improvement
+		expect(result.improvement.confidenceInterval.lower).toBeLessThan(-5); // More negative than -5%
+		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(-25); // Less negative than -25%
 	});
 
 	/**
@@ -156,6 +156,118 @@ describe('Two-Proportion Z-Test', () => {
 		expect(result.testStatistic).toBeCloseTo(0, 3);
 		expect(result.pValue).toBeCloseTo(1.0, 1); // p-value should be ~1.0
 		expect(result.isSignificant).toBe(false);
+	});
+
+	/**
+	 * TEST CASE 6: User Bug Report - Blue Button vs Red Button
+	 * Source: User-reported bug where confidence interval showed "0.0% to 0.0%"
+	 * 
+	 * Data: Blue Button (10000 visitors, 1200 conversions = 12%), Red Button (10000 visitors, 1440 conversions = 14.4%)
+	 * Expected: 20% relative improvement with confidence interval approximately 8.4% to 32.7%
+	 */
+	it('should correctly calculate relative improvement confidence interval for Blue vs Red Button scenario', () => {
+		const data = {
+			n1: 10000,      // Blue Button visitors
+			x1: 1200,       // Blue Button conversions (12%)
+			n2: 10000,      // Red Button visitors  
+			x2: 1440,       // Red Button conversions (14.4%)
+			confidenceLevel: 0.95
+		};
+
+		const result = twoProportionTest(data, 'Blue Button', 'Red Button');
+
+		// Verify basic calculations
+		expect(result.control.conversionRate).toBeCloseTo(0.12, 3);
+		expect(result.variation.conversionRate).toBeCloseTo(0.144, 3);
+		expect(result.improvement.absolute).toBeCloseTo(0.024, 3); // 2.4 percentage points
+		expect(result.improvement.relative).toBeCloseTo(20.0, 1); // 20% relative improvement
+		expect(result.isSignificant).toBe(true); // Should be significant with large samples
+
+		// Verify confidence interval for relative improvement (the main bug fix)
+		// With this sample size and effect, CI should be approximately 8% to 33%
+		expect(result.improvement.confidenceInterval.lower).toBeGreaterThan(8); // At least 8%
+		expect(result.improvement.confidenceInterval.lower).toBeLessThan(15); // Less than 15%
+		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(25); // At least 25%
+		expect(result.improvement.confidenceInterval.upper).toBeLessThan(35); // Less than 35%
+		
+		// The CI should NOT be "0.0% to 0.0%" anymore
+		expect(Math.abs(result.improvement.confidenceInterval.lower)).toBeGreaterThan(1);
+		expect(Math.abs(result.improvement.confidenceInterval.upper)).toBeGreaterThan(1);
+		
+		// Log the results for manual verification
+		console.log('Blue vs Red Button Test Results:');
+		console.log(`Blue Button: ${(result.control.conversionRate * 100).toFixed(2)}%`);
+		console.log(`Red Button: ${(result.variation.conversionRate * 100).toFixed(2)}%`);
+		console.log(`Relative improvement: ${result.improvement.relative?.toFixed(1)}%`);
+		console.log(`95% CI: ${result.improvement.confidenceInterval.lower.toFixed(1)}% to ${result.improvement.confidenceInterval.upper.toFixed(1)}%`);
+		console.log(`P-value: ${result.pValue.toFixed(4)}`);
+	});
+
+	/**
+	 * TEST CASE 7: Confidence Interval Validation for Different Scenarios
+	 * Ensures relative improvement confidence intervals behave correctly across different scenarios
+	 */
+	it('should calculate sensible relative improvement confidence intervals for various scenarios', () => {
+		// Small effect with large sample - tight CI
+		const smallEffect = {
+			n1: 5000, x1: 500,   // 10% control
+			n2: 5000, x2: 550,   // 11% variation (10% relative improvement)
+			confidenceLevel: 0.95
+		};
+		const smallResult = twoProportionTest(smallEffect);
+		
+		// Small effect should have relatively narrow CI around 10%
+		const smallRange = smallResult.improvement.confidenceInterval.upper - smallResult.improvement.confidenceInterval.lower;
+		expect(smallRange).toBeLessThan(30); // CI range should be less than 30 percentage points for relative improvement
+		expect(smallResult.improvement.relative).toBeCloseTo(10, 1);
+
+		// Large effect with small sample - wide CI  
+		const largeEffect = {
+			n1: 200, x1: 20,     // 10% control
+			n2: 200, x2: 40,     // 20% variation (100% relative improvement)
+			confidenceLevel: 0.95
+		};
+		const largeResult = twoProportionTest(largeEffect);
+		
+		// Large effect with small sample should have wide CI
+		const largeRange = largeResult.improvement.confidenceInterval.upper - largeResult.improvement.confidenceInterval.lower;
+		expect(largeRange).toBeGreaterThan(30); // CI range should be wider due to smaller sample
+		expect(largeResult.improvement.relative).toBeCloseTo(100, 1);
+
+		// Edge case: very small control rate
+		const smallControl = {
+			n1: 10000, x1: 10,   // 0.1% control
+			n2: 10000, x2: 20,   // 0.2% variation (100% relative improvement)
+			confidenceLevel: 0.95
+		};
+		const smallControlResult = twoProportionTest(smallControl);
+		
+		// Should still produce reasonable CI even with very small control rate
+		expect(smallControlResult.improvement.relative).toBeCloseTo(100, 1);
+		expect(smallControlResult.improvement.confidenceInterval.lower).toBeGreaterThan(-50); // Not wildly negative
+		expect(smallControlResult.improvement.confidenceInterval.upper).toBeLessThan(500); // Not wildly positive
+	});
+
+	/**
+	 * TEST CASE 8: Zero Control Rate Edge Case
+	 * Verifies proper handling when control has zero conversions
+	 */
+	it('should handle zero control rate gracefully in confidence intervals', () => {
+		const zeroControl = {
+			n1: 1000, x1: 0,     // 0% control
+			n2: 1000, x2: 50,    // 5% variation
+			confidenceLevel: 0.95
+		};
+
+		const result = twoProportionTest(zeroControl);
+		
+		// Should return null for relative improvement when control is 0
+		expect(result.improvement.relative).toBe(null);
+		
+		// CI should fall back to absolute difference (converted to percentages)
+		expect(result.improvement.confidenceInterval.lower).toBeLessThan(10); // Should be reasonable range
+		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(0);
+		expect(result.improvement.confidenceInterval.upper).toBeLessThan(15); // Not wildly large
 	});
 });
 

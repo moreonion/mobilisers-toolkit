@@ -1,6 +1,7 @@
 import jStat from 'jstat';
 import type { TwoProportionResult, ChiSquareResult } from '../../types/statistical-results';
 import type { TestVariation, TwoProportionTestData } from '../../types/ab-testing';
+import { bonferroniCorrection } from './bonferroni';
 
 /**
  * Performs a two-proportion z-test to compare conversion rates between control and variation
@@ -81,9 +82,15 @@ export function twoProportionTest(
 		improvement: {
 			absolute: difference, // raw percentage point difference (e.g., 0.02 for 2 percentage points)
 			relative: p1 > 0 ? (difference / p1) * 100 : null, // relative improvement as % (null when control is 0)
-			confidenceInterval: {
-				lower: difference - marginOfError,
-				upper: difference + marginOfError
+			confidenceInterval: p1 > 0 ? {
+				// Calculate confidence interval for relative improvement (user-friendly)
+				// Uses delta method: CI for relative improvement = CI for absolute difference / control rate * 100
+				lower: ((difference - marginOfError) / p1) * 100,
+				upper: ((difference + marginOfError) / p1) * 100
+			} : {
+				// When control rate is 0, fall back to absolute difference CI (converted to percentages)
+				lower: (difference - marginOfError) * 100,
+				upper: (difference + marginOfError) * 100
 			}
 		}
 	};
@@ -243,4 +250,347 @@ export function calculateConversionRates(variations: TestVariation[]): TestVaria
 		...variation,
 		conversionRate: variation.conversions / variation.visitors
 	}));
+}
+
+/**
+ * Performs comprehensive pairwise analysis for all variations
+ * 
+ * WHAT THIS DOES (for novices):
+ * Instead of just comparing everything to a "control", this compares every variation
+ * against every other variation to find meaningful patterns and performance tiers.
+ * 
+ * HOW IT WORKS (for experts):
+ * - Performs all possible pairwise two-proportion tests (n choose 2 comparisons)
+ * - Groups variations by statistical performance tiers
+ * - Identifies clear winners, losers, and statistical ties
+ * - Applies appropriate multiple comparison corrections
+ * - Returns business-friendly insights rather than raw statistical output
+ * 
+ * @param variations - Array of all test variations (3+ required)
+ * @param confidenceLevel - Confidence level for statistical tests
+ * @returns Comprehensive analysis with performance groupings and actionable insights
+ */
+export function comprehensivePairwiseAnalysis(
+	variations: TestVariation[], 
+	confidenceLevel: number
+) {
+	// Calculate conversion rates for all variations
+	const variationsWithRates = calculateConversionRates(variations);
+	
+	// Perform all possible pairwise comparisons
+	const allComparisons: TwoProportionResult[] = [];
+	for (let i = 0; i < variations.length; i++) {
+		for (let j = i + 1; j < variations.length; j++) {
+			const data = formatTwoProportionData(variations[i], variations[j], confidenceLevel);
+			const result = twoProportionTest(data, variations[i].name, variations[j].name);
+			allComparisons.push(result);
+		}
+	}
+	
+	// Apply Bonferroni correction to all comparisons
+	const bonferroniResults = bonferroniCorrection(
+		allComparisons.map(r => r.pValue),
+		1 - confidenceLevel
+	);
+	
+	// Update comparisons with corrected significance
+	const correctedComparisons = allComparisons.map((result, index) => ({
+		...result,
+		isSignificant: bonferroniResults[index].isSignificant,
+		pValue: bonferroniResults[index].correctedPValue,
+		originalPValue: bonferroniResults[index].originalPValue
+	}));
+	
+	// Calculate evidence strength for confidence-based labeling
+	const significantCount = correctedComparisons.filter(c => c.isSignificant).length;
+	const evidenceStrength = significantCount / correctedComparisons.length;
+	
+	// Group variations by performance tiers with evidence strength
+	const performanceGroups = groupVariationsByPerformance(
+		variationsWithRates as (TestVariation & { conversionRate: number })[], 
+		correctedComparisons,
+		evidenceStrength
+	);
+	
+	// Generate business insights
+	const insights = generateBusinessInsights(performanceGroups, correctedComparisons);
+	
+	return {
+		allComparisons: correctedComparisons,
+		performanceGroups,
+		insights,
+		bonferroniCorrected: true,
+		correctedAlpha: bonferroniResults[0].correctedAlpha
+	};
+}
+
+/**
+ * Groups variations into performance tiers based on statistical comparisons
+ * 
+ * @param variations - Variations with conversion rates
+ * @param comparisons - Statistical comparison results
+ * @param evidenceStrength - Proportion of significant comparisons (0-1)
+ * @returns Performance groups (high, medium, low performers) or single group if no significant differences
+ */
+function groupVariationsByPerformance(
+	variations: (TestVariation & { conversionRate: number })[], 
+	comparisons: TwoProportionResult[],
+	evidenceStrength: number
+) {
+	// Check if there are ANY significant differences
+	const hasSignificantDifferences = comparisons.some(c => c.isSignificant);
+	
+// Sort variations by conversion rate (highest first)
+	const sortedVariations = [...variations].sort((a, b) => b.conversionRate - a.conversionRate);
+	
+	// If no significant differences exist, return all variations as statistically tied
+	if (!hasSignificantDifferences) {
+		return [{
+			tier: 1,
+			label: "Similar Performance",
+			variations: sortedVariations
+		}];
+	}
+	
+	// Determine confidence level for labeling
+	const isStrongEvidence = evidenceStrength >= 0.5;
+	const confidencePrefix = isStrongEvidence ? "" : "Tentative ";
+	
+	// Create initial empty performance tiers
+	const performanceTiers: Array<{
+		tier: number;
+		label: string;
+		variations: (TestVariation & { conversionRate: number })[];
+	}> = [];
+	
+	// Group all variations based on statistical differences
+	for (let i = 0; i < sortedVariations.length; i++) {
+		const currentVariation = sortedVariations[i];
+		let placedInTier = false;
+		
+		// Check if this variation is statistically similar to ALL variations in any existing tier
+		for (const tier of performanceTiers) {
+			const isStatisticallySimilar = tier.variations.every(tierVariation => {
+				const comparison = comparisons.find(c => 
+					(c.control.name === currentVariation.name && c.variation.name === tierVariation.name) ||
+					(c.control.name === tierVariation.name && c.variation.name === currentVariation.name)
+				);
+				return comparison && !comparison.isSignificant;
+			});
+			
+			if (isStatisticallySimilar) {
+				tier.variations.push(currentVariation);
+				placedInTier = true;
+				break;
+			}
+		}
+		
+		// If not similar to any tier, create new tier
+		if (!placedInTier) {
+			const tierNumber = performanceTiers.length + 1;
+			const tierLabel = tierNumber === 1 ? `${confidencePrefix}Highest Performers` : 
+							 tierNumber === 2 ? `${confidencePrefix}Middle Performers` : 
+							 tierNumber === 3 ? `${confidencePrefix}Lower Performers` : 
+							 `${confidencePrefix}Tier ${tierNumber} Performers`;
+			
+			performanceTiers.push({
+				tier: tierNumber,
+				label: tierLabel,
+				variations: [currentVariation]
+			});
+		}
+	}
+	
+	return performanceTiers;
+}
+
+/**
+ * Calculates tier-crossing evidence strength for decision-making confidence
+ * 
+ * @param performanceGroups - Grouped performance tiers
+ * @param comparisons - Statistical comparison results
+ * @returns Evidence strength based on meaningful tier-crossing comparisons
+ */
+function calculateTierCrossingEvidence(
+	performanceGroups: Array<{
+		tier: number;
+		label: string;
+		variations: (TestVariation & { conversionRate: number })[];
+	}>,
+	comparisons: TwoProportionResult[]
+): number {
+	if (performanceGroups.length <= 1) {
+		// If all variants in one tier, use overall evidence
+		const significantComparisons = comparisons.filter(c => c.isSignificant);
+		return significantComparisons.length / comparisons.length;
+	}
+	
+	// Get top tier and all lower tier variants
+	const topTier = performanceGroups[0];
+	const lowerTierVariants = performanceGroups.slice(1).flatMap(tier => tier.variations);
+	
+	if (lowerTierVariants.length === 0) {
+		// Only one tier, fall back to overall evidence
+		const significantComparisons = comparisons.filter(c => c.isSignificant);
+		return significantComparisons.length / comparisons.length;
+	}
+	
+	// Count significant comparisons between top tier and lower tiers
+	let significantCrossings = 0;
+	let totalCrossings = 0;
+	
+	for (const topVariant of topTier.variations) {
+		for (const lowerVariant of lowerTierVariants) {
+			const comparison = comparisons.find(c => 
+				(c.control.name === topVariant.name && c.variation.name === lowerVariant.name) ||
+				(c.control.name === lowerVariant.name && c.variation.name === topVariant.name)
+			);
+			
+			if (comparison) {
+				totalCrossings++;
+				if (comparison.isSignificant) {
+					significantCrossings++;
+				}
+			}
+		}
+	}
+	
+	return totalCrossings > 0 ? significantCrossings / totalCrossings : 0;
+}
+
+/**
+ * Generates business-friendly insights from performance analysis
+ * 
+ * @param performanceGroups - Grouped performance tiers
+ * @param comparisons - Statistical comparison results
+ * @returns Array of actionable business insights
+ */
+function generateBusinessInsights(
+	performanceGroups: Array<{
+		tier: number;
+		label: string;
+		variations: (TestVariation & { conversionRate: number })[];
+	}>,
+	comparisons: TwoProportionResult[]
+) {
+	const insights: Array<{
+		type: 'success' | 'warning' | 'info';
+		title: string;
+		message: string;
+		actionable?: string;
+	}> = [];
+	
+	// Calculate tier-crossing evidence strength for meaningful confidence assessment
+	const evidenceStrength = calculateTierCrossingEvidence(performanceGroups, comparisons);
+	
+	// Determine confidence level for messaging
+	const isStrongEvidence = evidenceStrength >= 0.5;  // 50%+ significant tier-crossing comparisons
+	const hasAnyEvidence = evidenceStrength > 0;         // >0% significant tier-crossing comparisons
+	
+	// Performance tier analysis with confidence-based messaging
+	if (performanceGroups.length > 1) {
+		const topTier = performanceGroups[0];
+		const bottomTier = performanceGroups[performanceGroups.length - 1];
+		
+		if (topTier.variations.length === 1 && bottomTier.variations.length === 1) {
+			const topVariation = topTier.variations[0];
+			const bottomVariation = bottomTier.variations[0];
+			const improvement = ((topVariation.conversionRate - bottomVariation.conversionRate) / bottomVariation.conversionRate * 100);
+			
+			if (isStrongEvidence) {
+				insights.push({
+					type: 'success',
+					title: 'Clear Performance Leader',
+					message: `Variant ${topVariation.name} (${(topVariation.conversionRate * 100).toFixed(2)}%) significantly outperforms Variant ${bottomVariation.name} (${(bottomVariation.conversionRate * 100).toFixed(2)}%) by ${improvement.toFixed(1)}%.`,
+					actionable: `Implement Variant ${topVariation.name} for maximum impact.`
+				});
+			} else {
+				insights.push({
+					type: 'info',
+					title: 'Tentative Performance Leader',
+					message: `Variant ${topVariation.name} (${(topVariation.conversionRate * 100).toFixed(2)}%) appears to outperform Variant ${bottomVariation.name} (${(bottomVariation.conversionRate * 100).toFixed(2)}%) by ${improvement.toFixed(1)}%, but evidence is limited.`,
+					actionable: `Consider collecting more data or head-to-head testing before making final decisions.`
+				});
+			}
+		} else if (topTier.variations.length > 1) {
+			const topNames = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' })
+				.format(topTier.variations.map(v => `<em>${v.name}</em>`));
+			const avgTopRate = topTier.variations.reduce((sum, v) => sum + v.conversionRate, 0) / topTier.variations.length;
+			
+			if (isStrongEvidence) {
+				insights.push({
+					type: 'success',
+					title: 'Multiple High Performers',
+					message: `Variants ${topNames} are clearly top performers (avg. ${(avgTopRate * 100).toFixed(2)}%).`,
+					actionable: `Any of these variants can be confidently implemented, or test them head-to-head for a definitive winner.`
+				});
+			} else {
+				insights.push({
+					type: 'info',
+					title: 'Tentative High Performers',
+					message: `Variants ${topNames} appear to perform better than others (avg. ${(avgTopRate * 100).toFixed(2)}%), but we can't reliably distinguish between them.`,
+					actionable: `Consider collecting more data or head-to-head testing to identify the true winner.`
+				});
+			}
+		}
+	}
+	
+	// Overall evidence assessment using tier-crossing logic
+	const totalComparisons = comparisons.length;
+	const allSignificantComparisons = comparisons.filter(c => c.isSignificant);
+	
+	if (!hasAnyEvidence) {
+		insights.push({
+			type: 'warning',
+			title: 'No Significant Differences',
+			message: `None of your variants show statistically significant differences from each other.`,
+			actionable: `Consider collecting more data or testing more distinct variations.`
+		});
+	} else if (!isStrongEvidence) {
+		// Calculate tier-crossing specifics for messaging
+		const topTier = performanceGroups[0];
+		const lowerTierVariants = performanceGroups.slice(1).flatMap(tier => tier.variations);
+		const tierCrossingComparisons = topTier.variations.length * lowerTierVariants.length;
+		const significantTierCrossings = Math.round(evidenceStrength * tierCrossingComparisons);
+		
+		if (performanceGroups.length > 1 && tierCrossingComparisons > 0) {
+			insights.push({
+				type: 'info',
+				title: 'Limited Evidence',
+				message: `Only ${significantTierCrossings} of ${tierCrossingComparisons} key comparisons (top performers vs others) show significant differences. Results should be interpreted cautiously.`,
+				actionable: `Consider collecting more data to strengthen conclusions, or test fewer variants for clearer results.`
+			});
+		} else {
+			insights.push({
+				type: 'info',
+				title: 'Limited Evidence',
+				message: `Only ${allSignificantComparisons.length} of ${totalComparisons} comparisons show significant differences. Results should be interpreted cautiously.`,
+				actionable: `Consider collecting more data to strengthen conclusions, or test fewer variants for clearer results.`
+			});
+		}
+	} else {
+		// Calculate tier-crossing specifics for messaging
+		const topTier = performanceGroups[0];
+		const lowerTierVariants = performanceGroups.slice(1).flatMap(tier => tier.variations);
+		const tierCrossingComparisons = topTier.variations.length * lowerTierVariants.length;
+		const significantTierCrossings = Math.round(evidenceStrength * tierCrossingComparisons);
+		
+		if (performanceGroups.length > 1 && tierCrossingComparisons > 0) {
+			insights.push({
+				type: 'success',
+				title: 'Strong Evidence',
+				message: `${significantTierCrossings} of ${tierCrossingComparisons} key comparisons (top performers vs others) show significant differences, providing confident results.`,
+				actionable: `Results are reliable enough to make implementation decisions.`
+			});
+		} else {
+			insights.push({
+				type: 'success',
+				title: 'Strong Evidence',
+				message: `${allSignificantComparisons.length} of ${totalComparisons} comparisons show significant differences, providing confident results.`,
+				actionable: `Results are reliable enough to make implementation decisions.`
+			});
+		}
+	}
+	
+	return insights;
 }

@@ -114,6 +114,11 @@ export interface MultiVariationResult {
 	 * This keeps your overall false positive rate at the desired 5%
 	 */
 	bonferroniAlpha?: number;
+	/** 
+	 * Whether winners are shown with caveat (didn't survive Bonferroni but show practical advantage)
+	 * Used when overall test is significant but individual tests don't survive multiple comparison correction
+	 */
+	showWithCaveat?: boolean;
 	/** All winning variations (those with the highest significant improvement) */
 	winningVariations?: Array<{
 		/** Name of the winning variation */
@@ -157,4 +162,54 @@ export interface CalculationError {
 	message: string;
 	/** Detailed validation errors if type is 'validation' */
 	errors?: ValidationError[];
+}
+
+/**
+ * Performance tier grouping for comprehensive analysis
+ * Groups variations by statistical performance levels
+ */
+export interface PerformanceTier {
+	/** Tier number (1 = highest performing) */
+	tier: number;
+	/** Human-readable tier label */
+	label: string;
+	/** Variations in this performance tier */
+	variations: Array<{
+		name: string;
+		visitors: number;
+		conversions: number;
+		conversionRate: number;
+	}>;
+}
+
+/**
+ * Business insight from comprehensive analysis
+ * Provides actionable interpretation of statistical results
+ */
+export interface BusinessInsight {
+	/** Type of insight for styling/iconography */
+	type: 'success' | 'warning' | 'info';
+	/** Short descriptive title */
+	title: string;
+	/** Main insight message */
+	message: string;
+	/** Optional actionable recommendation */
+	actionable?: string;
+}
+
+/**
+ * Comprehensive pairwise analysis results
+ * Provides business-friendly interpretation of all statistical comparisons
+ */
+export interface ComprehensiveAnalysisResult {
+	/** All pairwise comparisons with Bonferroni correction applied */
+	allComparisons: TwoProportionResult[];
+	/** Variations grouped by statistical performance tiers */
+	performanceGroups: PerformanceTier[];
+	/** Business-friendly insights and recommendations */
+	insights: BusinessInsight[];
+	/** Whether Bonferroni correction was applied */
+	bonferroniCorrected: boolean;
+	/** The corrected alpha level used for significance testing */
+	correctedAlpha: number;
 }
