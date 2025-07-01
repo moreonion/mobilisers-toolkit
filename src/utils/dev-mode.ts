@@ -3,7 +3,7 @@
  * Detects if the application is running in development mode
  */
 export function isDevMode(): boolean {
-	return import.meta.env.MODE === 'development' || import.meta.env.DEV === true;
+	return import.meta.env.MODE === "development" || import.meta.env.DEV === true;
 }
 
 /**

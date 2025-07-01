@@ -11,16 +11,13 @@ import Feedback from "@/components/Feedback.astro";
 >
 	<div id="toolDescription">
 		<p>
-			Copying and pasting your copy directly from Word or Google Docs often
-			brings unwanted formatting with it. Use the clean-up box below to remove
-			all the extra colours, fonts etc from the HTML of your content.
+			Copying and pasting your copy directly from Word or Google Docs often brings unwanted
+			formatting with it. Use the clean-up box below to remove all the extra colours, fonts etc from
+			the HTML of your content.
 		</p>
 	</div>
 
-	<div
-		id="islandWrapper"
-		class="mt-6"
-	>
+	<div id="islandWrapper" class="mt-6">
 		<CleanHTMLIsland client:load />
 	</div>
 	<Feedback />

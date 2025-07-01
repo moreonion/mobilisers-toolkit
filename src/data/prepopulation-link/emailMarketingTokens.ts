@@ -1,8 +1,4 @@
-export type EmailMarketingProviders =
-	| "Mailchimp"
-	| "DotDigital"
-	| "CleverReach"
-	| "Other";
+export type EmailMarketingProviders = "Mailchimp" | "DotDigital" | "CleverReach" | "Other";
 
 export type EmailMarketingProviderFields =
 	| "title"
@@ -29,7 +25,7 @@ export const emailMarketingProviders: EmailMarketingProviders[] = [
 	"Mailchimp",
 	"DotDigital",
 	"CleverReach",
-	"Other",
+	"Other"
 ];
 
 export type EmailMarketingTokens = {
@@ -40,68 +36,68 @@ export const emailMarketingTokens: EmailMarketingTokens = {
 		Mailchimp: "",
 		DotDigital: "",
 		CleverReach: "{TITLE}",
-		Other: "",
+		Other: ""
 	},
 	first_name: {
 		Mailchimp: "*|FNAME|*",
 		DotDigital: "@FIRSTNAME@",
 		CleverReach: "{FIRSTNAME}",
-		Other: "",
+		Other: ""
 	},
 	last_name: {
 		Mailchimp: "*|LNAME|*",
 		DotDigital: "@LASTNAME@",
 		CleverReach: "{LASTNAME}",
-		Other: "",
+		Other: ""
 	},
 	email: {
 		Mailchimp: "*|EMAIL|*",
 		DotDigital: "@EMAIL@",
 		CleverReach: "{EMAIL}",
-		Other: "",
+		Other: ""
 	},
 	phone_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
 		CleverReach: "",
-		Other: "",
+		Other: ""
 	},
 	mobile_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
 		CleverReach: "",
-		Other: "",
+		Other: ""
 	},
 	street_address: {
 		Mailchimp: "",
 		DotDigital: "@ADDRESS@",
 		CleverReach: "{STREET}",
-		Other: "",
+		Other: ""
 	},
 	city: {
 		Mailchimp: "",
 		DotDigital: "@CITY@",
 		CleverReach: "{CITY}",
-		Other: "",
+		Other: ""
 	},
 	state: {
 		Mailchimp: "",
 		DotDigital: "@STATE@",
 		CleverReach: "",
-		Other: "",
+		Other: ""
 	},
 	postcode: {
 		Mailchimp: "",
 		DotDigital: "@ZIP@",
 		CleverReach: "{ZIP}",
-		Other: "",
+		Other: ""
 	},
 	country: {
 		Mailchimp: "",
 		DotDigital: "@COUNTRY@",
 		CleverReach: "{COUNTRY}",
-		Other: "",
-	},
+		Other: ""
+	}
 };
 
 export type EmailMarketingTokenDocumentationType = {
@@ -111,18 +107,17 @@ export type EmailMarketingTokenDocumentationType = {
 	};
 };
 
-export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationType =
-	{
-		Mailchimp: {
-			tokenTerminology: "Merge tag",
-			link: "https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/#Personalization",
-		},
-		DotDigital: {
-			tokenTerminology: "Data field",
-			link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page",
-		},
-		CleverReach: {
-			tokenTerminology: "Variable",
-			link: "https://support.cleverreach.de/hc/en-us/articles/360020682999-Newsletter-Editor-Personalize-Texts",
-		},
-	};
+export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationType = {
+	Mailchimp: {
+		tokenTerminology: "Merge tag",
+		link: "https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/#Personalization"
+	},
+	DotDigital: {
+		tokenTerminology: "Data field",
+		link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page"
+	},
+	CleverReach: {
+		tokenTerminology: "Variable",
+		link: "https://support.cleverreach.de/hc/en-us/articles/360020682999-Newsletter-Editor-Personalize-Texts"
+	}
+};

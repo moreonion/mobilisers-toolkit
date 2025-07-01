@@ -4,9 +4,9 @@ import ShareLinkIsland from "@/islands/share-link.svelte";
 import Feedback from "@/components/Feedback.astro";
 import { SHARE_TARGETS } from "@/data/share-link/store.svelte";
 
-const commaListFormatter = new Intl.ListFormat('en', { 
-	type: 'conjunction', // end with 'and'
-	style: 'long',  // use 'and', not '&'
+const commaListFormatter = new Intl.ListFormat("en", {
+	type: "conjunction", // end with 'and'
+	style: "long" // use 'and', not '&'
 });
 const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
 ---
@@ -19,15 +19,18 @@ const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
 	<div id="toolDescription">
 		<p>Create share links for {formattedShareTargetsList}</p>
 		<p>
-			Let your supporters quickly share your action with their friends and family on thank you pages and emails
+			Let your supporters quickly share your action with their friends and family on thank you pages
+			and emails
 		</p>
-		<p>See the Help Centre for more information about how you might <a href="https://support.impact-stack.org/hc/en-us/articles/360018432999-Styling-your-content#your-own-share-button">use these to create custom share buttons in thank you emails</a>.</p>
+		<p>
+			See the Help Centre for more information about how you might <a
+				href="https://support.impact-stack.org/hc/en-us/articles/360018432999-Styling-your-content#your-own-share-button"
+				>use these to create custom share buttons in thank you emails</a
+			>.
+		</p>
 	</div>
 
-	<div
-		id="islandWrapper"
-		class="mt-6"
-	>
+	<div id="islandWrapper" class="mt-6">
 		<ShareLinkIsland client:load />
 	</div>
 	<Feedback />

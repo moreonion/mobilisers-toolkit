@@ -5,34 +5,33 @@ import Feedback from "@/components/Feedback.astro";
 ---
 
 <BaseLayout
-  title="Prepopulation Link Generator"
-  description="Prefill your Impact Stack form with your supporters' details"
-  socialImageFilename="prepopulation_social.png"
+	title="Prepopulation Link Generator"
+	description="Prefill your Impact Stack form with your supporters' details"
+	socialImageFilename="prepopulation_social.png"
 >
-  <div id="toolDescription">
-    <p>
-      Save your supporters time and boost your conversion rates. Generate a link
-      to <a
-        href="https://support.impact-stack.org/hc/en-us/articles/115001868166-How-to-pre-populate-forms-from-email-URLs"
-        >prepopulate Impact Stack form fields</a
-      > with the data you already have about them in your Mailchimp, Dotdigital,
-      CleverReach or other email tool.
-    </p>
-  </div>
+	<div id="toolDescription">
+		<p>
+			Save your supporters time and boost your conversion rates. Generate a link to <a
+				href="https://support.impact-stack.org/hc/en-us/articles/115001868166-How-to-pre-populate-forms-from-email-URLs"
+				>prepopulate Impact Stack form fields</a
+			> with the data you already have about them in your Mailchimp, Dotdigital, CleverReach or other
+			email tool.
+		</p>
+	</div>
 
-  <div id="islandWrapper" class="mt-6">
-    <PrepopulationLinkIsland client:load />
-  </div>
-  <Feedback />
+	<div id="islandWrapper" class="mt-6">
+		<PrepopulationLinkIsland client:load />
+	</div>
+	<Feedback />
 </BaseLayout>
 
 <style>
-  #toolDescription,
-  #islandWrapper {
-    max-width: 36rem;
-  }
+	#toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	}
 
-  div p {
-    margin-bottom: 0;
-  }
+	div p {
+		margin-bottom: 0;
+	}
 </style>

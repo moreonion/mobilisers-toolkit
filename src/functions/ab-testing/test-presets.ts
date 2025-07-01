@@ -165,5 +165,5 @@ export function getAllPresets(): TestPreset[] {
  * Find preset by name
  */
 export function getPresetByName(name: string): TestPreset | undefined {
-	return getAllPresets().find(preset => preset.name === name);
+	return getAllPresets().find((preset) => preset.name === name);
 }

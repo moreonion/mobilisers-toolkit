@@ -1,34 +1,38 @@
-import { describe, it, expect } from 'vitest';
-import { twoProportionTest, chiSquareTest, formatTwoProportionData, pairwiseComparisons } from '../statistical-tests';
-import type { TestVariation } from '../../../types/ab-testing';
+import { describe, it, expect } from "vitest";
+import {
+	twoProportionTest,
+	chiSquareTest,
+	formatTwoProportionData,
+	pairwiseComparisons
+} from "../statistical-tests";
+import type { TestVariation } from "../../../types/ab-testing";
 
 /**
  * Academic-quality unit tests for A/B testing statistical functions
- * 
+ *
  * TEST DATA SOURCES & CITATIONS:
  * 1. Statistics How To (statisticshowto.com) - Presidential candidate survey example
- * 2. Statistics LibreTexts (stats.libretexts.org) - Student lateness study  
+ * 2. Statistics LibreTexts (stats.libretexts.org) - Student lateness study
  * 3. Statology (statology.org) - Two-proportion z-test examples
  * 4. Manual verification calculations using standard statistical formulas
- * 
+ *
  * All test cases include expected values calculated independently to verify our implementation
  */
 
-describe('Two-Proportion Z-Test', () => {
-	
+describe("Two-Proportion Z-Test", () => {
 	/**
 	 * TEST CASE 1: Presidential Candidate Survey
 	 * Source: Statistics How To (https://www.statisticshowto.com/probability-and-statistics/hypothesis-testing/z-test/)
-	 * 
+	 *
 	 * Data: 700 women (35% support), 700 men (30% support)
 	 * Expected results calculated using standard two-proportion z-test formulas
 	 */
-	it('should correctly calculate significance for presidential candidate survey (Statistics How To)', () => {
+	it("should correctly calculate significance for presidential candidate survey (Statistics How To)", () => {
 		const data = {
-			n1: 700,        // women sample size  
-			x1: 245,        // women supporting (700 × 0.35)
-			n2: 700,        // men sample size
-			x2: 210,        // men supporting (700 × 0.30)
+			n1: 700, // women sample size
+			x1: 245, // women supporting (700 × 0.35)
+			n2: 700, // men sample size
+			x2: 210, // men supporting (700 × 0.30)
 			confidenceLevel: 0.95
 		};
 
@@ -42,31 +46,31 @@ describe('Two-Proportion Z-Test', () => {
 		// two-tailed p-value ≈ 0.046
 
 		expect(result.control.conversionRate).toBeCloseTo(0.35, 3);
-		expect(result.variation.conversionRate).toBeCloseTo(0.30, 3);
+		expect(result.variation.conversionRate).toBeCloseTo(0.3, 3);
 		expect(result.improvement.absolute).toBeCloseTo(-0.05, 3);
 		expect(result.improvement.relative).toBeCloseTo(-14.29, 1); // -5/35 * 100
 		expect(Math.abs(result.testStatistic)).toBeCloseTo(1.993, 2);
 		expect(result.pValue).toBeCloseTo(0.046, 2);
 		expect(result.isSignificant).toBe(true); // p < 0.05
-		
+
 		// Confidence interval for relative improvement should be reasonable for -14.29% improvement
 		expect(result.improvement.confidenceInterval.lower).toBeLessThan(-5); // More negative than -5%
 		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(-25); // Less negative than -25%
 	});
 
 	/**
-	 * TEST CASE 2: Student Lateness Study  
+	 * TEST CASE 2: Student Lateness Study
 	 * Source: Statistics LibreTexts (stats.libretexts.org)
-	 * 
+	 *
 	 * Data: First class (200 students, 13 late), After lunch (200 students, 16 late)
 	 * Expected: Non-significant result (p > 0.05)
 	 */
-	it('should correctly handle non-significant results for student lateness study (LibreTexts)', () => {
+	it("should correctly handle non-significant results for student lateness study (LibreTexts)", () => {
 		const data = {
-			n1: 200,        // first class sample size
-			x1: 13,         // late students in first class  
-			n2: 200,        // after lunch class sample size
-			x2: 16,         // late students after lunch
+			n1: 200, // first class sample size
+			x1: 13, // late students in first class
+			n2: 200, // after lunch class sample size
+			x2: 16, // late students after lunch
 			confidenceLevel: 0.95
 		};
 
@@ -87,15 +91,15 @@ describe('Two-Proportion Z-Test', () => {
 	/**
 	 * TEST CASE 3: High Significance A/B Test
 	 * Source: Manual calculation for clear statistical significance
-	 * 
+	 *
 	 * Large effect size with adequate sample to ensure clear significance
 	 */
-	it('should correctly identify highly significant results', () => {
+	it("should correctly identify highly significant results", () => {
 		const data = {
-			n1: 1000,       // control sample size
-			x1: 100,        // control conversions (10%)
-			n2: 1000,       // variation sample size  
-			x2: 150,        // variation conversions (15%)
+			n1: 1000, // control sample size
+			x1: 100, // control conversions (10%)
+			n2: 1000, // variation sample size
+			x2: 150, // variation conversions (15%)
 			confidenceLevel: 0.95
 		};
 
@@ -103,7 +107,7 @@ describe('Two-Proportion Z-Test', () => {
 
 		// Expected: Large effect (5 percentage points) with large samples
 		// Should be highly significant (p << 0.01)
-		expect(result.control.conversionRate).toBeCloseTo(0.10, 2);
+		expect(result.control.conversionRate).toBeCloseTo(0.1, 2);
 		expect(result.variation.conversionRate).toBeCloseTo(0.15, 2);
 		expect(result.improvement.absolute).toBeCloseTo(0.05, 2);
 		expect(result.improvement.relative).toBeCloseTo(50, 1); // 50% relative improvement
@@ -115,12 +119,12 @@ describe('Two-Proportion Z-Test', () => {
 	 * TEST CASE 4: Edge Case - Zero Conversions
 	 * Tests handling of edge case where one group has no conversions
 	 */
-	it('should handle zero conversion edge case gracefully', () => {
+	it("should handle zero conversion edge case gracefully", () => {
 		const data = {
-			n1: 100,        // control sample size
-			x1: 0,          // no control conversions
-			n2: 100,        // variation sample size
-			x2: 5,          // variation conversions
+			n1: 100, // control sample size
+			x1: 0, // no control conversions
+			n2: 100, // variation sample size
+			x2: 5, // variation conversions
 			confidenceLevel: 0.95
 		};
 
@@ -131,26 +135,26 @@ describe('Two-Proportion Z-Test', () => {
 		expect(result.improvement.relative).toBe(null); // Cannot calculate relative improvement from 0% baseline
 		expect(result.pValue).toBeGreaterThan(0); // should produce valid p-value
 		expect(result.pValue).toBeLessThan(1); // p-value should be valid range
-		expect(typeof result.isSignificant).toBe('boolean');
+		expect(typeof result.isSignificant).toBe("boolean");
 	});
 
 	/**
 	 * TEST CASE 5: Identical Conversion Rates
 	 * Tests case where both groups have exactly the same conversion rate
 	 */
-	it('should handle identical conversion rates', () => {
+	it("should handle identical conversion rates", () => {
 		const data = {
-			n1: 500,        // control sample size
-			x1: 50,         // control conversions (10%)
-			n2: 500,        // variation sample size
-			x2: 50,         // variation conversions (10%) 
+			n1: 500, // control sample size
+			x1: 50, // control conversions (10%)
+			n2: 500, // variation sample size
+			x2: 50, // variation conversions (10%)
 			confidenceLevel: 0.95
 		};
 
 		const result = twoProportionTest(data);
 
-		expect(result.control.conversionRate).toBeCloseTo(0.10, 2);
-		expect(result.variation.conversionRate).toBeCloseTo(0.10, 2);
+		expect(result.control.conversionRate).toBeCloseTo(0.1, 2);
+		expect(result.variation.conversionRate).toBeCloseTo(0.1, 2);
 		expect(result.improvement.absolute).toBeCloseTo(0, 3);
 		expect(result.improvement.relative).toBeCloseTo(0, 3);
 		expect(result.testStatistic).toBeCloseTo(0, 3);
@@ -161,20 +165,20 @@ describe('Two-Proportion Z-Test', () => {
 	/**
 	 * TEST CASE 6: User Bug Report - Blue Button vs Red Button
 	 * Source: User-reported bug where confidence interval showed "0.0% to 0.0%"
-	 * 
+	 *
 	 * Data: Blue Button (10000 visitors, 1200 conversions = 12%), Red Button (10000 visitors, 1440 conversions = 14.4%)
 	 * Expected: 20% relative improvement with confidence interval approximately 8.4% to 32.7%
 	 */
-	it('should correctly calculate relative improvement confidence interval for Blue vs Red Button scenario', () => {
+	it("should correctly calculate relative improvement confidence interval for Blue vs Red Button scenario", () => {
 		const data = {
-			n1: 10000,      // Blue Button visitors
-			x1: 1200,       // Blue Button conversions (12%)
-			n2: 10000,      // Red Button visitors  
-			x2: 1440,       // Red Button conversions (14.4%)
+			n1: 10000, // Blue Button visitors
+			x1: 1200, // Blue Button conversions (12%)
+			n2: 10000, // Red Button visitors
+			x2: 1440, // Red Button conversions (14.4%)
 			confidenceLevel: 0.95
 		};
 
-		const result = twoProportionTest(data, 'Blue Button', 'Red Button');
+		const result = twoProportionTest(data, "Blue Button", "Red Button");
 
 		// Verify basic calculations
 		expect(result.control.conversionRate).toBeCloseTo(0.12, 3);
@@ -189,17 +193,19 @@ describe('Two-Proportion Z-Test', () => {
 		expect(result.improvement.confidenceInterval.lower).toBeLessThan(15); // Less than 15%
 		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(25); // At least 25%
 		expect(result.improvement.confidenceInterval.upper).toBeLessThan(35); // Less than 35%
-		
+
 		// The CI should NOT be "0.0% to 0.0%" anymore
 		expect(Math.abs(result.improvement.confidenceInterval.lower)).toBeGreaterThan(1);
 		expect(Math.abs(result.improvement.confidenceInterval.upper)).toBeGreaterThan(1);
-		
+
 		// Log the results for manual verification
-		console.log('Blue vs Red Button Test Results:');
+		console.log("Blue vs Red Button Test Results:");
 		console.log(`Blue Button: ${(result.control.conversionRate * 100).toFixed(2)}%`);
 		console.log(`Red Button: ${(result.variation.conversionRate * 100).toFixed(2)}%`);
 		console.log(`Relative improvement: ${result.improvement.relative?.toFixed(1)}%`);
-		console.log(`95% CI: ${result.improvement.confidenceInterval.lower.toFixed(1)}% to ${result.improvement.confidenceInterval.upper.toFixed(1)}%`);
+		console.log(
+			`95% CI: ${result.improvement.confidenceInterval.lower.toFixed(1)}% to ${result.improvement.confidenceInterval.upper.toFixed(1)}%`
+		);
 		console.log(`P-value: ${result.pValue.toFixed(4)}`);
 	});
 
@@ -207,41 +213,51 @@ describe('Two-Proportion Z-Test', () => {
 	 * TEST CASE 7: Confidence Interval Validation for Different Scenarios
 	 * Ensures relative improvement confidence intervals behave correctly across different scenarios
 	 */
-	it('should calculate sensible relative improvement confidence intervals for various scenarios', () => {
+	it("should calculate sensible relative improvement confidence intervals for various scenarios", () => {
 		// Small effect with large sample - tight CI
 		const smallEffect = {
-			n1: 5000, x1: 500,   // 10% control
-			n2: 5000, x2: 550,   // 11% variation (10% relative improvement)
+			n1: 5000,
+			x1: 500, // 10% control
+			n2: 5000,
+			x2: 550, // 11% variation (10% relative improvement)
 			confidenceLevel: 0.95
 		};
 		const smallResult = twoProportionTest(smallEffect);
-		
+
 		// Small effect should have relatively narrow CI around 10%
-		const smallRange = smallResult.improvement.confidenceInterval.upper - smallResult.improvement.confidenceInterval.lower;
+		const smallRange =
+			smallResult.improvement.confidenceInterval.upper -
+			smallResult.improvement.confidenceInterval.lower;
 		expect(smallRange).toBeLessThan(30); // CI range should be less than 30 percentage points for relative improvement
 		expect(smallResult.improvement.relative).toBeCloseTo(10, 1);
 
-		// Large effect with small sample - wide CI  
+		// Large effect with small sample - wide CI
 		const largeEffect = {
-			n1: 200, x1: 20,     // 10% control
-			n2: 200, x2: 40,     // 20% variation (100% relative improvement)
+			n1: 200,
+			x1: 20, // 10% control
+			n2: 200,
+			x2: 40, // 20% variation (100% relative improvement)
 			confidenceLevel: 0.95
 		};
 		const largeResult = twoProportionTest(largeEffect);
-		
+
 		// Large effect with small sample should have wide CI
-		const largeRange = largeResult.improvement.confidenceInterval.upper - largeResult.improvement.confidenceInterval.lower;
+		const largeRange =
+			largeResult.improvement.confidenceInterval.upper -
+			largeResult.improvement.confidenceInterval.lower;
 		expect(largeRange).toBeGreaterThan(30); // CI range should be wider due to smaller sample
 		expect(largeResult.improvement.relative).toBeCloseTo(100, 1);
 
 		// Edge case: very small control rate
 		const smallControl = {
-			n1: 10000, x1: 10,   // 0.1% control
-			n2: 10000, x2: 20,   // 0.2% variation (100% relative improvement)
+			n1: 10000,
+			x1: 10, // 0.1% control
+			n2: 10000,
+			x2: 20, // 0.2% variation (100% relative improvement)
 			confidenceLevel: 0.95
 		};
 		const smallControlResult = twoProportionTest(smallControl);
-		
+
 		// Should still produce reasonable CI even with very small control rate
 		expect(smallControlResult.improvement.relative).toBeCloseTo(100, 1);
 		expect(smallControlResult.improvement.confidenceInterval.lower).toBeGreaterThan(-50); // Not wildly negative
@@ -252,18 +268,20 @@ describe('Two-Proportion Z-Test', () => {
 	 * TEST CASE 8: Zero Control Rate Edge Case
 	 * Verifies proper handling when control has zero conversions
 	 */
-	it('should handle zero control rate gracefully in confidence intervals', () => {
+	it("should handle zero control rate gracefully in confidence intervals", () => {
 		const zeroControl = {
-			n1: 1000, x1: 0,     // 0% control
-			n2: 1000, x2: 50,    // 5% variation
+			n1: 1000,
+			x1: 0, // 0% control
+			n2: 1000,
+			x2: 50, // 5% variation
 			confidenceLevel: 0.95
 		};
 
 		const result = twoProportionTest(zeroControl);
-		
+
 		// Should return null for relative improvement when control is 0
 		expect(result.improvement.relative).toBe(null);
-		
+
 		// CI should fall back to absolute difference (converted to percentages)
 		expect(result.improvement.confidenceInterval.lower).toBeLessThan(10); // Should be reasonable range
 		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(0);
@@ -271,19 +289,18 @@ describe('Two-Proportion Z-Test', () => {
 	});
 });
 
-describe('Chi-Square Test for Multi-Variation', () => {
-
+describe("Chi-Square Test for Multi-Variation", () => {
 	/**
 	 * TEST CASE 1: Three-Group A/B/C Test
 	 * Source: Manual calculation with expected chi-square distribution
-	 * 
+	 *
 	 * Tests basic 3-variation scenario with moderate differences
 	 */
-	it('should correctly perform chi-square test for 3 variations', () => {
+	it("should correctly perform chi-square test for 3 variations", () => {
 		const variations: TestVariation[] = [
-			{ name: 'Control', visitors: 1000, conversions: 100 },    // 10%
-			{ name: 'Variation A', visitors: 1000, conversions: 120 }, // 12%  
-			{ name: 'Variation B', visitors: 1000, conversions: 90 }   // 9%
+			{ name: "Control", visitors: 1000, conversions: 100 }, // 10%
+			{ name: "Variation A", visitors: 1000, conversions: 120 }, // 12%
+			{ name: "Variation B", visitors: 1000, conversions: 90 } // 9%
 		];
 
 		const result = chiSquareTest(variations, 0.95);
@@ -293,7 +310,7 @@ describe('Chi-Square Test for Multi-Variation', () => {
 		// Expected conversions per group = 1000 × 0.1033 = 103.33
 		// Expected non-conversions per group = 1000 × 0.8967 = 896.67
 		// Chi-square = Σ[(observed - expected)²/expected] for all cells
-		
+
 		expect(result.degreesOfFreedom).toBe(2); // (3-1) × (2-1) = 2
 		expect(result.testStatistic).toBeGreaterThan(0);
 		expect(result.pValue).toBeGreaterThan(0);
@@ -303,7 +320,7 @@ describe('Chi-Square Test for Multi-Variation', () => {
 		expect(result.residuals).toHaveLength(3);
 
 		// Each row should have 2 columns [conversions, non-conversions]
-		result.observedFrequencies.forEach(row => {
+		result.observedFrequencies.forEach((row) => {
 			expect(row).toHaveLength(2);
 		});
 	});
@@ -312,11 +329,11 @@ describe('Chi-Square Test for Multi-Variation', () => {
 	 * TEST CASE 2: Identical Groups (Should be Non-Significant)
 	 * All variations have exactly the same conversion rate
 	 */
-	it('should return non-significant result for identical groups', () => {
+	it("should return non-significant result for identical groups", () => {
 		const variations: TestVariation[] = [
-			{ name: 'Control', visitors: 500, conversions: 50 },     // 10%
-			{ name: 'Variation A', visitors: 500, conversions: 50 }, // 10%
-			{ name: 'Variation B', visitors: 500, conversions: 50 }  // 10%
+			{ name: "Control", visitors: 500, conversions: 50 }, // 10%
+			{ name: "Variation A", visitors: 500, conversions: 50 }, // 10%
+			{ name: "Variation B", visitors: 500, conversions: 50 } // 10%
 		];
 
 		const result = chiSquareTest(variations, 0.95);
@@ -330,11 +347,11 @@ describe('Chi-Square Test for Multi-Variation', () => {
 	 * TEST CASE 3: Large Effect Size (Should be Significant)
 	 * One variation performs much better than others
 	 */
-	it('should detect significant differences with large effect sizes', () => {
+	it("should detect significant differences with large effect sizes", () => {
 		const variations: TestVariation[] = [
-			{ name: 'Control', visitors: 1000, conversions: 50 },     // 5%
-			{ name: 'Variation A', visitors: 1000, conversions: 60 }, // 6%
-			{ name: 'Variation B', visitors: 1000, conversions: 150 } // 15% - much higher
+			{ name: "Control", visitors: 1000, conversions: 50 }, // 5%
+			{ name: "Variation A", visitors: 1000, conversions: 60 }, // 6%
+			{ name: "Variation B", visitors: 1000, conversions: 150 } // 15% - much higher
 		];
 
 		const result = chiSquareTest(variations, 0.95);
@@ -345,11 +362,10 @@ describe('Chi-Square Test for Multi-Variation', () => {
 	});
 });
 
-describe('Helper Functions', () => {
-
-	it('should correctly format data for two-proportion tests', () => {
-		const control: TestVariation = { name: 'Control', visitors: 1000, conversions: 100 };
-		const variation: TestVariation = { name: 'Test', visitors: 1200, conversions: 150 };
+describe("Helper Functions", () => {
+	it("should correctly format data for two-proportion tests", () => {
+		const control: TestVariation = { name: "Control", visitors: 1000, conversions: 100 };
+		const variation: TestVariation = { name: "Test", visitors: 1200, conversions: 150 };
 
 		const formatted = formatTwoProportionData(control, variation, 0.95);
 
@@ -360,45 +376,45 @@ describe('Helper Functions', () => {
 		expect(formatted.confidenceLevel).toBe(0.95);
 	});
 
-	it('should perform pairwise comparisons correctly', () => {
+	it("should perform pairwise comparisons correctly", () => {
 		const variations: TestVariation[] = [
-			{ name: 'Control', visitors: 1000, conversions: 100 },    // 10%
-			{ name: 'Variation A', visitors: 1000, conversions: 120 }, // 12%
-			{ name: 'Variation B', visitors: 1000, conversions: 90 }   // 9%
+			{ name: "Control", visitors: 1000, conversions: 100 }, // 10%
+			{ name: "Variation A", visitors: 1000, conversions: 120 }, // 12%
+			{ name: "Variation B", visitors: 1000, conversions: 90 } // 9%
 		];
 
 		const results = pairwiseComparisons(variations, 0.95);
 
 		expect(results).toHaveLength(2); // 2 comparisons (A vs Control, B vs Control)
-		
+
 		// First comparison: Variation A vs Control
-		expect(results[0].control.name).toBe('Control');
-		expect(results[0].variation.name).toBe('Variation A');
-		expect(results[0].control.conversionRate).toBeCloseTo(0.10, 2);
+		expect(results[0].control.name).toBe("Control");
+		expect(results[0].variation.name).toBe("Variation A");
+		expect(results[0].control.conversionRate).toBeCloseTo(0.1, 2);
 		expect(results[0].variation.conversionRate).toBeCloseTo(0.12, 2);
 
-		// Second comparison: Variation B vs Control  
-		expect(results[1].control.name).toBe('Control');
-		expect(results[1].variation.name).toBe('Variation B');
-		expect(results[1].control.conversionRate).toBeCloseTo(0.10, 2);
+		// Second comparison: Variation B vs Control
+		expect(results[1].control.name).toBe("Control");
+		expect(results[1].variation.name).toBe("Variation B");
+		expect(results[1].control.conversionRate).toBeCloseTo(0.1, 2);
 		expect(results[1].variation.conversionRate).toBeCloseTo(0.09, 2);
 	});
 });
 
 /**
  * REFERENCE VALIDATION NOTES:
- * 
+ *
  * These test cases can be validated against:
  * 1. VWO A/B Test Significance Calculator (vwo.com/tools/ab-test-significance-calculator/)
  * 2. Evan Miller's A/B Testing Tools (evanmiller.org/ab-testing/)
  * 3. SurveyMonkey A/B Testing Calculator
  * 4. Manual calculation using standard statistical formulas
- * 
+ *
  * To validate:
  * 1. Input the same data into reference calculators
  * 2. Compare p-values, z-statistics, and confidence intervals
  * 3. Results should match within 0.01% (as specified in PRD)
- * 
+ *
  * Sources for test cases:
  * - Presidential survey: Statistics How To (well-established statistics education site)
  * - Student lateness: Statistics LibreTexts (peer-reviewed educational content)

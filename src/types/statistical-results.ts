@@ -13,7 +13,7 @@ export interface StatisticalTestResult {
 	confidenceLevel: number;
 	/** The calculated test statistic (z-score, t-statistic, chi-square value, etc.) */
 	testStatistic: number;
-	/** 
+	/**
 	 * Degrees of freedom: A statistical concept that roughly means "how many independent pieces of data we have"
 	 * For chi-square tests: (number of rows - 1) × (number of columns - 1)
 	 * For t-tests: roughly the sample size minus 1
@@ -70,19 +70,19 @@ export interface TwoProportionResult extends StatisticalTestResult {
  * Used for multi-variation tests and contingency table analysis
  */
 export interface ChiSquareResult extends StatisticalTestResult {
-	/** 
+	/**
 	 * Expected frequencies: What we would expect to see in each group if there were no real differences
 	 * Calculated based on the overall conversion rate applied to each group's sample size
 	 * This is a 2D array: [group1_conversions, group1_non_conversions], [group2_conversions, group2_non_conversions], etc.
 	 */
 	expectedFrequencies: number[][];
-	/** 
+	/**
 	 * Observed frequencies: What we actually saw in the test results
 	 * This is a 2D array showing actual conversions and non-conversions for each group
 	 * Format: [group1_conversions, group1_non_conversions], [group2_conversions, group2_non_conversions], etc.
 	 */
 	observedFrequencies: number[][];
-	/** 
+	/**
 	 * Residuals: Show which groups contributed most to the overall chi-square result
 	 * Larger absolute values indicate groups that deviate most from expected results
 	 * Positive values = more conversions than expected, negative = fewer conversions than expected
@@ -97,7 +97,7 @@ export interface ChiSquareResult extends StatisticalTestResult {
 export interface MultiVariationResult {
 	/** Overall chi-square test to determine if any variations differ significantly */
 	overallTest: ChiSquareResult;
-	/** 
+	/**
 	 * Individual pairwise comparisons: When you have 3+ variations, you often want to know
 	 * which specific variations beat the control, not just "something is different"
 	 * This compares each variation individually against the control (Variation A vs Control, Variation B vs Control, etc.)
@@ -106,7 +106,7 @@ export interface MultiVariationResult {
 	pairwiseComparisons: TwoProportionResult[];
 	/** Whether Bonferroni correction was applied to adjust for multiple comparisons */
 	bonferroniCorrected: boolean;
-	/** 
+	/**
 	 * The stricter confidence level used for each individual test when Bonferroni correction is applied
 	 * Problem: When you do multiple tests, you're more likely to find false positives by chance
 	 * Solution: Bonferroni correction makes each individual test more strict to compensate
@@ -114,7 +114,7 @@ export interface MultiVariationResult {
 	 * This keeps your overall false positive rate at the desired 5%
 	 */
 	bonferroniAlpha?: number;
-	/** 
+	/**
 	 * Whether winners are shown with caveat (didn't survive Bonferroni but show practical advantage)
 	 * Used when overall test is significant but individual tests don't survive multiple comparison correction
 	 */
@@ -157,7 +157,7 @@ export interface ValidationError {
  */
 export interface CalculationError {
 	/** Type of error that occurred */
-	type: 'validation' | 'statistical' | 'computation';
+	type: "validation" | "statistical" | "computation";
 	/** High-level error message for display to users */
 	message: string;
 	/** Detailed validation errors if type is 'validation' */
@@ -188,7 +188,7 @@ export interface PerformanceTier {
  */
 export interface BusinessInsight {
 	/** Type of insight for styling/iconography */
-	type: 'success' | 'warning' | 'info';
+	type: "success" | "warning" | "info";
 	/** Short descriptive title */
 	title: string;
 	/** Main insight message */

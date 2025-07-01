@@ -15,20 +15,13 @@ export const utmFormData = $state<UTMFormType>({
 	UTMMedium: "",
 	UTMCampaign: "",
 	UTMContent: "",
-	UTMTerm: "",
+	UTMTerm: ""
 });
 
 // URL processing function - returns computed tracking URL based on current form state
 export function getOutputLinkToTrack(): string {
-	const {
-		UTMSource,
-		UTMID,
-		UTMMedium,
-		UTMCampaign,
-		UTMContent,
-		UTMTerm,
-		LinkToTrack,
-	} = utmFormData;
+	const { UTMSource, UTMID, UTMMedium, UTMCampaign, UTMContent, UTMTerm, LinkToTrack } =
+		utmFormData;
 
 	let linkAsURLObject;
 
@@ -73,17 +66,12 @@ export function getOutputLinkToTrack(): string {
 	}
 
 	// If the user has defined a query parameter in the form then add it to the search params of the output URL
-	if (UTMSource.trim() !== "")
-		linkAsURLObject.searchParams.set("utm_source", UTMSource);
+	if (UTMSource.trim() !== "") linkAsURLObject.searchParams.set("utm_source", UTMSource);
 	if (UTMID.trim() !== "") linkAsURLObject.searchParams.set("utm_id", UTMID);
-	if (UTMMedium.trim() !== "")
-		linkAsURLObject.searchParams.set("utm_medium", UTMMedium);
-	if (UTMCampaign.trim() !== "")
-		linkAsURLObject.searchParams.set("utm_campaign", UTMCampaign);
-	if (UTMContent.trim() !== "")
-		linkAsURLObject.searchParams.set("utm_content", UTMContent);
-	if (UTMTerm.trim() !== "")
-		linkAsURLObject.searchParams.set("utm_term", UTMTerm);
+	if (UTMMedium.trim() !== "") linkAsURLObject.searchParams.set("utm_medium", UTMMedium);
+	if (UTMCampaign.trim() !== "") linkAsURLObject.searchParams.set("utm_campaign", UTMCampaign);
+	if (UTMContent.trim() !== "") linkAsURLObject.searchParams.set("utm_content", UTMContent);
+	if (UTMTerm.trim() !== "") linkAsURLObject.searchParams.set("utm_term", UTMTerm);
 
 	return linkAsURLObject.toString();
 }

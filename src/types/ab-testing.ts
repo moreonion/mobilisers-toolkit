@@ -61,7 +61,7 @@ export interface MultiVariationTestData {
  */
 export interface TestConfiguration {
 	/** Type of test to perform based on number of variations */
-	testType: 'two-proportion' | 'multi-variation';
+	testType: "two-proportion" | "multi-variation";
 	/** Whether to apply correction for multiple testing */
 	bonferroniCorrection: boolean;
 	/** Confidence level for statistical significance */

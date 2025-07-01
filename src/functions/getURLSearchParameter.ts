@@ -4,8 +4,7 @@ export function getURLSearchParameter(
 ): string | null {
 	// Find the first occurrence of '?' and extract the substring from there onwards
 	const queryStringStart = url.indexOf("?");
-	const queryString =
-		queryStringStart !== -1 ? url.substring(queryStringStart + 1) : "";
+	const queryString = queryStringStart !== -1 ? url.substring(queryStringStart + 1) : "";
 	const urlParams = new URLSearchParams(queryString);
 
 	// Get the parameter by name, which is expected to be a URL
