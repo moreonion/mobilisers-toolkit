@@ -30,8 +30,8 @@ export function twoProportionTest(
 	const { n1, x1, n2, x2, confidenceLevel } = data;
 	
 	// Calculate conversion rates (what percentage of people converted)
-	let p1 = x1 / n1; // control conversion rate: conversions ÷ visitors
-	let p2 = x2 / n2; // variation conversion rate: conversions ÷ visitors
+	const p1 = x1 / n1; // control conversion rate: conversions ÷ visitors
+	const p2 = x2 / n2; // variation conversion rate: conversions ÷ visitors
 	const difference = p2 - p1; // how much better (or worse) is the variation?
 	
 	// Handle edge case: jStat doesn't handle zero proportions gracefully

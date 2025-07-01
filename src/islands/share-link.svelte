@@ -89,7 +89,7 @@
                 </label>
                 <Tags
                   bind:tags={shareLinkState.TwitterParameters.hashtags}
-                  inputPlaceholderText={"Enter any hashtags for your Twitter share..."}
+                  inputPlaceholderText="Enter any hashtags for your Twitter share..."
                   onlyUnique={true}
                 />
               </div>
