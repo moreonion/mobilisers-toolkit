@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type {
-	TestVariation,
 	ABTestInput,
 	TwoProportionTestData,
 	MultiVariationTestData
@@ -243,7 +242,7 @@ export function validateStatisticalRequirements(data: ABTestInput): string[] {
 /**
  * Simple input sanitisation - handles the most common issues
  */
-export function sanitiseABTestInput(input: any): any {
+export function sanitiseABTestInput(input: unknown): unknown {
 	if (!input || typeof input !== "object") return input;
 
 	return {
@@ -255,7 +254,7 @@ export function sanitiseABTestInput(input: any): any {
 	};
 }
 
-function sanitiseVariation(input: any): any {
+function sanitiseVariation(input: unknown): unknown {
 	if (!input || typeof input !== "object") return input;
 
 	return {
@@ -266,7 +265,7 @@ function sanitiseVariation(input: any): any {
 	};
 }
 
-function sanitiseNumber(value: any): any {
+function sanitiseNumber(value: unknown): unknown {
 	if (typeof value === "string") {
 		const cleaned = value.replace(/[,\s]/g, ""); // Remove commas and spaces
 		const parsed = parseFloat(cleaned);
@@ -275,7 +274,7 @@ function sanitiseNumber(value: any): any {
 	return value;
 }
 
-function sanitiseConfidenceLevel(value: any): any {
+function sanitiseConfidenceLevel(value: unknown): unknown {
 	if (typeof value === "string" && value.includes("%")) {
 		const parsed = parseFloat(value.replace("%", ""));
 		return isNaN(parsed) ? value : parsed / 100;

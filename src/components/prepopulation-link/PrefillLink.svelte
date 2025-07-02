@@ -41,7 +41,7 @@
 
 		<!-- prettier-ignore -->
 		<p class="mb-0">
-			{$prepopulationLinkStore.actionPageURL}#p:<wbr/>{#each prefillLinkParts as part, index}<span>{part}</span>{#if index < prefillLinkParts.length - 1}&<wbr/>{/if}{/each}
+			{$prepopulationLinkStore.actionPageURL}#p:<wbr/>{#each prefillLinkParts as part, index (index)}<span>{part}</span>{#if index < prefillLinkParts.length - 1}&<wbr/>{/if}{/each}
 		</p>
 		<a class="button tiny" href={trackingUrl}>Add tracking</a>
 	</div>

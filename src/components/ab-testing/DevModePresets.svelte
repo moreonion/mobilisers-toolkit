@@ -33,7 +33,7 @@
 				<div class="preset-group">
 					<h6>Two-Variation Tests (A/B)</h6>
 					<div class="preset-buttons">
-						{#each twoVariationPresets as preset}
+						{#each twoVariationPresets as preset (preset.name)}
 							<button
 								type="button"
 								class="button tiny secondary"
@@ -50,7 +50,7 @@
 				<div class="preset-group">
 					<h6>Multi-Variation Tests (A/B/C+)</h6>
 					<div class="preset-buttons">
-						{#each multiVariationPresets as preset}
+						{#each multiVariationPresets as preset (preset.name)}
 							<button
 								type="button"
 								class="button tiny secondary"

@@ -10,6 +10,6 @@ export function isDevMode(): boolean {
  * Only execute function in development mode
  * @param fn Function to execute only in dev mode
  */
-export function devOnly<T extends (...args: any[]) => any>(fn: T): T | (() => void) {
+export function devOnly<T extends (...args: unknown[]) => unknown>(fn: T): T | (() => void) {
 	return isDevMode() ? fn : () => {};
 }

@@ -3,10 +3,7 @@ import {
 	testVariationSchema,
 	abTestInputSchema,
 	twoProportionTestDataSchema,
-	multiVariationTestDataSchema,
 	validateABTestInput,
-	validateTwoProportionTestData,
-	validateMultiVariationTestData,
 	validateStatisticalRequirements,
 	formatValidationErrors
 } from "../validation";

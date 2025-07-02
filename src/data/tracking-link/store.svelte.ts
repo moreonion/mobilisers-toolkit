@@ -28,11 +28,13 @@ export function getOutputLinkToTrack(): string {
 	// Supports URLs with or without a scheme (e.g., 'google.com' or 'https://google.com')
 	try {
 		linkAsURLObject = new URL(LinkToTrack);
-	} catch (e) {
+	} catch {
+		// Handle invalid URL gracefully
 		if (LinkToTrack.length > 0) {
 			try {
 				linkAsURLObject = new URL(`https://${LinkToTrack}`);
-			} catch (secondError) {
+			} catch {
+				// Handle invalid URL with https prefix
 				// Return empty string for invalid URLs to maintain UI consistency
 				return "";
 			}

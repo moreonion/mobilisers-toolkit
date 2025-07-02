@@ -164,7 +164,7 @@
 							<select bind:value={field.token} onchange={() => updateFormFieldsToken(field)}>
 								<option value="">Select interval</option>
 								{#if field.options}
-									{#each field.options as option, index}
+									{#each field.options as option, index (index)}
 										<option value={index === 0 ? "1" : index === 1 ? "m" : "y"}>
 											{option}
 										</option>

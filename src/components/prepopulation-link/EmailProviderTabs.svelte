@@ -4,7 +4,7 @@
 </script>
 
 <section id="tabsWrapper">
-	{#each emailMarketingProviders as provider}
+	{#each emailMarketingProviders as provider (provider)}
 		<button
 			class:active={$prepopulationLinkStore.selectedEmailProvider === provider}
 			onclick={() => ($prepopulationLinkStore.selectedEmailProvider = provider)}

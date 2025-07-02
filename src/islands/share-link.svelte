@@ -49,7 +49,7 @@
 		<p>Copy and paste them wherever you need them.</p>
 
 		<div id="shareLinksWrapper">
-			{#each getAllShareLinks() as { platform, shareLink }}
+			{#each getAllShareLinks() as { platform, shareLink } (platform)}
 				<div
 					class="shareLinkSection"
 					id={platform.toLowerCase().replaceAll(" ", "-")}

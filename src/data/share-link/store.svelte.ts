@@ -11,33 +11,6 @@ export const SHARE_TARGETS = [
 
 type ShareTargets = (typeof SHARE_TARGETS)[number];
 
-type TwitterParametersType = {
-	text: string;
-	hashtags: string[];
-};
-
-type EmailParametersType = {
-	subject: string;
-	body: string;
-};
-
-type WhatsAppParametersType = {
-	text: string;
-};
-
-type BlueSkyParametersType = {
-	text: string;
-};
-
-type LinkedInParametersType = {
-	text: string;
-};
-
-type ThreadsParametersType = {
-	text: string;
-	url: string;
-};
-
 type ShareLinkType = {
 	platform: ShareTargets;
 	shareLink: string;

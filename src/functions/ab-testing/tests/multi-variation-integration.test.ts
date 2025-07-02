@@ -98,7 +98,7 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		const confidenceLevel = 0.95;
 
 		// STEP 1: Overall test
-		const overallTest = chiSquareTest(variations, confidenceLevel);
+		// const overallTest = chiSquareTest(variations, confidenceLevel);
 
 		// STEP 2: Pairwise comparisons
 		const pairwiseResults = pairwiseComparisons(variations, confidenceLevel);
@@ -213,7 +213,7 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		];
 		const confidenceLevel = 0.95;
 
-		const overallTest = chiSquareTest(variations, confidenceLevel);
+		// const overallTest = chiSquareTest(variations, confidenceLevel);
 		const pairwiseResults = pairwiseComparisons(variations, confidenceLevel);
 		const bonferroniResults = applyBonferroniToTests(pairwiseResults, 0.05);
 
