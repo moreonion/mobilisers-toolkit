@@ -1,6 +1,4 @@
 ---
-import UniversalLogger from "@/components/UniversalLogger.astro";
-
 import "@/assets/styles/ist_brand_styles.css";
 import "@/assets/styles/styles.css";
 
@@ -24,8 +22,6 @@ if (Astro.url.pathname === "/") {
 }
 
 const siteURL = "https://mobilisers-toolkit.netlify.app";
-
-console.log("hi from the base layout frontmatter script");
 ---
 
 <html lang="en">
@@ -71,17 +67,11 @@ console.log("hi from the base layout frontmatter script");
 		</style>
 	</head>
 	<body>
-		<UniversalLogger />
-
 		<Header title={title} />
 
 		<main>
 			<slot />
 		</main>
 		<Footer />
-
-		<script>
-			console.log("hi from the base layout inline script tag");
-		</script>
 	</body>
 </html>
