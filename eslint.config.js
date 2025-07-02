@@ -18,6 +18,11 @@ export default ts.config(
 	...svelte.configs.prettier,
 	...eslintPluginAstro.configs.recommended,
 	{
+		// settings: {
+		// 	svelte: {
+		// 		// ignoreWarnings: ["svelte/no-at-html-tags"]
+		// 	}
+		// },
 		languageOptions: {
 			globals: { ...globals.browser, ...globals.node }
 		},
@@ -31,11 +36,13 @@ export default ts.config(
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		languageOptions: {
 			parserOptions: {
+
 				projectService: true,
 				extraFileExtensions: ['.svelte'],
 				parser: ts.parser,
 				svelteConfig
 			}
+
 		}
 	}
 );
