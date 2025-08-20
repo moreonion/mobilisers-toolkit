@@ -103,14 +103,14 @@ export const toolState = persisted('tool-name-state', initialState);
 
 ### Core Framework
 
-- **Astro 5.9+** - Static site generation
-- **Svelte 5.34+** - Component framework with runes
-- **TypeScript 5.5+** - Type safety
+- **Astro** - Static site generation
+- **Svelte** - Component framework with runes
+- **TypeScript** - Type safety
 
 ### Key Libraries
 
 - **jstat** - Statistical calculations for A/B testing
-- **zod 3.22+** - Schema validation and type inference
+- **zod** - Schema validation and type inference
 - **svelte-persisted-store** - Client-side state persistence
 - **svelte-unstyled-tags** - Accessible component primitives
 
