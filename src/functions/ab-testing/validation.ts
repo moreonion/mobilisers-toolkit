@@ -245,23 +245,27 @@ export function validateStatisticalRequirements(data: ABTestInput): string[] {
 export function sanitiseABTestInput(input: unknown): unknown {
 	if (!input || typeof input !== "object") return input;
 
+	const inputObj = input as Record<string, unknown>;
+
 	return {
-		controlVariation: sanitiseVariation(input.controlVariation),
-		variations: Array.isArray(input.variations)
-			? input.variations.map(sanitiseVariation)
-			: input.variations,
-		confidenceLevel: sanitiseConfidenceLevel(input.confidenceLevel)
+		controlVariation: sanitiseVariation(inputObj.controlVariation),
+		variations: Array.isArray(inputObj.variations)
+			? inputObj.variations.map(sanitiseVariation)
+			: inputObj.variations,
+		confidenceLevel: sanitiseConfidenceLevel(inputObj.confidenceLevel)
 	};
 }
 
 function sanitiseVariation(input: unknown): unknown {
 	if (!input || typeof input !== "object") return input;
 
+	const inputObj = input as Record<string, unknown>;
+
 	return {
-		name: typeof input.name === "string" ? input.name.trim() : input.name,
-		visitors: sanitiseNumber(input.visitors),
-		conversions: sanitiseNumber(input.conversions),
-		conversionRate: input.conversionRate
+		name: typeof inputObj.name === "string" ? inputObj.name.trim() : inputObj.name,
+		visitors: sanitiseNumber(inputObj.visitors),
+		conversions: sanitiseNumber(inputObj.conversions),
+		conversionRate: inputObj.conversionRate
 	};
 }
 
