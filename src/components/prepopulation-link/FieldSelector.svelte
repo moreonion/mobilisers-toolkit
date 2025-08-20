@@ -189,10 +189,11 @@
 										token: (e.target as HTMLInputElement).value
 									})}
 								oninput={(e) => {
-									if (field.fieldType === "number" && field.validation?.min !== undefined) {
-										const value = parseFloat(e.target.value);
+									if (field.fieldType === "number" && field.validation?.min !== undefined && e.target) {
+										const target = e.target as HTMLInputElement;
+										const value = parseFloat(target.value);
 										if (value < field.validation.min) {
-											e.target.value = "";
+											target.value = "";
 											field.token = "";
 										}
 									}
