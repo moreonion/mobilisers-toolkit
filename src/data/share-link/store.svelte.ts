@@ -11,33 +11,6 @@ export const SHARE_TARGETS = [
 
 type ShareTargets = (typeof SHARE_TARGETS)[number];
 
-type TwitterParametersType = {
-  text: string;
-  hashtags: string[];
-};
-
-type EmailParametersType = {
-  subject: string;
-  body: string;
-};
-
-type WhatsAppParametersType = {
-  text: string;
-};
-
-type BlueSkyParametersType = {
-  text: string;
-};
-
-type LinkedInParametersType = {
-  text: string;
-};
-
-type ThreadsParametersType = {
-  text: string;
-  url: string;
-};
-
 type ShareLinkType = {
   platform: ShareTargets;
   shareLink: string;
@@ -71,7 +44,7 @@ export const shareLinkState = $state({
 });
 
 
-export function getPrefixedLinkToShare(): string {
+function getPrefixedLinkToShare(): string {
   const link = shareLinkState.LinkToShare;
   if (
     !link.startsWith("http://") &&
@@ -84,11 +57,11 @@ export function getPrefixedLinkToShare(): string {
   return link;
 }
 
-export function getEncodedLinkToShare(): string {
+function getEncodedLinkToShare(): string {
   return encodeURIComponent(getPrefixedLinkToShare());
 }
 
-export function getTwitterParametersPartOfURL(): string {
+function getTwitterParametersPartOfURL(): string {
   let parametersURL = "";
   if (shareLinkState.TwitterParameters.text !== "") {
     parametersURL += `&text=${encodeURIComponent(shareLinkState.TwitterParameters.text)}`;
@@ -100,7 +73,7 @@ export function getTwitterParametersPartOfURL(): string {
   return parametersURL;
 }
 
-export function getEmailParametersPartOfURL(): string {
+function getEmailParametersPartOfURL(): string {
   const bodyContent =
     shareLinkState.EmailParameters.body !== ""
       ? `${shareLinkState.EmailParameters.body}\n\n${shareLinkState.LinkToShare}`
@@ -115,7 +88,7 @@ export function getEmailParametersPartOfURL(): string {
   return parametersURL;
 }
 
-export function getWhatsAppParametersPartOfURL(): string {
+function getWhatsAppParametersPartOfURL(): string {
   const textContent =
     shareLinkState.WhatsAppParameters.text !== ""
       ? `${shareLinkState.WhatsAppParameters.text}\n\n${getPrefixedLinkToShare()}`
@@ -124,7 +97,7 @@ export function getWhatsAppParametersPartOfURL(): string {
   return encodeURIComponent(textContent);
 }
 
-export function getBlueSkyParametersPartOfURL(): string {
+function getBlueSkyParametersPartOfURL(): string {
   const textContent =
     shareLinkState.BlueSkyParameters.text !== ""
       ? `${shareLinkState.BlueSkyParameters.text}\n\n${getPrefixedLinkToShare()}`
@@ -133,7 +106,7 @@ export function getBlueSkyParametersPartOfURL(): string {
   return encodeURIComponent(textContent);
 }
 
-export function getLinkedInParametersPartOfURL(): string {
+function getLinkedInParametersPartOfURL(): string {
   const textContent =
     shareLinkState.LinkedInParameters.text !== ""
       ? `${shareLinkState.LinkedInParameters.text}\n\n${getPrefixedLinkToShare()}`
@@ -142,7 +115,7 @@ export function getLinkedInParametersPartOfURL(): string {
   return encodeURIComponent(textContent);
 }
 
-export function getThreadsParametersPartOfURL(): string {
+function getThreadsParametersPartOfURL(): string {
   let parametersURL = "";
 
   // If there's text content, add it as the text parameter
