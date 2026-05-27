@@ -1,0 +1,79 @@
+---
+import Feedback from "@/components/Feedback.astro";
+import { SHARE_TARGETS } from "@/data/share-link/store.svelte";
+import ShareLinkButtonsIsland from "@/islands/share-link-buttons.svelte";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const commaListFormatter = new Intl.ListFormat("en", {
+    type: "conjunction",
+    style: "long",
+});
+const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
+---
+
+<BaseLayout
+    title="Share Buttons Generator"
+    description="Make ready-to-paste share buttons for Impact Stack thank you pages and emails."
+    socialImageFilename="share-link.png"
+>
+    <div id="toolDescription">
+        <p>
+            <strong>Make custom share buttons</strong> for your <a
+                href="https://www.impact-stack.org"
+            >
+                Impact Stack</a
+            > thank you pages – for {formattedShareTargetsList}.
+        </p>
+        <p>
+            Let your supporters quickly share your action with their friends and
+            family on thank you pages and emails.
+        </p>
+
+        <p>
+            Just want the links? <a href="/share-link"
+                >Use the links-only generator</a
+            >.
+        </p>
+        <div class="callout">
+            <p>
+                <strong>Want the social icons?</strong> Share links will work as soon
+                as you paste in the HTML. If you want the extra icons for Bluesky,
+                LinkedIn, Mastodon, Telegram and Threads, ask Support to enable them
+                on your theme.
+            </p>
+        </div>
+    </div>
+
+    <div id="islandWrapper" class="mt-6">
+        <ShareLinkButtonsIsland client:load />
+    </div>
+    <Feedback />
+</BaseLayout>
+
+<style>
+    #toolDescription,
+    #islandWrapper {
+        max-width: 36rem;
+    }
+
+    #toolDescription p:not(.callout p),
+    #toolDescription .callout {
+        margin-top: 1rem;
+    }
+
+    #toolDescription .callout p {
+        font-weight: normal;
+    }
+
+    div p {
+        margin-bottom: 0;
+    }
+
+    #toolDescription code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        background-color: #f3f3f3;
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+    }
+</style>
