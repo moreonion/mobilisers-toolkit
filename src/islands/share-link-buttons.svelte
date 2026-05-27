@@ -108,7 +108,7 @@
             .filter(Boolean)
             .join(" ");
 
-        return `        <li class="${config.liClass}"><a class="${aClass}" data-share="${config.dataShare}" href="${shareLink}" target="_blank" title="${config.title}"><span class="${config.iconClass}"><span>${config.label}</span></span> </a></li>`;
+        return `            <li class="${config.liClass}"><a class="${aClass}" data-share="${config.dataShare}" href="${shareLink}" target="_blank" title="${config.title}"><span class="${config.iconClass}"><span>${config.label}</span></span> </a></li>`;
     }
 
     function generatedMarkup(): string {
