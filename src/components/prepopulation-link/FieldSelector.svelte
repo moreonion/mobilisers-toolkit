@@ -8,7 +8,7 @@
     emailMarketingTokenDocumentation,
     type EmailMarketingProviders,
   } from "@/data/prepopulation-link/emailMarketingTokens";
-  import { z } from "zod";
+  import { z } from "astro/zod";
 
   // Accept form fields from parent component
   let { formFields = $bindable() }: { formFields: PrefillFormFieldsType[] } =
@@ -151,8 +151,8 @@
             <input type="checkbox" bind:checked={field.prefilled} />
           </td>
           <!-- <td>
-						{field.label}
-					</td> -->
+            {field.label}
+          </td> -->
           <td>
             {#if field.label === "Custom field"}
               <input
