@@ -82,11 +82,6 @@
 
     let headingText = $state("Share the campaign!");
 
-    // Start with every platform selected
-    let selectedPlatforms = $state<Record<string, boolean>>(
-        Object.fromEntries(Object.keys(BUTTON_MARKUP).map((p) => [p, true])),
-    );
-
     let markupCopied = $state(false);
 
     $effect(() => {
@@ -112,15 +107,7 @@
     }
 
     function generatedMarkup(): string {
-        const includedLinks = getAllShareLinks().filter(
-            ({ platform }) => selectedPlatforms[platform],
-        );
-
-        if (includedLinks.length === 0) {
-            return "";
-        }
-
-        const listItems = includedLinks
+        const listItems = getAllShareLinks()
             .map(({ platform, shareLink }) =>
                 buildButtonLi(platform, shareLink),
             )
@@ -190,28 +177,41 @@ ${listItems}
         in:fade={{ delay: 100 }}
         aria-label="Generated share buttons"
     >
-        <p class="h5 mb-0">Choose which buttons to include</p>
-        <div id="platformToggles" class="mt-2">
-            {#each Object.keys(BUTTON_MARKUP) as platform}
-                <label
-                    class="platformToggle button small"
-                    class:hollow={!selectedPlatforms[platform]}
-                    class:filled={selectedPlatforms[platform]}
-                    class:primary={selectedPlatforms[platform]}
-                    class:isDeselected={!selectedPlatforms[platform]}
+        <details class="customiseDetails">
+            <summary
+                >Customise the message for each platform (optional)</summary
+            >
+            <p class="mt-2 mb-0">
+                <small
+                    >Add your own text, hashtags or subject line for Twitter / X,
+                    WhatsApp, Email, Bluesky, LinkedIn and Threads.</small
                 >
-                    <input
-                        type="checkbox"
-                        bind:checked={selectedPlatforms[platform]}
-                    />
-                    {platform}
-                </label>
-            {/each}
-        </div>
+            </p>
+            <ShareLinkList />
+        </details>
 
-        <div class="mt-6">
+        <div>
             <p class="h5 mb-0">Generated HTML markup</p>
             <p>Paste the HTML into the Source view of your thank you page.</p>
+            <details class="mb-2">
+                <summary>Show or hide buttons on specific screen sizes</summary>
+                <p>
+                    Add one of these classes to a <code>&lt;li&gt;</code> to control
+                    which screen sizes the button appears on.
+                </p>
+                <dl class="responsiveVisibility">
+                    <dt><code>show-for-small-only</code></dt>
+                    <dd>Only visible on small screens</dd>
+                    <dt><code>show-for-medium-only</code></dt>
+                    <dd>Only visible on medium screens</dd>
+                    <dt><code>show-for-large-only</code></dt>
+                    <dd>Only visible on large screens</dd>
+                    <dt><code>hide-for-medium</code></dt>
+                    <dd>Not visible on medium screens or larger</dd>
+                    <dt><code>hide-for-large</code></dt>
+                    <dd>Not visible on large screens or larger</dd>
+                </dl>
+            </details>
             <textarea
                 id="markupOutput"
                 readonly
@@ -234,60 +234,16 @@ ${listItems}
                 </button>
             </div>
         </div>
-
-        <details class="mt-6">
-            <summary
-                >See the individual share links and customise the text</summary
-            >
-            <ShareLinkList />
-        </details>
     </section>
 {/if}
 
 <style>
-    #platformToggles {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    summary {
+        font-weight: bold;
     }
 
-    .platformToggle,
-    .platformToggle:hover,
-    .platformToggle:focus {
-        margin: 0;
-        padding: 0.75rem 1rem;
-        border-width: 1px;
-        border-style: solid;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .platformToggle.isDeselected,
-    .platformToggle.isDeselected:hover,
-    .platformToggle.isDeselected:focus {
-        background-color: #f3f3f3;
-        border-color: #d4d4d4;
-        color: #8a8a8a;
-    }
-
-    .platformToggle.isDeselected:hover {
-        background-color: #ececec;
-        border-color: #8a8a8a;
-        color: #2f2f2f;
-    }
-
-    .platformToggle:has(input[type="checkbox"]:focus-visible) {
-        outline: 2px solid currentColor;
-        outline-offset: 2px;
-    }
-
-    .platformToggle input[type="checkbox"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        margin: 0;
-        pointer-events: none;
+    .customiseDetails {
+        margin-bottom: 2.5rem;
     }
 
     #markupOutput {
@@ -299,5 +255,25 @@ ${listItems}
 
     .text-left {
         text-align: left;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        background-color: #f3f3f3;
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+    }
+
+    .responsiveVisibility {
+        margin-top: 0.5rem;
+    }
+
+    .responsiveVisibility dt {
+        margin-top: 0.5rem;
+    }
+
+    .responsiveVisibility dd {
+        margin-left: 1.5rem;
     }
 </style>
