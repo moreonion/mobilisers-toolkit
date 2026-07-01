@@ -1,9 +1,8 @@
 ---
-import { Image } from "astro:assets";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ABTestingIsland from "@/islands/ab-testing.svelte";
 import Feedback from "@/components/Feedback.astro";
-import ImpactStackLogo from "@/assets/images/ingra_logo_pink_nopadding.png";
+import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 ---
 
 <BaseLayout
@@ -11,16 +10,11 @@ import ImpactStackLogo from "@/assets/images/ingra_logo_pink_nopadding.png";
 	description="Find out if your A/B test results can be relied upon or if they're just pure chance."
 	socialImageFilename="ab_testing_social.png"
 >
-	<div class="impact-stack-promo" aria-label="Impact Stack">
-		<a href="https://www.impact-stack.org" aria-label="Visit Impact Stack">
-			<Image class="impact-stack-logo" src={ImpactStackLogo} alt="Impact Stack" />
-		</a>
-		<p>
-			Statistical significance calculator brought to you by campaigning and fundraising platform <a
-				href="https://www.impact-stack.org">Impact Stack</a
-			>.
-		</p>
-	</div>
+	<ImpactStackPlug>
+		Statistical significance calculator brought to you by campaigning and fundraising platform <a
+			href="https://www.impact-stack.org">Impact Stack</a
+		>.
+	</ImpactStackPlug>
 
 	<div id="toolDescription">
 		<p>Find out if your A/B test results can be relied upon or if they're just pure chance.</p>
@@ -33,32 +27,9 @@ import ImpactStackLogo from "@/assets/images/ingra_logo_pink_nopadding.png";
 </BaseLayout>
 
 <style>
-	.impact-stack-promo {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		max-width: 48rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.impact-stack-promo a:has(> .impact-stack-logo) {
-		border-bottom: 0;
-		box-shadow: none;
-		flex: 0 0 auto;
-	}
-
-	.impact-stack-logo {
-		width: 6rem;
-		max-width: 100%;
-	}
-
 	#toolDescription {
 		max-width: 36rem;
 	}
-	/* #toolDescription,
-	#islandWrapper {
-		max-width: 36rem;
-	} */
 
 	div p {
 		margin-bottom: 0;

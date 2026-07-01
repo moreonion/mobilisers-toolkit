@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PrepopulationLinkIsland from "@/islands/prepopulation-link.svelte";
 import Feedback from "@/components/Feedback.astro";
+import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 ---
 
 <BaseLayout
@@ -9,6 +10,12 @@ import Feedback from "@/components/Feedback.astro";
 	description="Prefill your Impact Stack form with your supporters' details"
 	socialImageFilename="prepopulation_social.png"
 >
+	<ImpactStackPlug>
+		Prepopulation link generator brought to you by campaigning and fundraising platform <a
+			href="https://www.impact-stack.org">Impact Stack</a
+		>. Use it to prefill Impact Stack forms with supporter details from your email tool.
+	</ImpactStackPlug>
+
 	<div id="toolDescription">
 		<p>
 			Save your supporters time and boost your conversion rates. Generate a link to <a

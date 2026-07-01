@@ -1,0 +1,36 @@
+---
+import { Image } from "astro:assets";
+import ImpactStackLogo from "@/assets/images/ingra_logo_pink_nopadding.png";
+---
+
+<section class="impact-stack-plug" aria-label="Impact Stack">
+	<a href="https://www.impact-stack.org" aria-label="Visit Impact Stack">
+		<Image class="impact-stack-logo" src={ImpactStackLogo} alt="Impact Stack" />
+	</a>
+	<p><slot /></p>
+</section>
+
+<style>
+	.impact-stack-plug {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		max-width: 48rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.impact-stack-plug a:has(> .impact-stack-logo) {
+		border-bottom: 0;
+		box-shadow: none;
+		flex: 0 0 auto;
+	}
+
+	.impact-stack-logo {
+		width: 6rem;
+		max-width: 100%;
+	}
+
+	.impact-stack-plug p {
+		margin-bottom: 0;
+	}
+</style>
