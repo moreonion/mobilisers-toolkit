@@ -1,0 +1,34 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ABTestingIsland from "@/islands/ab-testing.svelte";
+import Feedback from "@/components/Feedback.astro";
+---
+
+<BaseLayout
+	title="A/B Testing Statistical Significance Calculator"
+	description="Find out if your A/B test results are real wins or just lucky guesses. Get clear answers on what to do next."
+	socialImageFilename="ab_testing_social.png"
+>
+	<div id="toolDescription">
+		<p>Find out if your A/B test results are real wins or just lucky guesses.</p>
+	</div>
+
+	<div id="islandWrapper" class="mt-6">
+		<ABTestingIsland client:load />
+	</div>
+	<Feedback />
+</BaseLayout>
+
+<style>
+	#toolDescription {
+		max-width: 36rem;
+	}
+	/* #toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	} */
+
+	div p {
+		margin-bottom: 0;
+	}
+</style>
