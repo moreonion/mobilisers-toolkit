@@ -148,7 +148,11 @@
       {#each formFields as field (field.id)}
         <tr>
           <td>
-            <input type="checkbox" bind:checked={field.prefilled} />
+            <input
+              type="checkbox"
+              bind:checked={field.prefilled}
+              aria-label={`${field.label} prefill toggle`}
+            />
           </td>
           <!-- <td>
             {field.label}
@@ -158,6 +162,7 @@
               <input
                 type="text"
                 placeholder="Impact Stack form key"
+                aria-label={`${field.label} form key`}
                 bind:value={field.formKey}
                 onkeyup={(e) =>
                   updateFormFieldsToken(
@@ -178,6 +183,7 @@
             {#if field.fieldType === "select"}
               <select
                 bind:value={field.token}
+                aria-label={`${field.label} token`}
                 onchange={() => updateFormFieldsToken(field)}
               >
                 <option value="">Select interval</option>
@@ -196,6 +202,7 @@
                   ? "Enter a number…"
                   : emailMarketingTokenDocumentation[selectedProvider]
                       ?.tokenTerminology || "Token"}
+                aria-label={`${field.label} token`}
                 bind:value={field.token}
                 onkeyup={(e) =>
                   updateFormFieldsToken({
