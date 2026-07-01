@@ -41,15 +41,9 @@ test.describe('Clean HTML Tool', () => {
       });
 
       await test.step('Verify HTML was processed', async () => {
-        // Debug the current state if assertion fails
-        try {
-          await cleanHtmlPage.expectCleanHtmlContains('Hello');
-          await cleanHtmlPage.expectCleanHtmlContains('world');
-        } catch (error) {
-          await cleanHtmlPage.debugCurrentState();
-          throw error;
-        }
-        
+        await cleanHtmlPage.expectCleanHtmlContains('Hello');
+        await cleanHtmlPage.expectCleanHtmlContains('world');
+
         // <b> should be converted to <strong>
         await cleanHtmlPage.expectBoldTagsNormalized();
       });
