@@ -1,6 +1,5 @@
 ---
 import Feedback from "@/components/Feedback.astro";
-import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 import { SHARE_TARGETS } from "@/data/share-link/store.svelte";
 import ShareLinkButtonsIsland from "@/islands/share-link-buttons.svelte";
 import BaseLayout from "@/layouts/BaseLayout.astro";
@@ -39,12 +38,6 @@ const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
 			</p>
 		</div>
 	</div>
-
-	<ImpactStackPlug>
-		Share buttons generator brought to you by campaigning and fundraising platform <a
-			href="https://www.impact-stack.org">Impact Stack</a
-		>. Use it to add ready-to-paste share buttons to thank you pages and emails.
-	</ImpactStackPlug>
 
 	<div id="islandWrapper" class="mt-6">
 		<ShareLinkButtonsIsland client:load />
