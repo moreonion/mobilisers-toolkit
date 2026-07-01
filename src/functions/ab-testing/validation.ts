@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type {
 	ABTestInput,
-	TwoProportionTestData,
-	MultiVariationTestData
+	MultiVariationTestData,
+	TwoProportionTestData
 } from "../../types/ab-testing";
 
 /**
@@ -47,7 +47,7 @@ export const abTestInputSchema = z.object({
 
 	confidenceLevel: z
 		.number()
-		.min(0.8, "We recommend at least 80% confidence. Anything lower isn't reliable")
+		.min(0.8, "We recommend at least 80% confidence; anything lower isn't reliable")
 		.max(0.99, "99% is the highest confidence level we support")
 		.refine((level) => [0.8, 0.85, 0.9, 0.95, 0.99].includes(level), {
 			message: "Please choose a standard confidence level: 80%, 85%, 90%, 95%, or 99%"
