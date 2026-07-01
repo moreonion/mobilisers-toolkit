@@ -42,7 +42,11 @@
 
     {#if utmFormData.LinkToTrack !== ""}
       <!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
-      <section class="mt-6" in:fade={{ delay: 100 }}>
+      <section
+        class="mt-6"
+        aria-label="Tracking link preview"
+        in:fade={{ delay: 100 }}
+      >
         <p class="h5 mb-0">Build your tracking link using the form below</p>
         <p>The link will automatically update as you fill in the form</p>
 
@@ -130,7 +134,11 @@
 
 {#if utmFormData.LinkToTrack !== ""}
   <!-- {#if $utmFormData.LinkToTrack !== "" && isURL($utmFormData.LinkToTrack)} -->
-  <section class="mt-6" in:fade={{ delay: 100 }}>
+  <section
+    class="mt-6"
+    aria-label="Tracking link output"
+    in:fade={{ delay: 100 }}
+  >
     <p class="h5 mb-0">Here's your tracking link</p>
     <p>Copy and paste it wherever you need it.</p>
 

@@ -128,21 +128,21 @@ test.describe('Tracking Link Generator', () => {
     await trackingPage.expectGeneratedLinkContainsUtmParam('term', '#climateaction');
   });
 
-  test('should handle URLs with fragments/hash', async ({ page }) => {
+  test("moves query params found after # into the URL's search params", async ({ page }) => {
     await trackingPage.goto();
-    
-    // Test URL with hash that contains query parameters (edge case from store logic)
+
     const urlWithHashQuery = 'https://act.example.org/petition#section?existing=param';
     await trackingPage.enterTrackingUrl(urlWithHashQuery);
-    
+
     await trackingPage.fillUtmParameters({
       source: 'newsletter'
     });
-    
-    // Should handle hash parameters correctly based on store logic
+
     const generatedLink = await trackingPage.getGeneratedLink();
-    expect(generatedLink).toContain('utm_source=newsletter');
-    expect(generatedLink).toContain('existing=param');
+    const url = new URL(generatedLink);
+    expect(url.hash).toBe('#section');
+    expect(url.searchParams.get('existing')).toBe('param');
+    expect(url.searchParams.get('utm_source')).toBe('newsletter');
   });
 
   test('should handle empty UTM fields gracefully', async ({ page }) => {
@@ -168,41 +168,68 @@ test.describe('Tracking Link Generator', () => {
     expect(generatedLink).not.toContain('utm_id=');
   });
 
-  test('should handle invalid URLs gracefully', async ({ page }) => {
+  test('auto-adds https:// scheme when the input has no protocol', async ({ page }) => {
     await trackingPage.goto();
-    
-    // Based on actual behavior, the app auto-prefixes https:// to invalid URLs
+
     await trackingPage.linkToTrackInput.fill('not-a-valid-url');
-    
-    // Form should still appear (based on component logic)
+
     await trackingPage.expectTrackingFormVisible();
     await trackingPage.expectFinalLinkSectionVisible();
-    
-    // The app auto-prefixes https:// to make invalid URLs valid
-    await trackingPage.expectGeneratedLinkContains('https://not-a-valid-url/');
+
+    const generatedLink = await trackingPage.getGeneratedLink();
+    const url = new URL(generatedLink);
+    expect(url.protocol).toBe('https:');
+    expect(url.hostname).toBe('not-a-valid-url');
   });
 
-  test('should handle multiple protocol schemes correctly', async ({ page }) => {
+  test('supports https: links (allow-listed protocol)', async ({ page }) => {
     await trackingPage.goto();
-    
-    // Test different valid protocols based on store logic
-    const testCases = [
-      'https://act.example.org/petition',
-      'http://act.example.org/petition', 
-      'mailto:test@example.org',
-      'fb-messenger://share?link=test'
-    ];
-    
-    for (const testUrl of testCases) {
-      await trackingPage.linkToTrackInput.fill(testUrl);
-      await trackingPage.fillUtmParameters({ source: 'test' });
-      
-      // Should generate valid tracking link for supported protocols
-      await trackingPage.expectGeneratedLinkContains(testUrl);
-      
-      // Clear for next test
-      await trackingPage.clearAllInputs();
-    }
+
+    const testUrl = 'https://act.example.org/petition';
+    await trackingPage.linkToTrackInput.fill(testUrl);
+    await trackingPage.fillUtmParameters({ source: 'test' });
+
+    await trackingPage.expectGeneratedLinkContains(testUrl);
+  });
+
+  test('supports http: links (allow-listed protocol)', async ({ page }) => {
+    await trackingPage.goto();
+
+    const testUrl = 'http://act.example.org/petition';
+    await trackingPage.linkToTrackInput.fill(testUrl);
+    await trackingPage.fillUtmParameters({ source: 'test' });
+
+    await trackingPage.expectGeneratedLinkContains(testUrl);
+  });
+
+  test('supports mailto: links (allow-listed protocol)', async ({ page }) => {
+    await trackingPage.goto();
+
+    const testUrl = 'mailto:test@example.org';
+    await trackingPage.linkToTrackInput.fill(testUrl);
+    await trackingPage.fillUtmParameters({ source: 'test' });
+
+    await trackingPage.expectGeneratedLinkContains(testUrl);
+  });
+
+  test('supports fb-messenger: links (allow-listed protocol)', async ({ page }) => {
+    await trackingPage.goto();
+
+    const testUrl = 'fb-messenger://share?link=test';
+    await trackingPage.linkToTrackInput.fill(testUrl);
+    await trackingPage.fillUtmParameters({ source: 'test' });
+
+    await trackingPage.expectGeneratedLinkContains(testUrl);
+  });
+
+  test('produces empty output for an unsupported protocol', async ({ page }) => {
+    await trackingPage.goto();
+
+    await trackingPage.linkToTrackInput.fill('javascript:alert(1)');
+    await trackingPage.fillUtmParameters({ source: 'test' });
+
+    const generatedLink = await trackingPage.getGeneratedLink();
+    expect(generatedLink).toBe('');
   });
 
   test('should maintain state when switching between URLs', async ({ page }) => {
@@ -231,19 +258,31 @@ test.describe('Tracking Link Generator', () => {
     await trackingPage.expectGeneratedLinkContainsUtmParam('source', 'email');
   });
 
-  test('should show duplicate tracking link outputs', async ({ page }) => {
+  test('should show the live link preview in the "Tracking link preview" region', async ({ page }) => {
     await trackingPage.goto();
     await trackingPage.enterTrackingUrl('https://act.example.org/petition');
-    
-    // Based on component structure, there are two identical outputs
-    const outputs = await trackingPage.trackingLinkOutputs.all();
-    expect(outputs.length).toBe(2);
-    
-    // Both should show the same content
-    const firstText = await outputs[0].textContent();
-    const secondText = await outputs[1].textContent();
-    expect(firstText).toBe(secondText);
-    expect(firstText).toContain('https://act.example.org/petition');
+
+    await expect(trackingPage.previewRegion).toBeVisible();
+    await expect(trackingPage.previewRegion).toContainText('https://act.example.org/petition');
+  });
+
+  test('should show the copy-friendly link in the "Tracking link output" region', async ({ page }) => {
+    await trackingPage.goto();
+    await trackingPage.enterTrackingUrl('https://act.example.org/petition');
+
+    await expect(trackingPage.outputRegion).toBeVisible();
+    await expect(trackingPage.outputRegion).toContainText('https://act.example.org/petition');
+  });
+
+  test('should keep the preview and output links in sync', async ({ page }) => {
+    await trackingPage.goto();
+    await trackingPage.enterTrackingUrl('https://act.example.org/petition');
+    await trackingPage.fillUtmParameters({ source: 'newsletter' });
+
+    const previewText = await trackingPage.previewLink.textContent();
+    const outputText = await trackingPage.outputLink.textContent();
+
+    expect(new URL(previewText!.trim())).toEqual(new URL(outputText!.trim()));
   });
 
   test('should handle real-world campaign scenario', async ({ page }) => {
@@ -261,16 +300,14 @@ test.describe('Tracking Link Generator', () => {
     });
     
     const generatedLink = await trackingPage.getGeneratedLink();
-    
-    // Verify complete tracking link structure - expect + encoding for spaces
-    expect(generatedLink).toContain('https://act.greenpeace.org/save-the-arctic');
-    expect(generatedLink).toContain('utm_source=facebook');
-    expect(generatedLink).toContain('utm_medium=social');
-    expect(generatedLink).toContain('utm_campaign=save-arctic-2024');
-    expect(generatedLink).toContain('utm_content=video-post');
-    expect(generatedLink).toContain('utm_term=arctic+climate+change');
-    
-    // Should be a valid URL
-    expect(() => new URL(generatedLink)).not.toThrow();
+    const url = new URL(generatedLink);
+
+    // Verify complete tracking link structure
+    expect(url.origin + url.pathname).toBe('https://act.greenpeace.org/save-the-arctic');
+    expect(url.searchParams.get('utm_source')).toBe('facebook');
+    expect(url.searchParams.get('utm_medium')).toBe('social');
+    expect(url.searchParams.get('utm_campaign')).toBe('save-arctic-2024');
+    expect(url.searchParams.get('utm_content')).toBe('video-post');
+    expect(url.searchParams.get('utm_term')).toBe('arctic climate change');
   });
 });

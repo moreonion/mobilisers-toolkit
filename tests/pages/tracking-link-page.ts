@@ -50,24 +50,24 @@ export class TrackingLinkPage {
     return this.page.getByLabel('UTM ID');
   }
 
-  // Sections that appear conditionally - using unique identifiers to avoid strict mode violations
-  get trackingFormSection() {
-    // Target the section that contains the first #trackingLinkWrapper (preview section)
-    return this.page.locator('section').filter({ has: this.page.locator('#trackingLinkWrapper') }).first();
+  get previewRegion() {
+    return this.page.getByRole('region', { name: /tracking link preview/i });
   }
 
-  get finalTrackingLinkSection() {
-    // Target the final output section by its unique text
-    return this.page.getByText("Here's your tracking link").locator('..');
+  get outputRegion() {
+    return this.page.getByRole('region', { name: /tracking link output/i });
+  }
+
+  get previewLink() {
+    return this.previewRegion.locator('p').last();
+  }
+
+  get outputLink() {
+    return this.outputRegion.locator('p').last();
   }
 
   get trackingLinkOutputs() {
-    return this.page.locator('#trackingLinkWrapper p');
-  }
-
-  // UTM form container (the div that contains all UTM inputs)
-  get utmFormContainer() {
-    return this.page.locator('#utmSource').locator('../..');
+    return [this.previewLink, this.outputLink];
   }
 
   // Actions
@@ -138,19 +138,16 @@ export class TrackingLinkPage {
 
   async expectGeneratedLinkContains(expectedUrl: string) {
     // Both output locations should contain the expected URL
-    const outputs = await this.trackingLinkOutputs.all();
-    for (const output of outputs) {
+    for (const output of this.trackingLinkOutputs) {
       await expect(output).toContainText(expectedUrl);
     }
   }
 
   async expectGeneratedLinkContainsUtmParam(paramName: string, paramValue: string) {
-    // The app uses URL encoding where spaces become + instead of %20
-    const expectedParam = `utm_${paramName}=${encodeURIComponent(paramValue).replace(/%20/g, '+')}`;
-    
-    const outputs = await this.trackingLinkOutputs.all();
-    for (const output of outputs) {
-      await expect(output).toContainText(expectedParam);
+    for (const output of this.trackingLinkOutputs) {
+      const text = await output.textContent();
+      const url = new URL(text!.trim());
+      expect(url.searchParams.get(`utm_${paramName}`)).toBe(paramValue);
     }
   }
 
@@ -162,9 +159,7 @@ export class TrackingLinkPage {
 
   // URL Construction Testing Helpers
   async getGeneratedLink(): Promise<string> {
-    // Get the text from the first output element
-    const firstOutput = this.trackingLinkOutputs.first();
-    return await firstOutput.textContent() || '';
+    return await this.previewLink.textContent() || '';
   }
 
   async expectBaseUrlHandling(inputUrl: string, expectedBaseUrl: string) {
