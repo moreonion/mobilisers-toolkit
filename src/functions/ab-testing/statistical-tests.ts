@@ -560,9 +560,9 @@ function generateBusinessInsights(
 	if (!hasAnyEvidence) {
 		insights.push({
 			type: "warning",
-			title: "No Significant Differences",
-			message: `None of your variants show statistically significant differences from each other.`,
-			actionable: `Consider collecting more data or testing more distinct variations.`
+			title: "No clear winner",
+			message: `The variants are too close together for this test to separate them confidently.`,
+			actionable: `Collect more data if a small difference matters, or test a more distinct change.`
 		});
 	} else if (!isStrongEvidence) {
 		// Calculate tier-crossing specifics for messaging
@@ -575,15 +575,15 @@ function generateBusinessInsights(
 			insights.push({
 				type: "info",
 				title: "Limited Evidence",
-				message: `Only ${significantTierCrossings} of ${tierCrossingComparisons} key comparisons (top performers vs others) show significant differences. Results should be interpreted cautiously.`,
-				actionable: `Consider collecting more data to strengthen conclusions, or test fewer variants for clearer results.`
+				message: `Only ${significantTierCrossings} of ${tierCrossingComparisons} checks clearly separate the top performers from the other variants. Treat this result as a guide, not a final answer.`,
+				actionable: `Collect more data to strengthen the result, or test fewer variants next time.`
 			});
 		} else {
 			insights.push({
 				type: "info",
 				title: "Limited Evidence",
-				message: `Only ${allSignificantComparisons.length} of ${totalComparisons} comparisons show significant differences. Results should be interpreted cautiously.`,
-				actionable: `Consider collecting more data to strengthen conclusions, or test fewer variants for clearer results.`
+				message: `Only ${allSignificantComparisons.length} of ${totalComparisons} checks show a clear difference between variants. Treat this result as a guide, not a final answer.`,
+				actionable: `Collect more data to strengthen the result, or test fewer variants next time.`
 			});
 		}
 	} else {
@@ -597,15 +597,15 @@ function generateBusinessInsights(
 			insights.push({
 				type: "success",
 				title: "Strong Evidence",
-				message: `${significantTierCrossings} of ${tierCrossingComparisons} key comparisons (top performers vs others) show significant differences, providing confident results.`,
-				actionable: `Results are reliable enough to make implementation decisions.`
+				message: `The top performers were clearly ahead of the other variants in ${significantTierCrossings} of ${tierCrossingComparisons} checks. This is strong enough to choose a variant.`,
+				actionable: `Use these results to decide what to implement.`
 			});
 		} else {
 			insights.push({
 				type: "success",
 				title: "Strong Evidence",
-				message: `${allSignificantComparisons.length} of ${totalComparisons} comparisons show significant differences, providing confident results.`,
-				actionable: `Results are reliable enough to make implementation decisions.`
+				message: `${allSignificantComparisons.length} of ${totalComparisons} checks show a clear difference between variants. This is strong enough to choose a variant.`,
+				actionable: `Use these results to decide what to implement.`
 			});
 		}
 	}

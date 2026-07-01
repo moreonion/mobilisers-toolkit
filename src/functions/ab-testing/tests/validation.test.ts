@@ -38,7 +38,7 @@ describe("testVariationSchema", () => {
 		}
 	});
 
-	it("rejects conversions exceeding visitors", () => {
+	it("rejects conversions exceeding sample size", () => {
 		const invalidVariation = {
 			name: "Test",
 			visitors: 100,
@@ -49,12 +49,12 @@ describe("testVariationSchema", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues[0].message).toContain(
-				"You can't have more conversions than visitors"
+				"Conversions can't be higher than sample size"
 			);
 		}
 	});
 
-	it("rejects negative visitors", () => {
+	it("rejects negative sample size", () => {
 		const invalidVariation = {
 			name: "Test",
 			visitors: -10,
@@ -64,7 +64,8 @@ describe("testVariationSchema", () => {
 		const result = testVariationSchema.safeParse(invalidVariation);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("You need at least 1 visitor");
+			expect(result.error.issues[0].message).toContain("Sample size must be at least 1");
+			expect(result.error.issues[0].message).toContain("remove any variant with 0");
 		}
 	});
 
@@ -93,7 +94,7 @@ describe("testVariationSchema", () => {
 		expect(result.success).toBe(true);
 	});
 
-	it("rejects decimal numbers for visitors and conversions", () => {
+	it("rejects decimal numbers for sample size and conversions", () => {
 		const invalidVariation = {
 			name: "Test",
 			visitors: 100.5,
@@ -203,7 +204,7 @@ describe("twoProportionTestDataSchema", () => {
 		expect(result.success).toBe(true);
 	});
 
-	it("rejects when control conversions exceed control visitors", () => {
+	it("rejects when control conversions exceed control sample size", () => {
 		const invalidData = {
 			n1: 100,
 			x1: 150, // More than n1
@@ -216,12 +217,12 @@ describe("twoProportionTestDataSchema", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues[0].message).toContain(
-				"Control conversions can't exceed control visitors"
+				"Control conversions can't be higher than control sample size"
 			);
 		}
 	});
 
-	it("rejects when test conversions exceed test visitors", () => {
+	it("rejects when test conversions exceed test sample size", () => {
 		const invalidData = {
 			n1: 1000,
 			x1: 50,
@@ -234,7 +235,7 @@ describe("twoProportionTestDataSchema", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues[0].message).toContain(
-				"Test conversions can't exceed test visitors"
+				"Test conversions can't be higher than test sample size"
 			);
 		}
 	});
@@ -320,8 +321,8 @@ describe("validateStatisticalRequirements", () => {
 		};
 
 		const warnings = validateStatisticalRequirements(smallSampleTest);
-		expect(warnings.some((w) => w.includes("only 50 visitors"))).toBe(true);
-		expect(warnings.some((w) => w.includes("at least 100 visitors"))).toBe(true);
+		expect(warnings.some((w) => w.includes("sample size of only 50"))).toBe(true);
+		expect(warnings.some((w) => w.includes("at least 100 per variation"))).toBe(true);
 	});
 
 	it("warns about low conversion counts", () => {

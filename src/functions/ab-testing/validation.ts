@@ -18,9 +18,9 @@ export const testVariationSchema = z
 
 		visitors: z
 			.number()
-			.int("Please enter a whole number for visitors (no decimals)")
-			.min(1, "You need at least 1 visitor to run a test")
-			.max(1000000000, "Please enter a smaller number (less than 1 billion visitors)"),
+			.int("Please enter a whole number for sample size (no decimals)")
+			.min(1, "Sample size must be at least 1. Enter a value or remove any variant with 0.")
+			.max(1000000000, "Please enter a smaller sample size (less than 1 billion)"),
 
 		conversions: z
 			.number()
@@ -30,7 +30,7 @@ export const testVariationSchema = z
 		conversionRate: z.number().optional()
 	})
 	.refine((data) => data.conversions <= data.visitors, {
-		message: "You can't have more conversions than visitors - please check your numbers",
+		message: "Conversions can't be higher than sample size - please check your numbers",
 		path: ["conversions"]
 	});
 
@@ -61,8 +61,8 @@ export const twoProportionTestDataSchema = z
 	.object({
 		n1: z
 			.number()
-			.int("Control group size must be a whole number")
-			.min(1, "Control group needs at least 1 visitor"),
+			.int("Control sample size must be a whole number")
+			.min(1, "Control group needs a sample size of at least 1"),
 
 		x1: z
 			.number()
@@ -71,8 +71,8 @@ export const twoProportionTestDataSchema = z
 
 		n2: z
 			.number()
-			.int("Test group size must be a whole number")
-			.min(1, "Test group needs at least 1 visitor"),
+			.int("Test sample size must be a whole number")
+			.min(1, "Test group needs a sample size of at least 1"),
 
 		x2: z
 			.number()
@@ -85,11 +85,11 @@ export const twoProportionTestDataSchema = z
 			.max(0.99, "Maximum confidence level is 99%")
 	})
 	.refine((data) => data.x1 <= data.n1, {
-		message: "Control conversions can't exceed control visitors - please double-check",
+		message: "Control conversions can't be higher than control sample size - please double-check",
 		path: ["x1"]
 	})
 	.refine((data) => data.x2 <= data.n2, {
-		message: "Test conversions can't exceed test visitors - please double-check",
+		message: "Test conversions can't be higher than test sample size - please double-check",
 		path: ["x2"]
 	});
 
@@ -187,7 +187,7 @@ export function validateStatisticalRequirements(data: ABTestInput): string[] {
 		// Small sample size warning with explanation
 		if (variation.visitors < 100) {
 			warnings.push(
-				`${label} has only ${variation.visitors} visitors. For reliable results, try to get at least 100 visitors per variation before drawing conclusions.`
+				`${label} has a sample size of only ${variation.visitors}. For reliable results, try to get at least 100 per variation before drawing conclusions.`
 			);
 		}
 

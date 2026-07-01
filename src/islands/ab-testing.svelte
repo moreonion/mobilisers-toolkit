@@ -7,6 +7,7 @@
 		comprehensivePairwiseAnalysis
 	} from "@/functions/ab-testing/statistical-tests";
 	import { testVariationSchema } from "@/functions/ab-testing/validation";
+	import { estimateSampleSizePerVariant } from "@/functions/ab-testing/sample-size";
 	import DevModePresets from "@/components/ab-testing/DevModePresets.svelte";
 	import type { TestPreset } from "@/functions/ab-testing/test-presets";
 	import type { TestVariation } from "@/types/ab-testing";
@@ -25,12 +26,20 @@
 	let results = $state<TwoProportionResult | MultiVariationResult | null>(null);
 	let comprehensiveResults = $state<ComprehensiveAnalysisResult | null>(null);
 	let validationErrors = $state<ValidationError[]>([]);
-	let hasChanges = $state(false);
 
 	// Derived state for checking if we have multiple variations
 	const isMultiVariation = $derived(additionalVariations.length > 0);
 	const hasBasicInputs = $derived(
 		Number(controlData.visitors) > 0 && Number(variationData.visitors) > 0
+	);
+	const hasEnteredData = $derived(
+		controlData.name !== "A" ||
+			Number(controlData.visitors) > 0 ||
+			Number(controlData.conversions) > 0 ||
+			variationData.name !== "B" ||
+			Number(variationData.visitors) > 0 ||
+			Number(variationData.conversions) > 0 ||
+			additionalVariations.length > 0
 	);
 
 	// Properly typed derived variable for two-proportion results
@@ -39,39 +48,6 @@
 			? (results as TwoProportionResult)
 			: null
 	);
-
-	// Capture initial state on mount
-	let initialState: {
-		controlData: { name: string; visitors: number; conversions: number };
-		variationData: { name: string; visitors: number; conversions: number };
-		additionalVariations: TestVariation[];
-		confidenceLevel: number;
-	} | null = null;
-	$effect(() => {
-		if (!initialState) {
-			initialState = {
-				controlData: { ...controlData },
-				variationData: { ...variationData },
-				additionalVariations: [...additionalVariations],
-				confidenceLevel
-			};
-		}
-	});
-
-	// Automatically detect changes using reactive statement
-	$effect(() => {
-		if (initialState) {
-			hasChanges =
-				controlData.name !== initialState.controlData.name ||
-				controlData.visitors !== initialState.controlData.visitors ||
-				controlData.conversions !== initialState.controlData.conversions ||
-				variationData.name !== initialState.variationData.name ||
-				variationData.visitors !== initialState.variationData.visitors ||
-				variationData.conversions !== initialState.variationData.conversions ||
-				additionalVariations.length !== initialState.additionalVariations.length ||
-				confidenceLevel !== initialState.confidenceLevel;
-		}
-	});
 
 	const calculateResults = (): void => {
 		validationErrors = [];
@@ -260,7 +236,15 @@
 		additionalVariations = [];
 		confidenceLevel = 0.95;
 		validationErrors = [];
-		hasChanges = false;
+	};
+
+	const handleConfidenceLevelChange = (event: Event): void => {
+		const select = event.currentTarget as HTMLSelectElement;
+		confidenceLevel = Number(select.value);
+
+		if (results && hasBasicInputs) {
+			calculateResults();
+		}
 	};
 
 	const handleFormSubmit = (event: Event): void => {
@@ -268,6 +252,173 @@
 		if (hasBasicInputs) {
 			calculateResults();
 		}
+	};
+
+	type ImpactComparison = {
+		label: string;
+		difference: number;
+	};
+
+	let impactAudienceSizeInput = $state("10000");
+	const parsedImpactAudienceSize = $derived(Number(impactAudienceSizeInput.replace(/,/g, "")));
+	const hasValidImpactAudienceSize = $derived(
+		Number.isFinite(parsedImpactAudienceSize) && parsedImpactAudienceSize > 0
+	);
+
+	const wholeNumberFormatter = new Intl.NumberFormat(undefined, {
+		maximumFractionDigits: 0
+	});
+
+	const percentageFormatter = new Intl.NumberFormat(undefined, {
+		maximumFractionDigits: 2
+	});
+
+	const formatCompactNumber = (value: number): string =>
+		wholeNumberFormatter.format(Math.round(value));
+
+	const formatConversionRatePercent = (rate: number): string =>
+		`${percentageFormatter.format(rate * 100)}%`;
+
+	const formatSampleSizeEstimate = (value: number): string => {
+		let rounded: number;
+		if (value >= 100000) {
+			rounded = Math.round(value / 10000) * 10000;
+		} else if (value >= 10000) {
+			rounded = Math.round(value / 1000) * 1000;
+		} else if (value >= 1000) {
+			rounded = Math.round(value / 100) * 100;
+		} else {
+			rounded = Math.round(value / 10) * 10;
+		}
+
+		return wholeNumberFormatter.format(rounded);
+	};
+
+	const formatRateDecimal = (value: number): string =>
+		Math.abs(value).toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+
+	const formatPercentagePoints = (value: number): string => {
+		const percentagePoints = Math.abs(value * 100);
+		return percentagePoints >= 1 ? percentagePoints.toFixed(1) : percentagePoints.toFixed(2);
+	};
+
+	const formatImpactCalculation = (difference: number): string => {
+		const conversionDirection = difference >= 0 ? "extra" : "fewer";
+		const extraConversions = Math.abs(difference) * parsedImpactAudienceSize;
+
+		return `${formatCompactNumber(parsedImpactAudienceSize)} × ${formatRateDecimal(difference)} = about ${formatCompactNumber(extraConversions)} ${conversionDirection} conversions.`;
+	};
+
+	const getMultiVariantImpactComparison = (
+		analysis: ComprehensiveAnalysisResult | null
+	): ImpactComparison | null => {
+		const topVariant = analysis?.performanceGroups[0]?.variations[0];
+		const nextBestLowerVariant = analysis?.performanceGroups
+			.slice(1)
+			.flatMap((tier) => tier.variations)
+			.sort((a, b) => b.conversionRate - a.conversionRate)[0];
+
+		if (!topVariant || !nextBestLowerVariant) {
+			return null;
+		}
+
+		return {
+			label: `${topVariant.name} versus ${nextBestLowerVariant.name}`,
+			difference: topVariant.conversionRate - nextBestLowerVariant.conversionRate
+		};
+	};
+
+	const multiVariantImpactComparison = $derived(
+		getMultiVariantImpactComparison(comprehensiveResults)
+	);
+
+	type RatedVariation =
+		ComprehensiveAnalysisResult["performanceGroups"][number]["variations"][number];
+	type DataGuideItem = {
+		label: string;
+		text: string;
+	};
+
+	const getVariantGapGuide = (first: RatedVariation, second: RatedVariation): string | null => {
+		const estimate = estimateSampleSizePerVariant({
+			rateA: first.conversionRate,
+			rateB: second.conversionRate,
+			confidenceLevel
+		});
+		if (!estimate) return null;
+
+		return `${first.name} and ${second.name} differ by ${formatPercentagePoints(first.conversionRate - second.conversionRate)} percentage points. Detecting whether a gap that size is significant takes about ${formatSampleSizeEstimate(estimate)} total people in each variant.`;
+	};
+
+	const getClosestTopVersusOtherPair = (
+		analysis: ComprehensiveAnalysisResult
+	): [RatedVariation, RatedVariation] | null => {
+		const topVariants = analysis.performanceGroups[0]?.variations ?? [];
+		const lowerVariants = analysis.performanceGroups.slice(1).flatMap((tier) => tier.variations);
+		let closestPair: [RatedVariation, RatedVariation] | null = null;
+		let closestDifference = Infinity;
+
+		for (const topVariant of topVariants) {
+			for (const lowerVariant of lowerVariants) {
+				const difference = Math.abs(topVariant.conversionRate - lowerVariant.conversionRate);
+				if (difference < closestDifference) {
+					closestDifference = difference;
+					closestPair = [topVariant, lowerVariant];
+				}
+			}
+		}
+
+		return closestPair;
+	};
+
+	const getMultiVariantDataGuides = (
+		analysis: ComprehensiveAnalysisResult | null
+	): DataGuideItem[] => {
+		if (!analysis) return [];
+
+		const guides: DataGuideItem[] = [];
+		const insightTitles = analysis.insights.map((insight) => insight.title);
+		const hasHighPerformers = insightTitles.some((title) => title.includes("High Performers"));
+		const hasLimitedEvidence = insightTitles.includes("Limited Evidence");
+		const hasNoClearWinner = insightTitles.includes("No clear winner");
+		const sorted = analysis.performanceGroups
+			.flatMap((tier) => tier.variations)
+			.sort((a, b) => b.conversionRate - a.conversionRate);
+
+		if (hasHighPerformers && sorted.length >= 2) {
+			const guide = getVariantGapGuide(sorted[0], sorted[1]);
+			if (guide) {
+				guides.push({
+					label: "Pick between the top variants",
+					text: guide
+				});
+			}
+		}
+
+		if (hasLimitedEvidence) {
+			const pair = getClosestTopVersusOtherPair(analysis);
+			if (pair) {
+				const guide = getVariantGapGuide(pair[0], pair[1]);
+				if (guide) {
+					guides.push({
+						label: "Confirm the top group beats the others",
+						text: guide
+					});
+				}
+			}
+		}
+
+		if (hasNoClearWinner && guides.length === 0 && sorted.length >= 2) {
+			const guide = getVariantGapGuide(sorted[0], sorted[sorted.length - 1]);
+			if (guide) {
+				guides.push({
+					label: "Check the largest observed gap",
+					text: guide
+				});
+			}
+		}
+
+		return guides;
 	};
 
 	const loadPreset = (preset: TestPreset): void => {
@@ -296,8 +447,8 @@
 {#snippet conversionRateDisplay(visitors: number | string, conversions: number | string)}
 	<span class="conversion-rate">
 		{Number(visitors) > 0
-			? ((Number(conversions) / Number(visitors)) * 100).toFixed(2) + "%"
-			: "0.00%"}
+			? formatConversionRatePercent(Number(conversions) / Number(visitors))
+			: "0%"}
 	</span>
 {/snippet}
 
@@ -311,6 +462,7 @@
 )}
 	<tr class="data-row" class:winner-row={isWinner}>
 		<td>
+			<span class="mobile-cell-label" aria-hidden="true">Variant</span>
 			<input
 				type="text"
 				bind:value={variantData.name}
@@ -319,16 +471,18 @@
 			/>
 		</td>
 		<td>
+			<span class="mobile-cell-label" aria-hidden="true">Sample size</span>
 			<input
 				type="text"
 				bind:value={variantData.visitors}
 				min="1"
 				class="number-input"
-				aria-label="Number of visitors"
+				aria-label="Sample size"
 				placeholder={visitorPlaceholder}
 			/>
 		</td>
 		<td>
+			<span class="mobile-cell-label" aria-hidden="true">Conversions</span>
 			<input
 				type="text"
 				bind:value={variantData.conversions}
@@ -340,18 +494,21 @@
 			/>
 		</td>
 		<td class="conversion-rate-cell">
+			<span class="mobile-cell-label" aria-hidden="true">Conversion rate</span>
 			{@render conversionRateDisplay(variantData.visitors, variantData.conversions)}
 		</td>
-		<td>
+		<td class="variant-action-cell">
 			{#if showRemoveButton && onRemove}
 				<button
 					type="button"
-					class="button tiny alert hollow"
+					class="button tiny alert hollow remove-variant-button"
 					onclick={onRemove}
 					aria-label="Remove variant {variantData.name}"
 				>
 					❌
 				</button>
+			{:else}
+				<span class="remove-variant-placeholder" aria-hidden="true">❌</span>
 			{/if}
 		</td>
 	</tr>
@@ -366,6 +523,214 @@
 	</p>
 {/snippet}
 
+{#snippet impactCalculator(difference: number, comparisonLabel: string | null = null)}
+	<div class="impact-calculator">
+		<h5>Estimate the practical impact before changing anything</h5>
+		<p>
+			Before making a change, weigh the extra conversions against the cost, effort, and risk of
+			making a change. Sometimes, the change is very quick to make. Sometimes it's not. Are the
+			extra conversions worth it?
+		</p>
+		<p>
+			To estimate the number of extra conversions, multiply the percentage-point difference between
+			your variants by your normal audience size.
+		</p>
+		{#if comparisonLabel}
+			<p class="impact-comparison">{comparisonLabel}</p>
+		{/if}
+		<dl class="impact-details">
+			<div>
+				<dt>Difference:</dt>
+				<dd>{formatPercentagePoints(difference)} percentage points</dd>
+			</div>
+		</dl>
+		<label>
+			Normal audience size
+			<input
+				type="text"
+				inputmode="numeric"
+				bind:value={impactAudienceSizeInput}
+				class="number-input impact-audience-input"
+				aria-label="Normal audience size"
+			/>
+		</label>
+		<p class="impact-calculation">
+			{#if hasValidImpactAudienceSize}
+				{formatImpactCalculation(difference)}
+			{:else}
+				Enter a positive audience size to estimate conversions.
+			{/if}
+		</p>
+	</div>
+{/snippet}
+
+{#snippet reliabilityDetails(resultData: TwoProportionResult | MultiVariationResult)}
+	<details class="confidence-section">
+		<summary>How strong is the evidence?</summary>
+		<div class="confidence-content">
+			{#if "overallTest" in resultData}
+				{@const hasStrongEvidence =
+					comprehensiveResults &&
+					(() => {
+						if (comprehensiveResults.performanceGroups.length <= 1) {
+							return (
+								comprehensiveResults.allComparisons.filter((c) => c.isSignificant).length /
+									comprehensiveResults.allComparisons.length >=
+								0.5
+							);
+						}
+						const topTier = comprehensiveResults.performanceGroups[0];
+						const lowerTierVariants = comprehensiveResults.performanceGroups
+							.slice(1)
+							.flatMap((tier) => tier.variations);
+						let significantCrossings = 0;
+						let totalCrossings = 0;
+						for (const topVariant of topTier.variations) {
+							for (const lowerVariant of lowerTierVariants) {
+								const comparison = comprehensiveResults.allComparisons.find(
+									(c) =>
+										(c.control.name === topVariant.name &&
+											c.variation.name === lowerVariant.name) ||
+										(c.control.name === lowerVariant.name && c.variation.name === topVariant.name)
+								);
+								if (comparison) {
+									totalCrossings++;
+									if (comparison.isSignificant) {
+										significantCrossings++;
+									}
+								}
+							}
+						}
+						return totalCrossings > 0 ? significantCrossings / totalCrossings >= 0.5 : false;
+					})()}
+				<p>
+					<strong>Evidence</strong>
+					{#if resultData.overallTest.isSignificant && hasStrongEvidence}
+						Strong evidence. The differences are large enough, and the sample is big enough, to show
+						that some variants performed better than others.
+					{:else if resultData.overallTest.isSignificant}
+						Some variants may be performing differently, but this test cannot clearly show which
+						variant is best.
+					{:else}
+						Not enough evidence. With this sample size, the differences between variants could be
+						normal random variation.
+					{/if}
+				</p>
+				<p>
+					<strong>How to use this</strong>
+					{#if resultData.overallTest.isSignificant && hasStrongEvidence}
+						Start with the variants in the top group, then estimate the practical impact.
+					{:else if resultData.overallTest.isSignificant}
+						Do not pick a winner from the ranking alone. If you need a clear winner, collect more
+						data or run a simpler test with the strongest variants.
+					{:else}
+						Treat this as no clear winner. Do not pick a variant on these numbers alone; choose
+						based on cost, risk, fit, or collect more data if a small difference would change your
+						decision.
+					{/if}
+				</p>
+				{#if resultData.overallTest.isSignificant && hasStrongEvidence && multiVariantImpactComparison}
+					{@render impactCalculator(
+						multiVariantImpactComparison.difference,
+						multiVariantImpactComparison.label
+					)}
+				{/if}
+			{:else}
+				<p>
+					<strong>Evidence</strong>
+					{#if resultData.isSignificant}
+						Strong evidence. The difference is larger than we'd expect from random variation alone
+						at this sample size.
+					{:else}
+						This test did not find a clear winner. With this sample size, the difference in
+						conversion rates could be real or could be due to chance.
+					{/if}
+				</p>
+				<p>
+					<strong>How to use this</strong>
+					{#if resultData.isSignificant}
+						You can treat this as evidence that one variant performed better in this test.
+					{:else}
+						Do not pick a winner from these numbers alone. If even a small difference would matter,
+						collect more data. If not, choose the option that is cheaper, safer, or easier to run.
+					{/if}
+				</p>
+				{#if resultData.isSignificant}
+					{@render impactCalculator(Math.abs(resultData.improvement.absolute))}
+				{:else if estimateSampleSizePerVariant( { rateA: resultData.variation.conversionRate, rateB: resultData.control.conversionRate, confidenceLevel } )}
+					<p>
+						<strong>Sample size needed</strong>
+						The gap is {formatPercentagePoints(resultData.improvement.absolute)} percentage points.
+						Detecting whether a gap that size is significant takes about {formatSampleSizeEstimate(
+							estimateSampleSizePerVariant({
+								rateA: resultData.variation.conversionRate,
+								rateB: resultData.control.conversionRate,
+								confidenceLevel
+							}) || 0
+						)} total people in each variant.
+					</p>
+				{/if}
+			{/if}
+
+			<!-- Technical Details for Experts -->
+			<details class="technical-details">
+				<summary>Technical details</summary>
+				<div class="technical-details-content">
+					{#if "overallTest" in resultData}
+						{@render statisticalMetric(
+							"Chi-square statistic",
+							resultData.overallTest.testStatistic.toFixed(2),
+							`Compares actual conversions with expected conversions if variants performed about the same. Judge it with the p-value below.`
+						)}
+						{@render statisticalMetric(
+							"Degrees of freedom",
+							(resultData.overallTest.degreesOfFreedom || 0).toString(),
+							`The amount of independent information in this chi-square test. Here it is variants minus 1: ${additionalVariations.length + 2} variants gives ${resultData.overallTest.degreesOfFreedom || 0}. This affects how large the chi-square statistic must be before the p-value becomes small.`
+						)}
+						{@render statisticalMetric(
+							"P-value",
+							resultData.overallTest.pValue.toFixed(4),
+							`If the variants performed equally, this is the chance of seeing a chi-square statistic this large or larger from random variation alone. ${resultData.overallTest.pValue < 0.001 ? "Very strong evidence that at least one variant differs" : resultData.overallTest.pValue < 0.01 ? "Strong evidence that at least one variant differs" : resultData.overallTest.pValue < 0.05 ? "Moderate evidence that at least one variant differs" : "Weak evidence; the observed differences may be random variation"}.`
+						)}
+						{#if resultData.bonferroniCorrected}
+							{@render statisticalMetric(
+								"Multiple comparison adjustment",
+								"Applied",
+								"Pairwise comparisons use a stricter threshold because testing many pairs increases the chance that one looks significant by luck."
+							)}
+						{/if}
+					{:else}
+						{@render statisticalMetric(
+							"Relative improvement",
+							resultData.improvement.relative !== null
+								? (resultData.improvement.relative > 0 ? "+" : "") +
+										resultData.improvement.relative.toFixed(1) +
+										"%"
+								: "N/A",
+							"Change in the variation's conversion rate relative to the control: (variation − control) ÷ control. For practical impact, use the percentage-point difference: 2 points across 10,000 people is about 200 extra conversions. It is N/A when the control conversion rate is 0."
+						)}
+						{@render statisticalMetric(
+							"P-value",
+							resultData.pValue.toFixed(4),
+							`If the variants performed equally, this is the chance of seeing a difference this large or larger in either direction from random variation alone. Values below ${(1 - confidenceLevel).toFixed(2)} meet the selected significance threshold.`
+						)}
+						{@render statisticalMetric(
+							"Confidence interval",
+							`${resultData.improvement.confidenceInterval.lower.toFixed(1)}% to ${resultData.improvement.confidenceInterval.upper.toFixed(1)}%`,
+							`Estimated range for the true change. A ${confidenceLevel * 100}% confidence interval means this method would capture the true effect in about ${confidenceLevel * 100}% of repeated tests. If the range includes 0%, the true effect could be no change.`
+						)}
+						{@render statisticalMetric(
+							"Z-score",
+							resultData.testStatistic.toFixed(2),
+							"How many standard errors the observed difference is from 0. Larger absolute values are stronger evidence against equal conversion rates; at 95% confidence, values beyond ±1.96 usually correspond to p < 0.05."
+						)}
+					{/if}
+				</div>
+			</details>
+		</div>
+	</details>
+{/snippet}
+
 <section>
 	<div class="ab-testing-wrapper">
 		<!-- Data Input Form -->
@@ -375,11 +740,22 @@
 				<table class="hover stack" aria-label="A/B test data input">
 					<thead>
 						<tr>
-							<th>Variant</th>
-							<th>Visitors</th>
-							<th>Conversions</th>
-							<th>Conversion Rate</th>
-							<th></th>
+							<th>
+								Variant
+								<small>Your label for each version</small>
+							</th>
+							<th>
+								Sample size
+								<small>People or recipients in this group</small>
+							</th>
+							<th>
+								Conversions
+								<small>People who completed the goal</small>
+							</th>
+							<th>Conversion rate</th>
+							<th class="variant-action-column">
+								<span class="show-for-sr">Remove variant</span>
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -453,86 +829,100 @@
 			<div class="results-wrapper" in:fade={{ delay: 100 }} role="region" aria-label="Test results">
 				{#if comprehensiveResults}
 					<!-- Comprehensive Multi-variation Results -->
-					<div class="callout success">
+					<div class="callout result-callout result-positive">
 						{#if comprehensiveResults.performanceGroups.length > 0}
-							<div>
+							<div class="performance-groups" aria-label="Variant performance groups">
 								{#each comprehensiveResults.performanceGroups as tier (tier.tier)}
-									<div class="tier-group tier-{tier.tier}">
-										<strong>{tier.label}</strong>
-										<div class="tier-variants">
-											{#each tier.variations as variation, i (variation.name)}
-												<span class="variant-badge">
-													{variation.name}: {(variation.conversionRate * 100).toFixed(2)}%
-												</span>
-												{#if i < tier.variations.length - 1},
-												{/if}
+									<section class="tier-group" aria-labelledby="tier-{tier.tier}-label">
+										<h5 id="tier-{tier.tier}-label">{tier.label}</h5>
+										<ul class="tier-variants">
+											{#each tier.variations as variation (variation.name)}
+												<li>
+													<span>{variation.name}</span>
+													<strong>{formatConversionRatePercent(variation.conversionRate)}</strong>
+												</li>
 											{/each}
-										</div>
-									</div>
+										</ul>
+									</section>
 								{/each}
 							</div>
 						{/if}
 
 						<!-- Business Insights -->
 						{#if comprehensiveResults.insights.length > 0}
+							{@const dataGuides = getMultiVariantDataGuides(comprehensiveResults)}
 							<div class="business-insights">
 								{#each comprehensiveResults.insights as insight, index (index)}
-									<div
-										class="insight callout {insight.type === 'success'
-											? ''
-											: insight.type === 'warning'
-												? 'warning'
-												: 'secondary'}"
-									>
-										<h6>{insight.title}</h6>
+									<section class="insight" aria-labelledby="insight-{index}">
+										<h5 id="insight-{index}">{insight.title}</h5>
 										<!-- eslint-disable-next-line svelte/no-at-html-tags -- Safe: insight.message is generated by generateBusinessInsights() with trusted content -->
 										<p>{@html insight.message}</p>
 										{#if insight.actionable}
-											<p>
-												<small
-													><strong>Recommendation:</strong>
-													{insight.actionable}</small
-												>
-											</p>
+											<p class="insight-action"><strong>Next step:</strong> {insight.actionable}</p>
 										{/if}
-									</div>
+									</section>
 								{/each}
+								{#if dataGuides.length > 0}
+									<section class="insight-data-guide" aria-labelledby="multi-variant-data-guide">
+										<h5 id="multi-variant-data-guide">Sample size needed</h5>
+										{#if dataGuides.length > 1}
+											<p>Use the estimate that matches your next decision:</p>
+										{/if}
+										<ul>
+											{#each dataGuides as guide (guide.label)}
+												<li>{dataGuides.length > 1 ? `${guide.label}: ` : ""}{guide.text}</li>
+											{/each}
+										</ul>
+									</section>
+								{/if}
 							</div>
 						{/if}
+
+						{@render reliabilityDetails(results)}
 					</div>
 				{:else if "overallTest" in results}
 					<!-- Multi-variation results are displayed through comprehensiveResults. -->
 				{:else}
 					<!-- Two-proportion Results -->
-					<div class="callout {results.isSignificant ? 'success' : 'secondary'}">
+					<div
+						class="callout result-callout {results.isSignificant
+							? 'result-positive'
+							: 'result-negative'}"
+					>
 						<h4>
 							{results.isSignificant ? "✅ Significant result!" : "❌ Not significant"}
 						</h4>
 						{#if results.isSignificant}
-							<p>
-								Variant {results.variation.name}'s conversion rate ({(
-									results.variation.conversionRate * 100
-								).toFixed(2)}%) was
-								{#if results.improvement.relative !== null}
-									<strong
-										>{Math.abs(results.improvement.relative).toFixed(1)}% {results.improvement
-											.relative > 0
-											? "higher"
-											: "lower"}</strong
-									>
-									than variant {results.control.name}'s conversion rate ({(
-										results.control.conversionRate * 100
-									).toFixed(2)}%). You can be {confidenceLevel * 100}% confident that variant {results
-										.variation.name} will perform
-									{results.improvement.relative > 0 ? "better" : "worse"} than variant
-									{results.control.name}.
-								{:else}
-									significantly different from variant {results.control.name}'s conversion rate ({(
-										results.control.conversionRate * 100
-									).toFixed(2)}%). You can be {confidenceLevel * 100}% confident that variant {results
-										.variation.name} will perform differently than variant {results.control.name}.
-								{/if}
-							</p>
+							{#if results.improvement.relative !== null}
+								{@const variationWon = results.improvement.relative > 0}
+								<p>
+									<strong>
+										Variant <em>{variationWon ? results.variation.name : results.control.name}</em>
+										performed better.
+									</strong>
+									<em>{variationWon ? results.variation.name : results.control.name}</em> converted
+									at {(
+										(variationWon
+											? results.variation.conversionRate
+											: results.control.conversionRate) * 100
+									).toFixed(2)}%, compared with {(
+										(variationWon
+											? results.control.conversionRate
+											: results.variation.conversionRate) * 100
+									).toFixed(2)}% for
+									<em>{variationWon ? results.control.name : results.variation.name}</em>
+									— a {Math.abs(results.improvement.relative).toFixed(1)}% relative increase. This
+									is statistically significant at {confidenceLevel * 100}% confidence.
+								</p>
+							{:else}
+								<p>
+									<strong>Variant <em>{results.variation.name}</em> performed differently.</strong>
+									Its conversion rate was {(results.variation.conversionRate * 100).toFixed(2)}%,
+									compared with {(results.control.conversionRate * 100).toFixed(2)}% for
+									<em>{results.control.name}</em>. This is statistically significant at {confidenceLevel *
+										100}% confidence.
+								</p>
+							{/if}
 						{:else}
 							<p>
 								The difference between variant <em>{results.variation.name}</em>
@@ -542,165 +932,11 @@
 								significant.
 							</p>
 						{/if}
+
+						{@render reliabilityDetails(results)}
 					</div>
 				{/if}
 			</div>
-		{/if}
-
-		<!-- How confident are we? -->
-		{#if results}
-			<details class="confidence-section">
-				<summary>How much can you rely on these results?</summary>
-				<div class="callout secondary">
-					{#if "overallTest" in results}
-						{@const hasStrongEvidence =
-							comprehensiveResults &&
-							(() => {
-								if (comprehensiveResults.performanceGroups.length <= 1) {
-									return (
-										comprehensiveResults.allComparisons.filter((c) => c.isSignificant).length /
-											comprehensiveResults.allComparisons.length >=
-										0.5
-									);
-								}
-								const topTier = comprehensiveResults.performanceGroups[0];
-								const lowerTierVariants = comprehensiveResults.performanceGroups
-									.slice(1)
-									.flatMap((tier) => tier.variations);
-								let significantCrossings = 0;
-								let totalCrossings = 0;
-								for (const topVariant of topTier.variations) {
-									for (const lowerVariant of lowerTierVariants) {
-										const comparison = comprehensiveResults.allComparisons.find(
-											(c) =>
-												(c.control.name === topVariant.name &&
-													c.variation.name === lowerVariant.name) ||
-												(c.control.name === lowerVariant.name &&
-													c.variation.name === topVariant.name)
-										);
-										if (comparison) {
-											totalCrossings++;
-											if (comparison.isSignificant) {
-												significantCrossings++;
-											}
-										}
-									}
-								}
-								return totalCrossings > 0 ? significantCrossings / totalCrossings >= 0.5 : false;
-							})()}
-						<p>
-							<strong>Reliability</strong>
-							{#if results.overallTest.isSignificant && hasStrongEvidence}
-								Very confident. There's strong evidence of real differences between your variants,
-								and we can reliably identify which ones are better.
-							{:else if results.overallTest.isSignificant}
-								Mixed confidence. We're confident that differences exist between your variants (p = {results
-									.overallTest.pValue < 0.001
-									? "<0.001"
-									: results.overallTest.pValue.toFixed(4)}), but less confident about which specific
-								variants are better.
-							{:else}
-								Uncertain. Any differences you see could be due to random chance when testing
-								multiple variants together.
-							{/if}
-						</p>
-						<p>
-							<strong>Can you trust this result?</strong>
-							{#if results.overallTest.isSignificant && hasStrongEvidence}
-								Yes, you can confidently act on these results. Both overall differences and specific
-								rankings are statistically reliable.
-							{:else if results.overallTest.isSignificant}
-								Proceed with caution. There are real differences between variants, but the specific
-								rankings shown are less certain. Consider the groupings as rough guidance rather
-								than definitive rankings.
-							{:else}
-								We'd recommend getting more data or simplifying to fewer variants before making
-								decisions.
-							{/if}
-						</p>
-					{:else}
-						<p>
-							<strong>Reliability</strong>
-							{#if results.isSignificant}
-								Very confident. There's only a {((1 - confidenceLevel) * 100).toFixed(0)}% chance
-								this difference is due to random luck.
-							{:else}
-								Inconclusive — we can't determine if there's a meaningful difference with the
-								current data.
-							{/if}
-						</p>
-						<p>
-							<strong>Can you trust this result?</strong>
-							{#if results.isSignificant}
-								Yes, you can act on this result. The change of {results.improvement.relative !==
-								null
-									? Math.abs(results.improvement.relative).toFixed(1) + "%"
-									: "observed"} is statistically reliable.
-							{:else}
-								The data suggests these variants perform similarly. You can stick with the original
-								or choose based on other factors (ease of implementation, brand alignment, etc.). If
-								detecting small differences is critical, consider running a larger test.
-							{/if}
-						</p>
-					{/if}
-
-					<!-- Technical Details for Experts -->
-					<details class="technical-details">
-						<summary>Technical details</summary>
-						<div class="technical-details-content">
-							{#if "overallTest" in results}
-								{@render statisticalMetric(
-									"Chi-square statistic",
-									results.overallTest.testStatistic.toFixed(2),
-									`Measures how different your results are from what we'd expect if all variants performed equally. Values above 6 typically indicate strong evidence of real differences.`
-								)}
-								{@render statisticalMetric(
-									"Degrees of freedom",
-									(results.overallTest.degreesOfFreedom || 0).toString(),
-									`Number of independent comparisons. With ${additionalVariations.length + 2} variants, we have ${results.overallTest.degreesOfFreedom || 0} degrees of freedom.`
-								)}
-								{@render statisticalMetric(
-									"P-value",
-									results.overallTest.pValue.toFixed(4),
-									`Probability these differences are just random luck. ${results.overallTest.pValue < 0.001 ? "Very strong evidence of real differences" : results.overallTest.pValue < 0.01 ? "Strong evidence of real differences" : results.overallTest.pValue < 0.05 ? "Moderate evidence (meets typical 5% threshold)" : "Weak evidence - differences may be random"}.`
-								)}
-								{#if results.bonferroniCorrected}
-									{@render statisticalMetric(
-										"Multiple comparison adjustment",
-										"Applied",
-										"We used stricter criteria because multiple variants were tested together to avoid false discoveries"
-									)}
-								{/if}
-							{:else}
-								{@render statisticalMetric(
-									"Relative improvement",
-									results.improvement.relative !== null
-										? (results.improvement.relative > 0 ? "+" : "") +
-												results.improvement.relative.toFixed(1) +
-												"%"
-										: "N/A",
-									"Percentage change in conversion rate from control to variation — how much better or worse your variation performed. Positive values indicate improvement, negative values indicate decline."
-								)}
-								{@render statisticalMetric(
-									"P-value",
-									results.pValue.toFixed(4),
-									`Probability of observing this difference if there's no true effect. Think of it like a "doubt score" where lower numbers mean less doubt. Values below ${(1 - confidenceLevel).toFixed(2)} indicate statistical significance.`
-								)}
-								{@render statisticalMetric(
-									"Confidence interval",
-									`${results.improvement.confidenceInterval.lower.toFixed(1)}% to ${results.improvement.confidenceInterval.upper.toFixed(1)}%`,
-									`${confidenceLevel * 100}% confidence interval for the true relative improvement — if you ran this test 100 times under identical conditions, the real impact would fall in this range ${confidenceLevel * 100} times. If this range doesn't cross 0% (like -0.3% to -0.1%), there's a meaningful effect. If it crosses 0% (like -0.5% to +0.2%), the effect might be zero.`
-								)}
-								{@render statisticalMetric(
-									"Z-score",
-									results.testStatistic.toFixed(2),
-									"Measures how many standard deviations the observed difference is from zero. Higher numbers mean stronger evidence the difference is real (not just luck). At 95% confidence, values beyond ±1.96 correspond to p-values below 0.05 (the 5% significance threshold)."
-								)}
-							{/if}
-						</div>
-					</details>
-				</div>
-			</details>
 		{/if}
 
 		<!-- Advanced Settings -->
@@ -708,17 +944,22 @@
 			<summary>Advanced settings</summary>
 			<div class="advanced-content">
 				<label for="confidenceLevel">
-					Confidence Level
-					<select id="confidenceLevel" bind:value={confidenceLevel}>
+					Confidence level
+					<select
+						id="confidenceLevel"
+						value={confidenceLevel}
+						onchange={handleConfidenceLevelChange}
+					>
 						<option value={0.9}>90%</option>
 						<option value={0.95}>95%</option>
 						<option value={0.99}>99%</option>
 					</select>
+					<small>Sets how strong the evidence must be before we call a result significant.</small>
 				</label>
 
-				{#if hasChanges}
+				{#if hasEnteredData}
 					<button type="button" class="button alert small" onclick={resetForm}>
-						Reset all data
+						Clear all data
 					</button>
 				{/if}
 			</div>
@@ -736,7 +977,9 @@
 		background: white;
 		border-radius: 6px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		overflow: hidden;
+		overflow-x: auto;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	table {
@@ -750,6 +993,11 @@
 		border-bottom: 2px solid #e9ecef;
 	}
 
+	thead th small {
+		display: block;
+		margin-top: 0.25rem;
+	}
+
 	.data-row td {
 		padding: 1rem;
 		vertical-align: middle;
@@ -757,7 +1005,7 @@
 
 	.winner-row {
 		background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-		border-left: 4px solid #28a745;
+		box-shadow: inset 4px 0 0 #28a745;
 	}
 
 	.variant-input,
@@ -779,13 +1027,90 @@
 		text-align: center;
 	}
 
+	.mobile-cell-label {
+		display: none;
+	}
+
+	.variant-action-column,
+	.variant-action-cell {
+		box-sizing: border-box;
+		width: 4rem;
+		min-width: 4rem;
+		text-align: center;
+	}
+
+	.remove-variant-button,
+	.remove-variant-placeholder {
+		align-items: center;
+		box-sizing: border-box;
+		display: inline-flex;
+		height: 2rem;
+		justify-content: center;
+		line-height: 1;
+		margin: 0;
+		padding: 0;
+		width: 2rem;
+	}
+
+	.remove-variant-placeholder {
+		visibility: hidden;
+	}
+
 	.winner-row .conversion-rate {
 		color: #28a745;
-		font-size: 1.1em;
 	}
 
 	#confidenceLevel {
 		width: fit-content;
+	}
+
+	.impact-calculator {
+		background: #f8f9fa;
+		border: 1px solid #e9ecef;
+		border-radius: 4px;
+		color: #343433;
+		margin: 0.75rem 0 1rem;
+		padding: 0.75rem;
+	}
+
+	.impact-calculator h5 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem;
+	}
+
+	.impact-calculator p {
+		margin-bottom: 0.5rem;
+	}
+
+	.impact-details {
+		margin: 0 0 0.5rem;
+	}
+
+	.impact-details div {
+		align-items: baseline;
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.impact-details dt {
+		font-weight: 600;
+	}
+
+	.impact-details dd {
+		font-variant-numeric: tabular-nums;
+		margin: 0;
+	}
+
+	.impact-comparison,
+	.impact-calculation {
+		font-weight: 600;
+	}
+
+	.impact-audience-input {
+		background: #fff;
+		color: #343433;
+		margin-top: 0.25rem;
 	}
 
 	/* Button styling */
@@ -803,97 +1128,94 @@
 		margin-bottom: 2rem;
 	}
 
-	.winner-callout {
-		background: #28a745;
-		color: white;
-		padding: 1rem;
-		border-radius: 4px;
-		margin-top: 1rem;
-		text-align: center;
+	.result-callout {
+		background: #fff;
+		border: 1px solid #e9ecef;
+		border-left-width: 4px;
+		color: #343433;
+		max-width: 40rem;
 	}
 
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-		gap: 1rem;
-		margin-top: 1rem;
-	}
-
-	.stat-box {
-		text-align: center;
-		padding: 1rem;
-		background: #f8f9fa;
-		border-radius: 4px;
-	}
-
-	.stat-label {
-		font-size: 0.875rem;
-		color: #6c757d;
-		margin-bottom: 0.25rem;
-	}
-
-	.stat-value {
-		font-size: 1.5rem;
-		font-weight: 600;
-	}
-
-	.stat-value.positive {
-		color: #28a745;
-	}
-
-	.stat-value.negative {
-		color: #dc3545;
-	}
-
-	.tier-group {
-		margin-bottom: 1rem;
-		padding: 0.75rem;
-		border-radius: 4px;
-		border-left: 4px solid #ccc;
-	}
-
-	.tier-group.tier-1 {
-		background: #d4edda;
+	.result-positive {
 		border-left-color: #28a745;
 	}
 
-	.tier-group.tier-2 {
-		background: #fff3cd;
-		border-left-color: #ffc107;
-	}
-
-	.tier-group.tier-3 {
-		background: #f8d7da;
+	.result-negative {
 		border-left-color: #dc3545;
 	}
 
-	.tier-variants {
-		margin-top: 0.5rem;
+	.performance-groups {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 28rem;
 	}
 
-	.variant-badge {
-		display: inline-block;
-		padding: 0.25rem 0.5rem;
-		background: rgba(255, 255, 255, 0.8);
-		border-radius: 3px;
-		font-size: 0.875rem;
+	.tier-group {
+		border: 1px solid #e9ecef;
+		border-radius: 6px;
+		margin: 0;
+		padding: 0.75rem;
+	}
+
+	.tier-group h5,
+	.business-insights .insight h5,
+	.insight-data-guide h5 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem;
+	}
+
+	.tier-group h5 {
+		color: #343433;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+
+	.tier-variants {
+		list-style: none;
+		margin: 0;
+	}
+
+	.tier-variants li {
+		align-items: baseline;
+		border-top: 1px solid #e9ecef;
+		display: flex;
+		gap: 1rem;
+		justify-content: space-between;
+		padding: 0.5rem 0;
+	}
+
+	.tier-variants span {
 		font-weight: 500;
+		line-height: 1.3;
+	}
+
+	.tier-variants li:first-child {
+		border-top: 0;
+	}
+
+	.tier-variants strong {
+		color: #6c757d;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+		font-size: 0.8125rem;
+		font-variant-numeric: tabular-nums;
+		font-weight: 500;
+		white-space: nowrap;
 	}
 
 	/* Business Insights */
 	.business-insights {
-		margin-top: 1.5rem;
+		display: grid;
+		gap: 0.75rem;
+		margin-top: 1rem;
 	}
 
 	.business-insights .insight {
-		margin-bottom: 1rem;
-		padding: 1rem;
-	}
-
-	.business-insights .insight h6 {
-		margin: 0 0 0.5rem 0;
-		font-size: 1rem;
-		font-weight: 600;
+		border: 1px solid #e9ecef;
+		border-radius: 4px;
+		padding: 0.75rem;
 	}
 
 	.business-insights .insight p {
@@ -904,10 +1226,32 @@
 		margin-bottom: 0;
 	}
 
-	/* Fix contrast issues for small text in warning/alert contexts */
-	.business-insights .insight.warning small,
-	.callout.warning small {
-		color: rgba(0, 0, 0, 0.7);
+	.insight-action {
+		font-size: 0.875rem;
+	}
+
+	.insight-data-guide {
+		background: #f8f9fa;
+		border-radius: 3px;
+		font-size: 0.875rem;
+		padding: 0.625rem 0.75rem;
+	}
+
+	.insight-data-guide p {
+		margin-bottom: 0.5rem;
+	}
+
+	.insight-data-guide ul {
+		margin-bottom: 0;
+		margin-left: 1.1rem;
+	}
+
+	.insight-data-guide li {
+		font-weight: 400;
+	}
+
+	.insight-data-guide li + li {
+		margin-top: 0.5rem;
 	}
 
 	/* Confidence section styling */
@@ -916,12 +1260,15 @@
 	}
 
 	.confidence-section > summary {
+		border-bottom: 0;
+		color: #343433;
 		cursor: pointer;
-		color: #6c757d;
-		font-weight: 500;
+		font-weight: 600;
+		padding-bottom: 0;
+		text-decoration: none;
 	}
 
-	.confidence-section .callout {
+	.confidence-content {
 		margin-top: 0.5rem;
 	}
 
@@ -930,15 +1277,16 @@
 	}
 
 	.technical-details {
-		margin-top: 1.5rem;
-		border-top: 1px solid #e9ecef;
-		padding-top: 1rem;
+		margin-top: 1rem;
 	}
 
 	.technical-details > summary {
+		border-bottom: 0;
+		color: #6c757d;
 		cursor: pointer;
 		font-size: 0.875rem;
-		color: white;
+		padding-bottom: 0;
+		text-decoration: none;
 	}
 
 	.technical-details-content {
@@ -972,19 +1320,88 @@
 	}
 
 	/* Responsive adjustments */
-	@media screen and (max-width: 40em) {
-		/* Make table responsive by allowing horizontal scroll */
-		.table-scroll {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
+	@media screen and (min-width: 40.001em) and (max-width: 63.99875em) {
+		table.stack {
+			table-layout: fixed;
+			width: 100%;
 		}
 
-		/* Ensure table headers are visible and properly sized */
-		thead th {
-			padding: 0.75rem 0.5rem;
+		table.stack thead {
+			display: table-header-group;
+		}
+
+		table.stack tr {
+			display: table-row;
+		}
+
+		table.stack th,
+		table.stack td {
+			display: table-cell;
+		}
+
+		table.stack th {
 			font-size: 0.875rem;
-			white-space: nowrap;
-			min-width: 80px;
+			line-height: 1.25;
+			padding: 0.75rem 0.625rem;
+			white-space: normal;
+		}
+
+		table.stack th small {
+			font-size: 0.75rem;
+			line-height: 1.25;
+		}
+
+		table.stack td {
+			border-top: inherit;
+			padding: 0.75rem 0.625rem;
+		}
+
+		table.stack th:nth-child(1),
+		table.stack td:nth-child(1) {
+			width: 27%;
+		}
+
+		table.stack th:nth-child(2),
+		table.stack td:nth-child(2),
+		table.stack th:nth-child(3),
+		table.stack td:nth-child(3) {
+			width: 22%;
+		}
+
+		table.stack th:nth-child(4),
+		table.stack td:nth-child(4) {
+			width: 17%;
+		}
+
+		table.stack th:nth-child(5),
+		table.stack td:nth-child(5) {
+			padding-left: 0.5rem;
+			padding-right: 0.5rem;
+			width: 12%;
+		}
+
+		table.stack .variant-input,
+		table.stack .number-input {
+			box-sizing: border-box;
+			max-width: none;
+			min-width: 0;
+			width: 100%;
+		}
+	}
+
+	@media screen and (max-width: 40em) {
+		.mobile-cell-label {
+			color: #343433;
+			display: block;
+			font-size: 0.8125rem;
+			font-weight: 700;
+			line-height: 1.3;
+			margin-bottom: 0.35rem;
+		}
+
+		.conversion-rate-cell,
+		.variant-action-cell {
+			text-align: left;
 		}
 
 		/* Adjust table cell padding for mobile */
@@ -1021,29 +1438,10 @@
 			margin-bottom: 0;
 		}
 
-		/* Adjust stats grid for mobile */
-		.stats-grid {
-			grid-template-columns: 1fr 1fr;
-			gap: 0.5rem;
-		}
-
-		.stat-box {
-			padding: 0.75rem;
-		}
-
-		.stat-value {
-			font-size: 1.25rem;
-		}
-
 		/* Better callout spacing on mobile */
 		.callout {
 			padding: 1rem;
 			margin-bottom: 1rem;
-		}
-
-		.winner-callout {
-			padding: 0.75rem;
-			font-size: 0.875rem;
 		}
 
 		/* Advanced settings improvements */
