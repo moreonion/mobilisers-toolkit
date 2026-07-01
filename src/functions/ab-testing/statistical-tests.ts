@@ -34,22 +34,15 @@ export function twoProportionTest(
 	const p2 = x2 / n2; // variation conversion rate: conversions ÷ visitors
 	const difference = p2 - p1; // how much better (or worse) is the variation?
 
-	// Handle edge case: jStat doesn't handle zero proportions gracefully
-	// Apply continuity correction for edge cases (add small epsilon to avoid division by zero)
-	const epsilon = 0.000001;
-	const p1_adjusted = p1 === 0 ? epsilon : p1 === 1 ? 1 - epsilon : p1;
-	const p2_adjusted = p2 === 0 ? epsilon : p2 === 1 ? 1 - epsilon : p2;
-
-	// Get p-value using jStat's built-in function (this does the hard math for us)
-	// p-value = probability this difference happened by random chance
-	// Lower p-value = more confident the difference is real
-	const pValue = jStat.fn.twoSidedDifferenceOfProportions(p1_adjusted, n1, p2_adjusted, n2);
-
 	// Calculate z-statistic (how many "standard deviations" apart the groups are)
 	// Uses pooled approach: assumes control and variation have same true rate for testing
 	const pooledP = (x1 + x2) / (n1 + n2); // combined conversion rate across both groups
 	const pooledSE = Math.sqrt(pooledP * (1 - pooledP) * (1 / n1 + 1 / n2)); // standard error under null hypothesis
-	const zScore = difference / pooledSE; // standardised difference
+
+	// If everyone has the same degenerate outcome (0% or 100%), there is no variance
+	// and no evidence of a difference. Return a neutral finite result instead of NaN.
+	const zScore = pooledSE === 0 ? 0 : difference / pooledSE; // standardised difference
+	const pValue = pooledSE === 0 ? 1 : 2 * (1 - jStat.normal.cdf(Math.abs(zScore), 0, 1));
 
 	// Is the result "statistically significant"?
 	// If p-value < alpha (significance threshold), then YES the difference is likely real
@@ -176,6 +169,11 @@ export function chiSquareTest(
 		for (let j = 0; j < observed[i].length; j++) {
 			const expectedValue = expected[i][j];
 			const observedValue = observed[i][j];
+
+			if (expectedValue === 0) {
+				rowResiduals.push(0);
+				continue;
+			}
 
 			// Standardised residual: (observed - expected) / √expected
 			// Shows which cells contribute most to the overall chi-square

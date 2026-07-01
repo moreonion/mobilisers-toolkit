@@ -338,6 +338,21 @@ describe("validateStatisticalRequirements", () => {
 		expect(warnings.some((w) => w.includes("fewer than 5 conversions"))).toBe(true);
 	});
 
+	it("warns about low non-conversion counts", () => {
+		const lowFailureTest = {
+			...baseTestData,
+			controlVariation: {
+				...baseTestData.controlVariation,
+				visitors: 100,
+				conversions: 98
+			}
+		};
+
+		const warnings = validateStatisticalRequirements(lowFailureTest);
+		expect(warnings.some((w) => w.includes("only 2 non-conversions"))).toBe(true);
+		expect(warnings.some((w) => w.includes("fewer than 5 non-conversions"))).toBe(true);
+	});
+
 	it("warns about very low conversion rates", () => {
 		const lowRateTest = {
 			...baseTestData,

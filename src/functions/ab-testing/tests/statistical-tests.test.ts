@@ -187,26 +187,11 @@ describe("Two-Proportion Z-Test", () => {
 		expect(result.improvement.relative).toBeCloseTo(20.0, 1); // 20% relative improvement
 		expect(result.isSignificant).toBe(true); // Should be significant with large samples
 
-		// Verify confidence interval for relative improvement (the main bug fix)
-		// With this sample size and effect, CI should be approximately 8% to 33%
-		expect(result.improvement.confidenceInterval.lower).toBeGreaterThan(8); // At least 8%
-		expect(result.improvement.confidenceInterval.lower).toBeLessThan(15); // Less than 15%
-		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(25); // At least 25%
-		expect(result.improvement.confidenceInterval.upper).toBeLessThan(35); // Less than 35%
-
-		// The CI should NOT be "0.0% to 0.0%" anymore
-		expect(Math.abs(result.improvement.confidenceInterval.lower)).toBeGreaterThan(1);
-		expect(Math.abs(result.improvement.confidenceInterval.upper)).toBeGreaterThan(1);
-
-		// Log the results for manual verification
-		console.log("Blue vs Red Button Test Results:");
-		console.log(`Blue Button: ${(result.control.conversionRate * 100).toFixed(2)}%`);
-		console.log(`Red Button: ${(result.variation.conversionRate * 100).toFixed(2)}%`);
-		console.log(`Relative improvement: ${result.improvement.relative?.toFixed(1)}%`);
-		console.log(
-			`95% CI: ${result.improvement.confidenceInterval.lower.toFixed(1)}% to ${result.improvement.confidenceInterval.upper.toFixed(1)}%`
-		);
-		console.log(`P-value: ${result.pValue.toFixed(4)}`);
+		// Reference values independently checked with SciPy's normal distribution functions.
+		expect(result.testStatistic).toBeCloseTo(5.013596929, 6);
+		expect(result.pValue).toBeCloseTo(5.342183636e-7, 10);
+		expect(result.improvement.confidenceInterval.lower).toBeCloseTo(12.186320616, 6);
+		expect(result.improvement.confidenceInterval.upper).toBeCloseTo(27.813679384, 6);
 	});
 
 	/**
@@ -287,6 +272,40 @@ describe("Two-Proportion Z-Test", () => {
 		expect(result.improvement.confidenceInterval.upper).toBeGreaterThan(0);
 		expect(result.improvement.confidenceInterval.upper).toBeLessThan(15); // Not wildly large
 	});
+
+	it("returns a neutral finite result when neither variant has conversions", () => {
+		const result = twoProportionTest({
+			n1: 100,
+			x1: 0,
+			n2: 100,
+			x2: 0,
+			confidenceLevel: 0.95
+		});
+
+		expect(result.control.conversionRate).toBe(0);
+		expect(result.variation.conversionRate).toBe(0);
+		expect(result.testStatistic).toBe(0);
+		expect(result.pValue).toBe(1);
+		expect(result.isSignificant).toBe(false);
+		expect(result.improvement.confidenceInterval).toEqual({ lower: 0, upper: 0 });
+	});
+
+	it("returns a neutral finite result when both variants convert every visitor", () => {
+		const result = twoProportionTest({
+			n1: 100,
+			x1: 100,
+			n2: 100,
+			x2: 100,
+			confidenceLevel: 0.95
+		});
+
+		expect(result.control.conversionRate).toBe(1);
+		expect(result.variation.conversionRate).toBe(1);
+		expect(result.testStatistic).toBe(0);
+		expect(result.pValue).toBe(1);
+		expect(result.isSignificant).toBe(false);
+		expect(result.improvement.relative).toBe(0);
+	});
 });
 
 describe("Chi-Square Test for Multi-Variation", () => {
@@ -356,9 +375,41 @@ describe("Chi-Square Test for Multi-Variation", () => {
 
 		const result = chiSquareTest(variations, 0.95);
 
-		expect(result.testStatistic).toBeGreaterThan(10); // should be large chi-square
-		expect(result.pValue).toBeLessThan(0.001); // highly significant
+		expect(result.testStatistic).toBeCloseTo(76.6423357664, 6);
+		expect(result.pValue).toBeLessThan(0.001);
 		expect(result.isSignificant).toBe(true);
+	});
+
+	it("returns a neutral finite result when every variant has zero conversions", () => {
+		const result = chiSquareTest(
+			[
+				{ name: "A", visitors: 100, conversions: 0 },
+				{ name: "B", visitors: 100, conversions: 0 },
+				{ name: "C", visitors: 100, conversions: 0 }
+			],
+			0.95
+		);
+
+		expect(result.testStatistic).toBe(0);
+		expect(result.pValue).toBe(1);
+		expect(result.isSignificant).toBe(false);
+		expect(result.residuals.flat().every(Number.isFinite)).toBe(true);
+	});
+
+	it("returns a neutral finite result when every variant converts every visitor", () => {
+		const result = chiSquareTest(
+			[
+				{ name: "A", visitors: 100, conversions: 100 },
+				{ name: "B", visitors: 100, conversions: 100 },
+				{ name: "C", visitors: 100, conversions: 100 }
+			],
+			0.95
+		);
+
+		expect(result.testStatistic).toBe(0);
+		expect(result.pValue).toBe(1);
+		expect(result.isSignificant).toBe(false);
+		expect(result.residuals.flat().every(Number.isFinite)).toBe(true);
 	});
 });
 

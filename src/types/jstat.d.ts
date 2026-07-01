@@ -7,6 +7,7 @@ declare module "jstat" {
 			cdf(x: number, df: number): number;
 		};
 		normal: {
+			cdf(x: number, mean: number, std: number): number;
 			inv(p: number, mean: number, std: number): number;
 		};
 	}

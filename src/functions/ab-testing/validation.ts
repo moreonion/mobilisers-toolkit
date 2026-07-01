@@ -198,6 +198,13 @@ export function validateStatisticalRequirements(data: ABTestInput): string[] {
 			);
 		}
 
+		const nonConversions = variation.visitors - variation.conversions;
+		if (nonConversions < 5) {
+			warnings.push(
+				`${label} has only ${nonConversions} non-conversions. With fewer than 5 non-conversions, normal approximation tests can be unreliable.`
+			);
+		}
+
 		// Very low conversion rate with actionable advice
 		const conversionRate = variation.conversions / variation.visitors;
 		if (conversionRate < 0.005) {
