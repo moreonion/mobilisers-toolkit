@@ -101,7 +101,7 @@ test.describe("A/B testing calculator", () => {
 			{ sampleSize: "10000", conversions: "1440" }
 		);
 		await page.getByRole("button", { name: "Calculate" }).click();
-		await page.getByText("How much can you rely on these results?").click();
+		await page.getByText("How strong is the evidence?").click();
 
 		await page.getByLabel("Normal audience size").fill("50000");
 
@@ -118,10 +118,10 @@ test.describe("A/B testing calculator", () => {
 			{ sampleSize: "8000", conversions: "495" }
 		);
 		await page.getByRole("button", { name: "Calculate" }).click();
-		await page.getByText("How much can you rely on these results?").click();
+		await page.getByText("How strong is the evidence?").click();
 
 		await expect(page.getByText("The gap is 0.19 percentage points")).toBeVisible();
-		await expect(page.getByText("260,000 people in each variant")).toBeVisible();
+		await expect(page.getByText("260,000 total people in each variant")).toBeVisible();
 	});
 
 	test("updates the result when confidence level changes", async ({ page }) => {
