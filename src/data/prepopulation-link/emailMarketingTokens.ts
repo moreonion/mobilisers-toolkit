@@ -24,7 +24,7 @@ type Tokens = {
 export const emailMarketingProviders: EmailMarketingProviders[] = [
 	"Mailchimp",
 	"DotDigital",
-	"Other",
+	"Other"
 ];
 
 export type EmailMarketingTokens = {
@@ -34,58 +34,58 @@ export const emailMarketingTokens: EmailMarketingTokens = {
 	title: {
 		Mailchimp: "",
 		DotDigital: "",
-		Other: "",
+		Other: ""
 	},
 	first_name: {
 		Mailchimp: "*|FNAME|*",
 		DotDigital: "@FIRSTNAME@",
-		Other: "",
+		Other: ""
 	},
 	last_name: {
 		Mailchimp: "*|LNAME|*",
 		DotDigital: "@LASTNAME@",
-		Other: "",
+		Other: ""
 	},
 	email: {
 		Mailchimp: "*|EMAIL|*",
 		DotDigital: "@EMAIL@",
-		Other: "",
+		Other: ""
 	},
 	phone_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
-		Other: "",
+		Other: ""
 	},
 	mobile_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
-		Other: "",
+		Other: ""
 	},
 	street_address: {
 		Mailchimp: "",
 		DotDigital: "@ADDRESS@",
-		Other: "",
+		Other: ""
 	},
 	city: {
 		Mailchimp: "",
 		DotDigital: "@CITY@",
-		Other: "",
+		Other: ""
 	},
 	state: {
 		Mailchimp: "",
 		DotDigital: "@STATE@",
-		Other: "",
+		Other: ""
 	},
 	postcode: {
 		Mailchimp: "",
 		DotDigital: "@ZIP@",
-		Other: "",
+		Other: ""
 	},
 	country: {
 		Mailchimp: "",
 		DotDigital: "@COUNTRY@",
-		Other: "",
-	},
+		Other: ""
+	}
 };
 
 export type EmailMarketingTokenDocumentationType = {
@@ -95,14 +95,13 @@ export type EmailMarketingTokenDocumentationType = {
 	};
 };
 
-export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationType =
-	{
-		Mailchimp: {
-			tokenTerminology: "Merge tag",
-			link: "https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/#Personalization",
-		},
-		DotDigital: {
-			tokenTerminology: "Data field",
-			link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page",
-		},
-	};
+export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationType = {
+	Mailchimp: {
+		tokenTerminology: "Merge tag",
+		link: "https://mailchimp.com/help/all-the-merge-tags-cheat-sheet/#Personalization"
+	},
+	DotDigital: {
+		tokenTerminology: "Data field",
+		link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page"
+	}
+};

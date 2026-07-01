@@ -5,47 +5,47 @@ import ShareLinkIsland from "@/islands/share-link.svelte";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const commaListFormatter = new Intl.ListFormat("en", {
-    type: "conjunction", // end with 'and'
-    style: "long", // use 'and', not '&'
+	type: "conjunction", // end with 'and'
+	style: "long" // use 'and', not '&'
 });
 const formattedShareTargetsList = commaListFormatter.format(SHARE_TARGETS);
 ---
 
 <BaseLayout
-    title="Share Link Generator"
-    description=`Create share links for ${formattedShareTargetsList}`
-    socialImageFilename="share-link.png"
+	title="Share Link Generator"
+	description=`Create share links for ${formattedShareTargetsList}`
+	socialImageFilename="share-link.png"
 >
-    <div id="toolDescription">
-        <p>Create share links for {formattedShareTargetsList}</p>
-        <p>
-            Let your supporters quickly share your action with their friends and
-            family on thank you pages and emails
-        </p>
-        <p>
-            Want ready-to-paste share buttons for your <a
-                href="https://www.impact-stack.org/">Impact Stack</a
-            > thank you pages? <a href="/share-link-buttons">Make them here</a>.
-        </p>
-    </div>
+	<div id="toolDescription">
+		<p>Create share links for {formattedShareTargetsList}</p>
+		<p>
+			Let your supporters quickly share your action with their friends and family on thank you pages
+			and emails
+		</p>
+		<p>
+			Want ready-to-paste share buttons for your <a href="https://www.impact-stack.org/"
+				>Impact Stack</a
+			> thank you pages? <a href="/share-link-buttons">Make them here</a>.
+		</p>
+	</div>
 
-    <div id="islandWrapper" class="mt-6">
-        <ShareLinkIsland client:load />
-    </div>
-    <Feedback />
+	<div id="islandWrapper" class="mt-6">
+		<ShareLinkIsland client:load />
+	</div>
+	<Feedback />
 </BaseLayout>
 
 <style>
-    #toolDescription,
-    #islandWrapper {
-        max-width: 36rem;
-    }
+	#toolDescription,
+	#islandWrapper {
+		max-width: 36rem;
+	}
 
-    #toolDescription p {
-        margin-top: 1rem;
-    }
+	#toolDescription p {
+		margin-top: 1rem;
+	}
 
-    div p {
-        margin-bottom: 0;
-    }
+	div p {
+		margin-bottom: 0;
+	}
 </style>

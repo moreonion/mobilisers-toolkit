@@ -1,19 +1,14 @@
 ---
-import cleanHTMLImage from '@/assets/images/clean-html.png';
-import prepopulationLinkImage from '@/assets/images/prepopulation-link.png';
-import shareLinkImage from '@/assets/images/share-link.png';
-import trackingLinkImage from '@/assets/images/tracking-link.png';
+import cleanHTMLImage from "@/assets/images/clean-html.png";
+import prepopulationLinkImage from "@/assets/images/prepopulation-link.png";
+import shareLinkImage from "@/assets/images/share-link.png";
+import trackingLinkImage from "@/assets/images/tracking-link.png";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/Card.astro";
 ---
 
-<BaseLayout
-	title="Mobiliser's Toolkit"
-	socialImageFilename="home_social.png"
->
-	<p>
-		A collection of useful tools for mobilisers – by the makers of Impact Stack
-	</p>
+<BaseLayout title="Mobiliser's Toolkit" socialImageFilename="home_social.png">
+	<p>A collection of useful tools for mobilisers – by the makers of Impact Stack</p>
 
 	<div class="grid-x grid-margin-x grid-margin-y">
 		<div class="cell medium-6">
@@ -37,8 +32,9 @@ import Card from "@/components/Card.astro";
 				imageAlt="A chain link"
 			>
 				<p>
-					Impact Stack lets you prefill your form with data you already have in your email marketing tool. Quickly generate the link to
-					drop in to an email to prefill your form with your supporters' details
+					Impact Stack lets you prefill your form with data you already have in your email marketing
+					tool. Quickly generate the link to drop in to an email to prefill your form with your
+					supporters' details
 				</p>
 			</Card>
 		</div>
@@ -48,10 +44,10 @@ import Card from "@/components/Card.astro";
 				link="share-link"
 				image={shareLinkImage}
 				imageAlt="An arrow point up to the word Link"
-				>
+			>
 				<p>
-					Create share links for your thank you pages and emails to let your
-					supporters quickly share your action with their friends and family
+					Create share links for your thank you pages and emails to let your supporters quickly
+					share your action with their friends and family
 				</p>
 			</Card>
 		</div>
@@ -63,8 +59,7 @@ import Card from "@/components/Card.astro";
 				imageAlt="An archery target"
 			>
 				<p>
-					Create UTM tracking links to help you see how your supporters arrived
-					on your action pages
+					Create UTM tracking links to help you see how your supporters arrived on your action pages
 				</p>
 			</Card>
 		</div>

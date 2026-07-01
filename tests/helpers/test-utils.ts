@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page } from "@playwright/test";
 
 /**
  * Waits for Astro page hydration and Svelte component initialization
@@ -6,19 +6,19 @@ import type { Page } from '@playwright/test';
  * @param componentSelector - Optional specific component selector to wait for
  */
 export async function waitForAstroHydration(page: Page, componentSelector?: string) {
-  // Wait for network to be idle (Astro static generation)
-  await page.waitForLoadState('networkidle');
-  
-  // If specific component selector provided, wait for it
-  if (componentSelector) {
-    await page.locator(componentSelector).waitFor();
-  }
-  
-  // Wait for any potential client-side JavaScript to initialize
-  await page.waitForFunction(() => {
-    // Check if document is ready and any deferred scripts have executed
-    return document.readyState === 'complete';
-  });
+	// Wait for network to be idle (Astro static generation)
+	await page.waitForLoadState("networkidle");
+
+	// If specific component selector provided, wait for it
+	if (componentSelector) {
+		await page.locator(componentSelector).waitFor();
+	}
+
+	// Wait for any potential client-side JavaScript to initialize
+	await page.waitForFunction(() => {
+		// Check if document is ready and any deferred scripts have executed
+		return document.readyState === "complete";
+	});
 }
 
 /**
@@ -26,34 +26,34 @@ export async function waitForAstroHydration(page: Page, componentSelector?: stri
  * Should be called before performing actions that might cause errors
  */
 export function setupConsoleErrorTracking(page: Page): string[] {
-  const errors: string[] = [];
-  
-  page.on('console', msg => {
-    if (msg.type() === 'error') {
-      errors.push(msg.text());
-    }
-  });
-  
-  return errors;
+	const errors: string[] = [];
+
+	page.on("console", (msg) => {
+		if (msg.type() === "error") {
+			errors.push(msg.text());
+		}
+	});
+
+	return errors;
 }
 
 /**
  * Validates that a URL is properly formatted
  */
 export function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+	try {
+		new URL(url);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /**
  * Encodes UTM parameters the same way the application does
  */
 export function encodeUtmParameter(value: string): string {
-  return encodeURIComponent(value);
+	return encodeURIComponent(value);
 }
 
 /**
@@ -61,58 +61,61 @@ export function encodeUtmParameter(value: string): string {
  * Useful when testing reactive stores and bindings
  */
 export async function waitForSvelteUpdate(page: Page, timeout = 2000) {
-  // Wait for the next browser tick and ensure DOM updates are complete
-  await page.waitForFunction(() => {
-    return new Promise(resolve => {
-      // Wait for next microtask to ensure Svelte reactivity has processed
-      queueMicrotask(() => {
-        requestAnimationFrame(() => {
-          resolve(true);
-        });
-      });
-    });
-  }, { timeout });
+	// Wait for the next browser tick and ensure DOM updates are complete
+	await page.waitForFunction(
+		() => {
+			return new Promise((resolve) => {
+				// Wait for next microtask to ensure Svelte reactivity has processed
+				queueMicrotask(() => {
+					requestAnimationFrame(() => {
+						resolve(true);
+					});
+				});
+			});
+		},
+		{ timeout }
+	);
 }
 
 /**
  * Test data generators for common scenarios
  */
 export const testData = {
-  urls: {
-    simple: 'https://act.example.org/petition',
-    withParams: 'https://act.example.org/petition?existing=param&another=value',
-    withHash: 'https://act.example.org/petition#section',
-    withHashQuery: 'https://act.example.org/petition#section?existing=param',
-    noProtocol: 'act.example.org/petition',
-    complex: 'https://act.greenpeace.org/save-the-arctic?utm_source=test&campaign=existing'
-  },
-  
-  utmParams: {
-    basic: {
-      source: 'email',
-      medium: 'newsletter',
-      campaign: 'test-campaign'
-    },
-    complete: {
-      source: 'facebook',
-      medium: 'social',
-      campaign: 'save-arctic-2024',
-      content: 'video-post',
-      term: 'arctic climate change',
-      id: 'camp123'
-    },
-    specialChars: {
-      source: 'social media',
-      campaign: 'climate & environment',
-      content: 'test@example.com',
-      term: '#climateaction'
-    }
-  },
+	urls: {
+		simple: "https://act.example.org/petition",
+		withParams: "https://act.example.org/petition?existing=param&another=value",
+		withHash: "https://act.example.org/petition#section",
+		withHashQuery: "https://act.example.org/petition#section?existing=param",
+		noProtocol: "act.example.org/petition",
+		complex: "https://act.greenpeace.org/save-the-arctic?utm_source=test&campaign=existing"
+	},
 
-  // Clean HTML test data
-  htmlSamples: {
-    // Complex Word document HTML with extensive formatting
-    wordDocument: `<h1 style="margin-top:24px; margin-bottom:5px"><span style="font-size:20pt"><span style="line-height:115%"><span style="font-family:&quot;Aptos Display&quot;,serif"><span style="color:#0f4761"><span style="font-weight:normal">Heading one</span></span></span></span></span></h1>
+	utmParams: {
+		basic: {
+			source: "email",
+			medium: "newsletter",
+			campaign: "test-campaign"
+		},
+		complete: {
+			source: "facebook",
+			medium: "social",
+			campaign: "save-arctic-2024",
+			content: "video-post",
+			term: "arctic climate change",
+			id: "camp123"
+		},
+		specialChars: {
+			source: "social media",
+			campaign: "climate & environment",
+			content: "test@example.com",
+			term: "#climateaction"
+		}
+	},
+
+	// Clean HTML test data
+	htmlSamples: {
+		// Complex Word document HTML with extensive formatting
+		wordDocument: `<h1 style="margin-top:24px; margin-bottom:5px"><span style="font-size:20pt"><span style="line-height:115%"><span style="font-family:&quot;Aptos Display&quot;,serif"><span style="color:#0f4761"><span style="font-weight:normal">Heading one</span></span></span></span></span></h1>
 
 <p style="margin-bottom:11px"><span style="font-size:12pt"><span style="line-height:115%"><span style="font-family:&quot;Aptos&quot;,sans-serif">Proident officia excepteur eiusmod excepteur labore ea nisi consectetur tempor.</span></span></span></p>
 
@@ -158,23 +161,23 @@ export const testData = {
 
 <p style="margin-bottom:11px"><span style="font-size:12pt"><span style="line-height:115%"><span style="font-family:&quot;Aptos&quot;,sans-serif"><a href="https://google.com/" style="color:#467886; text-decoration:underline">Proident officia excepteur eiusmod excepteur labore ea nisi consectetur tempor.</a></span></span></span></p>`,
 
-    // Simple test cases
-    simpleFormatting: '<p>Hello <b>world</b>!</p>',
-    
-    styledSpans: `<p>Text with <span style="font-weight:700">bold</span> and <span style="font-style:italic">italic</span> and <span style="text-decoration:underline">underlined</span> content.</p>`,
-    
-    unwantedTags: `<div class="wrapper"><p>Content with <span style="color: red;">styled text</span></p><div>Another div</div></div>`,
-    
-    googleRedirect: `<p>Check out <a href="https://www.google.com/url?q=https%3A%2F%2Fexample.com%2Fpage&amp;source=gmail">this link</a></p>`,
-    
-    malformed: '<p>Unclosed paragraph<div>Mixed tags<span>No closing tags',
-    
-    scripts: `<p>Safe content</p><script>alert('xss');</script><style>body { background: red; }</style><p>More safe content</p>`,
-    
-    specialChars: '<p>&amp; &lt; &gt; &quot; &#x27; unicode: 你好 🌟</p>',
+		// Simple test cases
+		simpleFormatting: "<p>Hello <b>world</b>!</p>",
 
-    // Google Docs HTML with extreme span nesting and formatting
-    googleDocsDocument: `<h1 style="line-height:1.2; margin-top:27px; margin-bottom:8px"><span style="font-size:36pt; font-variant:normal; white-space:pre-wrap"><span style="font-family:Heebo,sans-serif"><span style="color:#343433"><span style="font-weight:900"><span style="font-style:normal"><span style="text-decoration:none">Heading one</span></span></span></span></span></span></h1>
+		styledSpans: `<p>Text with <span style="font-weight:700">bold</span> and <span style="font-style:italic">italic</span> and <span style="text-decoration:underline">underlined</span> content.</p>`,
+
+		unwantedTags: `<div class="wrapper"><p>Content with <span style="color: red;">styled text</span></p><div>Another div</div></div>`,
+
+		googleRedirect: `<p>Check out <a href="https://www.google.com/url?q=https%3A%2F%2Fexample.com%2Fpage&amp;source=gmail">this link</a></p>`,
+
+		malformed: "<p>Unclosed paragraph<div>Mixed tags<span>No closing tags",
+
+		scripts: `<p>Safe content</p><script>alert('xss');</script><style>body { background: red; }</style><p>More safe content</p>`,
+
+		specialChars: "<p>&amp; &lt; &gt; &quot; &#x27; unicode: 你好 🌟</p>",
+
+		// Google Docs HTML with extreme span nesting and formatting
+		googleDocsDocument: `<h1 style="line-height:1.2; margin-top:27px; margin-bottom:8px"><span style="font-size:36pt; font-variant:normal; white-space:pre-wrap"><span style="font-family:Heebo,sans-serif"><span style="color:#343433"><span style="font-weight:900"><span style="font-style:normal"><span style="text-decoration:none">Heading one</span></span></span></span></span></span></h1>
 
 <p style="line-height:1.38"><span style="font-size:12pt; font-variant:normal; white-space:pre-wrap"><span style="font-family:Heebo,sans-serif"><span style="color:#31302e"><span style="font-weight:300"><span style="font-style:normal"><span style="text-decoration:none">Proident officia excepteur eiusmod excepteur labore ea nisi consectetur tempor.</span></span></span></span></span></span></p>
 
@@ -211,5 +214,5 @@ export const testData = {
     </ol>
     <br>
     &nbsp;<p></p>`
-  }
+	}
 };
