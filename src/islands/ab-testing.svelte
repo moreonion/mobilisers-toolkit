@@ -155,6 +155,8 @@
 			});
 
 			if (validationErrors.length > 0) {
+				results = null;
+				comprehensiveResults = null;
 				return;
 			}
 
@@ -213,6 +215,8 @@
 			}
 		} catch {
 			// Error handling without needing the error object
+			results = null;
+			comprehensiveResults = null;
 			validationErrors = [
 				{
 					field: "calculation",
