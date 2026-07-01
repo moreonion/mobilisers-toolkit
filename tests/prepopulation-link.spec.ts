@@ -30,12 +30,6 @@ test.describe('Prepopulation Link Generator', () => {
     await expect(page.getByText('@FIRSTNAME@')).toBeVisible();
     await expect(page.getByText('@LASTNAME@')).toBeVisible();
     await expect(page.getByText('@EMAIL@')).toBeVisible();
-    
-    // Switch to CleverReach
-    await page.getByRole('button', { name: 'CleverReach' }).first().click();
-    await expect(page.getByText('{firstname}')).toBeVisible();
-    await expect(page.getByText('{lastname}')).toBeVisible();
-    await expect(page.getByText('{email}')).toBeVisible();
   });
 
   test('should handle donation interval dropdown', async ({ page }) => {

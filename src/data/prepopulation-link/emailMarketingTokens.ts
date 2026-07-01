@@ -1,8 +1,4 @@
-export type EmailMarketingProviders =
-	| "Mailchimp"
-	| "DotDigital"
-	| "CleverReach"
-	| "Other";
+export type EmailMarketingProviders = "Mailchimp" | "DotDigital" | "Other";
 
 export type EmailMarketingProviderFields =
 	| "title"
@@ -28,7 +24,6 @@ type Tokens = {
 export const emailMarketingProviders: EmailMarketingProviders[] = [
 	"Mailchimp",
 	"DotDigital",
-	"CleverReach",
 	"Other",
 ];
 
@@ -39,67 +34,56 @@ export const emailMarketingTokens: EmailMarketingTokens = {
 	title: {
 		Mailchimp: "",
 		DotDigital: "",
-		CleverReach: "{TITLE}",
 		Other: "",
 	},
 	first_name: {
 		Mailchimp: "*|FNAME|*",
 		DotDigital: "@FIRSTNAME@",
-		CleverReach: "{FIRSTNAME}",
 		Other: "",
 	},
 	last_name: {
 		Mailchimp: "*|LNAME|*",
 		DotDigital: "@LASTNAME@",
-		CleverReach: "{LASTNAME}",
 		Other: "",
 	},
 	email: {
 		Mailchimp: "*|EMAIL|*",
 		DotDigital: "@EMAIL@",
-		CleverReach: "{EMAIL}",
 		Other: "",
 	},
 	phone_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
-		CleverReach: "",
 		Other: "",
 	},
 	mobile_number: {
 		Mailchimp: "*|PHONE|*",
 		DotDigital: "@PHONE@",
-		CleverReach: "",
 		Other: "",
 	},
 	street_address: {
 		Mailchimp: "",
 		DotDigital: "@ADDRESS@",
-		CleverReach: "{STREET}",
 		Other: "",
 	},
 	city: {
 		Mailchimp: "",
 		DotDigital: "@CITY@",
-		CleverReach: "{CITY}",
 		Other: "",
 	},
 	state: {
 		Mailchimp: "",
 		DotDigital: "@STATE@",
-		CleverReach: "",
 		Other: "",
 	},
 	postcode: {
 		Mailchimp: "",
 		DotDigital: "@ZIP@",
-		CleverReach: "{ZIP}",
 		Other: "",
 	},
 	country: {
 		Mailchimp: "",
 		DotDigital: "@COUNTRY@",
-		CleverReach: "{COUNTRY}",
 		Other: "",
 	},
 };
@@ -120,9 +104,5 @@ export const emailMarketingTokenDocumentation: EmailMarketingTokenDocumentationT
 		DotDigital: {
 			tokenTerminology: "Data field",
 			link: "https://support.dotdigital.com/en/articles/8198875-add-data-field-personalisation-to-your-email-campaign-or-landing-page",
-		},
-		CleverReach: {
-			tokenTerminology: "Variable",
-			link: "https://support.cleverreach.de/hc/en-us/articles/360020682999-Newsletter-Editor-Personalize-Texts",
 		},
 	};
