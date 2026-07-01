@@ -10,12 +10,6 @@ import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 	description="A tool to instantly clean up HTML"
 	socialImageFilename="clean_html_social.png"
 >
-	<ImpactStackPlug>
-		Clean HTML tool brought to you by campaigning and fundraising platform <a
-			href="https://www.impact-stack.org">Impact Stack</a
-		>. Use it to tidy pasted content before adding it to campaign pages and emails.
-	</ImpactStackPlug>
-
 	<div id="toolDescription">
 		<p>
 			Copying and pasting your copy directly from Word or Google Docs often brings unwanted
@@ -23,6 +17,12 @@ import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 			the HTML of your content.
 		</p>
 	</div>
+
+	<ImpactStackPlug>
+		Clean HTML tool brought to you by campaigning and fundraising platform <a
+			href="https://www.impact-stack.org">Impact Stack</a
+		>. Use it to tidy pasted content before adding it to campaign pages and emails.
+	</ImpactStackPlug>
 
 	<div id="islandWrapper" class="mt-6">
 		<CleanHTMLIsland client:load />

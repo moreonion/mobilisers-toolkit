@@ -10,12 +10,6 @@ import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 	description="Prefill your Impact Stack form with your supporters' details"
 	socialImageFilename="prepopulation_social.png"
 >
-	<ImpactStackPlug>
-		Prepopulation link generator brought to you by campaigning and fundraising platform <a
-			href="https://www.impact-stack.org">Impact Stack</a
-		>. Use it to prefill Impact Stack forms with supporter details from your email tool.
-	</ImpactStackPlug>
-
 	<div id="toolDescription">
 		<p>
 			Save your supporters time and boost your conversion rates. Generate a link to <a
@@ -24,6 +18,12 @@ import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 			> with the data you already have about them in your Mailchimp, Dotdigital, or other email tool.
 		</p>
 	</div>
+
+	<ImpactStackPlug>
+		Prepopulation link generator brought to you by campaigning and fundraising platform <a
+			href="https://www.impact-stack.org">Impact Stack</a
+		>. Use it to prefill Impact Stack forms with supporter details from your email tool.
+	</ImpactStackPlug>
 
 	<div id="islandWrapper" class="mt-6">
 		<PrepopulationLinkIsland client:load />
