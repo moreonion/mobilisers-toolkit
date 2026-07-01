@@ -24,8 +24,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(svelte@5.55.9)
       svelte-unstyled-tags:
-        specifier: ^0.0.15
-        version: 0.0.15(svelte@5.55.9)
+        specifier: ^0.1.1
+        version: 0.1.1(svelte@5.55.9)
       typescript:
         specifier: ^5.5.0
         version: 5.8.3
@@ -1629,10 +1629,10 @@ packages:
     peerDependencies:
       svelte: ^3.48.0 || >4.0.0
 
-  svelte-unstyled-tags@0.0.15:
-    resolution: {integrity: sha512-3D+ClUMqTUeFSDnNYf+88+HQMz7XV0DVrrrJ6I+8Ji5hwvEgCk0tHr7b2Bmy/jEBNbw/onhF7E416HITvliJdg==}
+  svelte-unstyled-tags@0.1.1:
+    resolution: {integrity: sha512-mpVQd0uDMXxxSk9b68cbsbORBlLtJLTvhjfOepDOsgC7wodOueb8JSfdK/WMOC0HtPQJSDbBRMcX0Jcmd+rVOw==}
     peerDependencies:
-      svelte: ^4.0.0 || ^5.0.0
+      svelte: ^5.20.0
 
   svelte2tsx@0.7.57:
     resolution: {integrity: sha512-nQo0xEfUpSVjfkxan2UmC6Wl9UZVe9+/pglUiyBNMJ7KDQ9DDooucmXdToBOvzSfgYjj/kMYwf6CTTDz/z048w==}
@@ -3553,7 +3553,7 @@ snapshots:
     dependencies:
       svelte: 5.55.9
 
-  svelte-unstyled-tags@0.0.15(svelte@5.55.9):
+  svelte-unstyled-tags@0.1.1(svelte@5.55.9):
     dependencies:
       svelte: 5.55.9
 

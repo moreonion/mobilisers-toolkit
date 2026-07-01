@@ -1,331 +1,296 @@
 import { test, expect } from '@playwright/test';
+import { ShareLinkPage } from './pages/share-link-page';
 
 test.describe('Share Link Generator', () => {
-  test('should generate basic share links with URL input', async ({ page }) => {
-    await page.goto('/share-link');
-    
-    // Enter test URL
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/climate-petition');
-    
+  let sharePage: ShareLinkPage;
+
+  test.beforeEach(async ({ page }) => {
+    sharePage = new ShareLinkPage(page);
+  });
+
+  test('should generate basic share links with URL input', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/climate-petition');
+
     // Should see the share links section appear
-    await expect(page.getByText('Here are the share links')).toBeVisible();
-    
+    await sharePage.expectShareLinksVisible();
+
     // Check that all expected platforms are present
-    await expect(page.getByRole('region', { name: 'Facebook share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Twitter / X share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'WhatsApp share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Facebook Messenger share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Email share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Blue Sky share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'LinkedIn share options' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Threads share options' })).toBeVisible();
-    
+    await expect(sharePage.facebookSection).toBeVisible();
+    await expect(sharePage.twitterSection).toBeVisible();
+    await expect(sharePage.whatsappSection).toBeVisible();
+    await expect(sharePage.messengerSection).toBeVisible();
+    await expect(sharePage.emailSection).toBeVisible();
+    await expect(sharePage.blueSkySection).toBeVisible();
+    await expect(sharePage.linkedInSection).toBeVisible();
+    await expect(sharePage.threadsSection).toBeVisible();
+
     // Check that basic URLs are generated correctly
-    await expect(page.locator('text=facebook.com/sharer/sharer.php')).toBeVisible();
-    await expect(page.locator('text=x.com/intent/tweet')).toBeVisible();
-    await expect(page.locator('text=wa.me/')).toBeVisible();
-    await expect(page.locator('text=mailto:')).toBeVisible();
+    await expect(sharePage.facebookLink).toBeVisible();
+    await expect(sharePage.twitterLink).toBeVisible();
+    await expect(sharePage.whatsappLink).toBeVisible();
+    await expect(sharePage.emailLink).toBeVisible();
   });
 
   test('should handle Twitter/X text input and character count', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    // Find Twitter section
-    const twitterSection = page.getByRole('region', { name: 'Twitter / X share options' });
-    await expect(twitterSection).toBeVisible();
-    
-    // Find the Twitter textarea
-    const twitterTextarea = page.getByLabel('Twitter template text');
-    await expect(twitterTextarea).toBeVisible();
-    
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.twitterSection).toBeVisible();
+    await expect(sharePage.twitterTextarea).toBeVisible();
+
     // Initially should show 0 characters
     await expect(page.locator('text=0 characters')).toBeVisible();
-    
+
     // Add some text
     const testText = 'Check out this important climate petition!';
-    await twitterTextarea.fill(testText);
-    
+    await sharePage.fillTwitterText(testText);
+
     // Should show character count
     await expect(page.locator(`text=${testText.length} characters`)).toBeVisible();
-    
+
     // Twitter URL should include the text
-    await expect(page.locator('text=text=Check%20out%20this%20important%20climate%20petition!')).toBeVisible();
-    
+    expect(await sharePage.getUrlParam(sharePage.twitterLink, 'text')).toBe(testText);
+
     // Test character limit (280 chars)
     const longText = 'a'.repeat(300);
-    await twitterTextarea.fill(longText);
-    
+    await sharePage.fillTwitterText(longText);
+
     // Should be truncated to 280 characters
-    const actualValue = await twitterTextarea.inputValue();
+    const actualValue = await sharePage.twitterTextarea.inputValue();
     expect(actualValue.length).toBe(280);
   });
 
-  test('should handle Twitter hashtags with Tags component', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const twitterSection = page.getByRole('region', { name: 'Twitter / X share options' });
-    
+  test('should handle Twitter hashtags with Tags component', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
     // Find the hashtags input
-    const hashtagsInput = twitterSection.getByPlaceholder(/hashtags/);
-    await expect(hashtagsInput).toBeVisible();
-    
+    await expect(sharePage.twitterHashtagsInput).toBeVisible();
+
     // Add a hashtag
-    await hashtagsInput.fill('climate');
-    await hashtagsInput.press('Enter');
-    
-    // Should see the hashtag tag appear
-    await expect(twitterSection.locator('.tagWrapper:has-text("climate")')).toBeVisible();
-    
+    await sharePage.addHashtag('climate');
+
+    // Should see a named remove button for the hashtag tag
+    await expect(sharePage.getHashtagRemoveButton('climate')).toBeVisible();
+
     // Add another hashtag
-    await hashtagsInput.fill('environment');
-    await hashtagsInput.press('Enter');
-    
-    await expect(twitterSection.locator('.tagWrapper:has-text("environment")')).toBeVisible();
-    
+    await sharePage.addHashtag('environment');
+
+    await expect(sharePage.getHashtagRemoveButton('environment')).toBeVisible();
+
     // Twitter URL should include hashtags
-    await expect(page.locator('text=hashtags=climate,environment')).toBeVisible();
-    
+    expect(await sharePage.getUrlParam(sharePage.twitterLink, 'hashtags')).toBe('climate,environment');
+
     // Test removing a hashtag
-    await twitterSection.locator('.tagWrapper:has-text("climate") .removeTagButton').click();
-    
+    await sharePage.removeHashtag('climate');
+
     // Should only show environment hashtag in URL
-    await expect(page.locator('text=hashtags=environment')).toBeVisible();
-    await expect(page.locator('text=hashtags=climate,environment')).not.toBeVisible();
+    expect(await sharePage.getUrlParam(sharePage.twitterLink, 'hashtags')).toBe('environment');
   });
 
-  test('should handle WhatsApp text input', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const whatsappSection = page.getByRole('region', { name: 'WhatsApp share options' });
-    await expect(whatsappSection).toBeVisible();
-    
-    // Find WhatsApp textarea
-    const whatsappTextarea = page.getByLabel('WhatsApp template text');
-    await expect(whatsappTextarea).toBeVisible();
-    
+  test('should handle WhatsApp text input', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.whatsappSection).toBeVisible();
+    await expect(sharePage.whatsappTextarea).toBeVisible();
+
     // Add text
     const testText = 'Please sign this important petition!';
-    await whatsappTextarea.fill(testText);
-    
-    // Should see WhatsApp URL with encoded text
-    await expect(whatsappSection.getByText('wa.me')).toBeVisible();
-    await expect(whatsappSection.getByText('Please%20sign%20this%20important%20petition!')).toBeVisible();
-    
-    // Should also include the original URL in the WhatsApp link 
-    await expect(whatsappSection.getByText('%0A%0Ahttps%3A%2F%2Fact.test-org.org%2Fpetition')).toBeVisible();
+    await sharePage.fillWhatsappText(testText);
+
+    // Should see WhatsApp URL with the text and original link included
+    expect(await sharePage.getUrlParam(sharePage.whatsappLink, 'text')).toBe(
+      `${testText}\n\nhttps://act.test-org.org/petition`
+    );
   });
 
-  test('should handle Email subject and body inputs', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const emailSection = page.getByRole('region', { name: 'Email share options' });
-    await expect(emailSection).toBeVisible();
-    
-    // Find email inputs
-    const subjectInput = page.getByLabel('Email subject');
-    const bodyTextarea = page.getByLabel('Email body text');
-    
-    await expect(subjectInput).toBeVisible();
-    await expect(bodyTextarea).toBeVisible();
-    
+  test('should handle Email subject and body inputs', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.emailSection).toBeVisible();
+    await expect(sharePage.emailSubjectInput).toBeVisible();
+    await expect(sharePage.emailBodyTextarea).toBeVisible();
+
     // Add subject
-    await subjectInput.fill('Important Climate Petition');
-    
+    const subject = 'Important Climate Petition';
+    await sharePage.fillEmailSubject(subject);
+
     // Add body text
-    await bodyTextarea.fill('I thought you might be interested in this petition about climate action.');
-    
-    // Should see mailto URL within the Email section
-    await expect(emailSection.getByText('mailto:')).toBeVisible();
-    await expect(emailSection.getByText('subject=Important%20Climate%20Petition')).toBeVisible();
-    
-    // Should see encoded body text in mailto URL
-    await expect(emailSection.getByText('I%20thought%20you%20might%20be%20interested')).toBeVisible();
-    
-    // Should include the original URL in email body
-    await expect(emailSection.getByText('https%3A%2F%2Fact.test-org.org%2Fpetition')).toBeVisible();
+    const bodyText = 'I thought you might be interested in this petition about climate action.';
+    await sharePage.fillEmailBody(bodyText);
+
+    // Should see mailto URL within the Email section, with subject and body (plus the original link) included
+    expect(await sharePage.getUrlParam(sharePage.emailLink, 'subject')).toBe(subject);
+    expect(await sharePage.getUrlParam(sharePage.emailLink, 'body')).toBe(
+      `${bodyText}\n\nhttps://act.test-org.org/petition`
+    );
   });
 
-  test('should handle Blue Sky text input', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const blueSkySection = page.getByRole('region', { name: 'Blue Sky share options' });
-    await expect(blueSkySection).toBeVisible();
-    
-    // Find Blue Sky textarea
-    const blueSkyTextarea = page.getByLabel('Blue Sky template text');
-    await expect(blueSkyTextarea).toBeVisible();
-    
+  test('should handle Blue Sky text input', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.blueSkySection).toBeVisible();
+    await expect(sharePage.blueSkyTextarea).toBeVisible();
+
     // Add text
     const testText = 'Join me in supporting this cause!';
-    await blueSkyTextarea.fill(testText);
-    
-    // Should see Blue Sky URL with encoded text
-    await expect(page.locator('text=bsky.app/intent/compose')).toBeVisible();
-    await expect(page.locator('text=Join%20me%20in%20supporting%20this%20cause!')).toBeVisible();
+    await sharePage.fillBlueSkyText(testText);
+
+    // Should see Blue Sky URL with the text and link included
+    expect(await sharePage.getUrlParam(sharePage.blueSkyLink, 'text')).toBe(
+      `${testText}\n\nhttps://act.test-org.org/petition`
+    );
   });
 
   test('should handle LinkedIn text input', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const linkedInSection = page.getByRole('region', { name: 'LinkedIn share options' });
-    await expect(linkedInSection).toBeVisible();
-    
-    // Find LinkedIn textarea
-    const linkedInTextarea = page.getByLabel('LinkedIn template text');
-    await expect(linkedInTextarea).toBeVisible();
-    
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.linkedInSection).toBeVisible();
+    await expect(sharePage.linkedInTextarea).toBeVisible();
+
     // Add text
     const testText = 'Professional networks can drive change too!';
-    await linkedInTextarea.fill(testText);
-    
-    // Should see LinkedIn URL with encoded text
-    await expect(page.locator('text=linkedin.com/feed')).toBeVisible();
-    await expect(page.locator('text=Professional%20networks%20can%20drive%20change%20too!')).toBeVisible();
-    
+    await sharePage.fillLinkedInText(testText);
+
+    // Should see LinkedIn URL with the text and link included
+    expect(await sharePage.getUrlParam(sharePage.linkedInLink, 'text')).toBe(
+      `${testText}\n\nhttps://act.test-org.org/petition`
+    );
+
     // Should show LinkedIn warning message
     await expect(page.locator('text=LinkedIn appears to change the format')).toBeVisible();
   });
 
-  test('should handle Threads text input', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test-org.org/petition');
-    
-    const threadsSection = page.getByRole('region', { name: 'Threads share options' });
-    await expect(threadsSection).toBeVisible();
-    
-    // Find Threads input
-    const threadsInput = page.getByLabel('Threads template text');
-    await expect(threadsInput).toBeVisible();
-    
+  test('should handle Threads text input', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test-org.org/petition');
+
+    await expect(sharePage.threadsSection).toBeVisible();
+    await expect(sharePage.threadsInput).toBeVisible();
+
     // Add text
     const testText = 'Check this out on Threads!';
-    await threadsInput.fill(testText);
-    
-    // Should see Threads URL
-    await expect(page.locator('text=threads.net/intent/post')).toBeVisible();
-    await expect(page.locator('text=Check%20this%20out%20on%20Threads!')).toBeVisible();
+    await sharePage.fillThreadsText(testText);
+
+    // Should see Threads URL with the text and link as separate params
+    expect(await sharePage.getUrlParam(sharePage.threadsLink, 'text')).toBe(testText);
+    expect(await sharePage.getUrlParam(sharePage.threadsLink, 'url')).toBe('https://act.test-org.org/petition');
   });
 
-  test('should handle URL parameter pre-filling', async ({ page }) => {
+  test('should handle URL parameter pre-filling', async () => {
     // Test with URL parameter
     const testUrl = 'https://act.example.org/campaign';
-    await page.goto(`/share-link?url=${encodeURIComponent(testUrl)}`);
-    
+    await sharePage.gotoWithUrl(testUrl);
+
     // Input should be pre-filled
-    const actionPageInput = page.getByLabel('Enter the link you want to be shareable');
-    await expect(actionPageInput).toHaveValue(testUrl);
-    
+    await expect(sharePage.linkToShareInput).toHaveValue(testUrl);
+
     // Share links should be generated automatically
-    await expect(page.getByText('Here are the share links')).toBeVisible();
+    await sharePage.expectShareLinksVisible();
     // The URL appears in all share links, so just verify one specific platform
-    await expect(page.getByRole('region', { name: 'Facebook share options' }).getByText('https%3A%2F%2Fact.example.org%2Fcampaign')).toBeVisible();
+    expect(await sharePage.getUrlParam(sharePage.facebookLink, 'u')).toBe(testUrl);
   });
 
-  test('should validate URL input', async ({ page }) => {
-    await page.goto('/share-link');
-    
-    const actionPageInput = page.getByLabel('Enter the link you want to be shareable');
-    
+  test('should validate URL input', async () => {
+    await sharePage.goto();
+
     // Start with valid URL to show share links
-    await actionPageInput.fill('https://act.example.org/petition');
-    await expect(page.getByText('Here are the share links')).toBeVisible();
-    
+    await sharePage.fillLinkToShare('https://act.example.org/petition');
+    await sharePage.expectShareLinksVisible();
+
     // Invalid URL should still show share links (component shows links for any non-empty input)
-    await actionPageInput.fill('not-a-valid-url');
-    await expect(page.getByText('Here are the share links')).toBeVisible();
-    
+    await sharePage.fillLinkToShare('not-a-valid-url');
+    await sharePage.expectShareLinksVisible();
+
     // Valid URL should show share links
-    await actionPageInput.fill('https://act.example.org/petition');
-    await expect(page.getByText('Here are the share links')).toBeVisible();
-    
+    await sharePage.fillLinkToShare('https://act.example.org/petition');
+    await sharePage.expectShareLinksVisible();
+
     // Clear input should hide share links
-    await actionPageInput.fill('');
-    await expect(page.getByText('Here are the share links')).not.toBeVisible();
+    await sharePage.fillLinkToShare('');
+    await sharePage.expectShareLinksHidden();
   });
 
-  test('should handle complex URLs with existing parameters', async ({ page }) => {
-    await page.goto('/share-link');
-    
+  test('should handle complex URLs with existing parameters', async () => {
+    await sharePage.goto();
+
     // URL with existing query parameters
     const complexUrl = 'https://act.test.org/petition?utm_source=email&utm_campaign=climate';
-    await page.getByLabel('Enter the link you want to be shareable').fill(complexUrl);
-    
+    await sharePage.fillLinkToShare(complexUrl);
+
     // Should preserve the full URL in share links
-    await expect(page.getByText('Here are the share links')).toBeVisible();
+    await sharePage.expectShareLinksVisible();
     // Check that URL parameters are preserved by looking for the Facebook share URL specifically
-    await expect(page.getByText('https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fact.test.org%2Fpetition%3Futm_source%3Demail%26utm_campaign%3Dclimate')).toBeVisible();
+    expect(await sharePage.getUrlParam(sharePage.facebookLink, 'u')).toBe(complexUrl);
   });
 
-  test('should handle URLs without protocol', async ({ page }) => {
-    await page.goto('/share-link');
-    
+  test('should handle URLs without protocol', async () => {
+    await sharePage.goto();
+
     // URL without https://
-    await page.getByLabel('Enter the link you want to be shareable').fill('act.example.org/petition');
-    
+    await sharePage.fillLinkToShare('act.example.org/petition');
+
     // Should still generate share links (auto-prefixed with https://)
-    await expect(page.getByText('Here are the share links')).toBeVisible();
+    await sharePage.expectShareLinksVisible();
     // Check that https:// was auto-prefixed in a specific platform
-    await expect(page.getByRole('region', { name: 'Facebook share options' }).getByText('https%3A%2F%2Fact.example.org%2Fpetition')).toBeVisible();
+    expect(await sharePage.getUrlParam(sharePage.facebookLink, 'u')).toBe('https://act.example.org/petition');
   });
 
-  test('should maintain input values when switching between platforms', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test.org/petition');
-    
+  test('should maintain input values when switching between platforms', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test.org/petition');
+
     // Add Twitter text
-    const twitterTextarea = page.getByLabel('Twitter template text');
-    await twitterTextarea.fill('Twitter message');
-    
+    await sharePage.fillTwitterText('Twitter message');
+
     // Add WhatsApp text
-    const whatsappTextarea = page.getByLabel('WhatsApp template text');
-    await whatsappTextarea.fill('WhatsApp message');
-    
+    await sharePage.fillWhatsappText('WhatsApp message');
+
     // Add Email subject and body
-    const emailSubject = page.getByLabel('Email subject');
-    const emailBody = page.getByLabel('Email body text');
-    await emailSubject.fill('Email subject');
-    await emailBody.fill('Email body text');
-    
+    await sharePage.fillEmailSubject('Email subject');
+    await sharePage.fillEmailBody('Email body text');
+
     // Check that all values are preserved in their respective URLs
-    await expect(page.locator('text=Twitter%20message')).toBeVisible();
-    await expect(page.locator('text=WhatsApp%20message')).toBeVisible();
-    await expect(page.locator('text=Email%20subject')).toBeVisible();
-    await expect(page.locator('text=Email%20body%20text')).toBeVisible();
-    
+    expect(await sharePage.getUrlParam(sharePage.twitterLink, 'text')).toBe('Twitter message');
+    expect(await sharePage.getUrlParam(sharePage.whatsappLink, 'text')).toBe(
+      'WhatsApp message\n\nhttps://act.test.org/petition'
+    );
+    expect(await sharePage.getUrlParam(sharePage.emailLink, 'subject')).toBe('Email subject');
+    expect(await sharePage.getUrlParam(sharePage.emailLink, 'body')).toBe(
+      'Email body text\n\nhttps://act.test.org/petition'
+    );
+
     // Change main URL and verify all custom text is maintained
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://different-url.org/new-petition');
-    
+    await sharePage.fillLinkToShare('https://different-url.org/new-petition');
+
     // All platform-specific text should still be there
-    await expect(twitterTextarea).toHaveValue('Twitter message');
-    await expect(whatsappTextarea).toHaveValue('WhatsApp message');
-    await expect(emailSubject).toHaveValue('Email subject');
-    await expect(emailBody).toHaveValue('Email body text');
+    await expect(sharePage.twitterTextarea).toHaveValue('Twitter message');
+    await expect(sharePage.whatsappTextarea).toHaveValue('WhatsApp message');
+    await expect(sharePage.emailSubjectInput).toHaveValue('Email subject');
+    await expect(sharePage.emailBodyTextarea).toHaveValue('Email body text');
   });
 
-  test('should handle special characters in text inputs', async ({ page }) => {
-    await page.goto('/share-link');
-    await page.getByLabel('Enter the link you want to be shareable').fill('https://act.test.org/petition');
-    
+  test('should handle special characters in text inputs', async () => {
+    await sharePage.goto();
+    await sharePage.fillLinkToShare('https://act.test.org/petition');
+
     // Test special characters in Twitter
-    const twitterTextarea = page.getByLabel('Twitter template text');
     const specialText = 'Sign this petition! #ClimateAction @everyone 🌍';
-    await twitterTextarea.fill(specialText);
-    
-    // Should be properly encoded in the URL
-    await expect(page.locator('text=Sign%20this%20petition!')).toBeVisible();
-    await expect(page.locator('text=%40everyone')).toBeVisible(); // @ should be encoded
-    
+    await sharePage.fillTwitterText(specialText);
+
+    expect(await sharePage.getUrlParam(sharePage.twitterLink, 'text')).toBe(specialText);
+
     // Test emoji and special chars in WhatsApp
-    const whatsappTextarea = page.getByLabel('WhatsApp template text');
-    await whatsappTextarea.fill('🌍 Save our planet! 💚');
-    
-    // Should handle emojis in encoding
-    await expect(page.locator('text=Save%20our%20planet!')).toBeVisible();
+    const whatsappText = '🌍 Save our planet! 💚';
+    await sharePage.fillWhatsappText(whatsappText);
+
+    expect(await sharePage.getUrlParam(sharePage.whatsappLink, 'text')).toBe(
+      `${whatsappText}\n\nhttps://act.test.org/petition`
+    );
   });
 });
