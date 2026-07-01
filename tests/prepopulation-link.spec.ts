@@ -1,244 +1,225 @@
 import { test, expect } from '@playwright/test';
+import { PrepopulationLinkPage } from './pages/prepopulation-link-page';
 
 test.describe('Prepopulation Link Generator', () => {
+  let prepopPage: PrepopulationLinkPage;
+
+  test.beforeEach(async ({ page }) => {
+    prepopPage = new PrepopulationLinkPage(page);
+  });
+
   test('should generate basic prepopulation URL with default fields', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    
-    // Enter test URL
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/climate-petition');
-    
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/climate-petition');
+
     // Should see the generated link immediately with default checked fields
     await expect(page.locator('text=https://act.test-org.org/climate-petition#p:')).toBeVisible();
-    
+
     // Should contain the default fields (first_name, last_name, email are checked by default)
-    await expect(page.locator('text=first_name=')).toBeVisible();
-    await expect(page.locator('text=last_name=')).toBeVisible();
-    await expect(page.locator('text=email=')).toBeVisible();
+    await prepopPage.expectGeneratedLinkContains('first_name=');
+    await prepopPage.expectGeneratedLinkContains('last_name=');
+    await prepopPage.expectGeneratedLinkContains('email=');
   });
 
-  test('should handle email provider selection', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/petition');
-    
+  test('should handle email provider selection', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/petition');
+
     // Test Mailchimp (default)
-    await expect(page.locator('text=*|FNAME|*')).toBeVisible();
-    await expect(page.locator('text=*|LNAME|*')).toBeVisible();
-    await expect(page.locator('text=*|EMAIL|*')).toBeVisible();
-    
+    await prepopPage.expectGeneratedLinkContains('*|FNAME|*');
+    await prepopPage.expectGeneratedLinkContains('*|LNAME|*');
+    await prepopPage.expectGeneratedLinkContains('*|EMAIL|*');
+
     // Switch to DotDigital
-    await page.getByRole('button', { name: 'DotDigital' }).first().click();
-    await expect(page.getByText('@FIRSTNAME@')).toBeVisible();
-    await expect(page.getByText('@LASTNAME@')).toBeVisible();
-    await expect(page.getByText('@EMAIL@')).toBeVisible();
+    await prepopPage.switchProvider('DotDigital');
+    await prepopPage.expectGeneratedLinkContains('@FIRSTNAME@');
+    await prepopPage.expectGeneratedLinkContains('@LASTNAME@');
+    await prepopPage.expectGeneratedLinkContains('@EMAIL@');
   });
 
-  test('should handle donation interval dropdown', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/donate');
-    
+  test('should handle donation interval dropdown', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/donate');
+
     // Click customise fields
-    await page.getByRole('button', { name: 'Customise prepopulation fields' }).click();
-    
-    // Find donation_interval row and select dropdown
-    const donationIntervalRow = page.locator('tr:has(td:text("donation_interval"))');
-    const checkbox = donationIntervalRow.locator('input[type="checkbox"]');
-    const select = donationIntervalRow.locator('select');
-    
+    await prepopPage.openCustomiseFields();
+
+    // Find donation interval checkbox and select dropdown
+    const checkbox = prepopPage.fieldPrefillToggle('Donation Interval');
+
     // Initially unchecked
     await expect(checkbox).not.toBeChecked();
-    
+
     // Select "Monthly"
-    await select.selectOption('m');
+    await prepopPage.selectFieldToken('Donation Interval', 'm');
     await expect(checkbox).toBeChecked();
-    await expect(page.locator('text=donation_interval=m').first()).toBeVisible();
-    
+    await prepopPage.expectGeneratedLinkContains('donation_interval=m');
+
     // Select "Annual"
-    await select.selectOption('y');
-    await expect(page.locator('text=donation_interval=y').first()).toBeVisible();
-    
+    await prepopPage.selectFieldToken('Donation Interval', 'y');
+    await prepopPage.expectGeneratedLinkContains('donation_interval=y');
+
     // Select "Single"
-    await select.selectOption('1');
-    await expect(page.locator('text=donation_interval=1').first()).toBeVisible();
+    await prepopPage.selectFieldToken('Donation Interval', '1');
+    await prepopPage.expectGeneratedLinkContains('donation_interval=1');
   });
 
-  test('should handle donation amount number validation', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/donate');
-    
-    await page.getByRole('button', { name: 'Customise prepopulation fields' }).click();
-    
-    const donationAmountRow = page.locator('tr:has(td:text("donation_amount"))');
-    const checkbox = donationAmountRow.locator('input[type="checkbox"]');
-    const numberInput = donationAmountRow.locator('input[type="number"]');
-    
+  test('should handle donation amount number validation', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/donate');
+
+    await prepopPage.openCustomiseFields();
+
+    const checkbox = prepopPage.fieldPrefillToggle('Donation Amount');
+
     // Test valid positive numbers
-    await numberInput.fill('25');
-    await numberInput.dispatchEvent('change');
+    await prepopPage.fillFieldToken('Donation Amount', '25');
     await expect(checkbox).toBeChecked();
-    await expect(page.locator('text=donation_amount=25').first()).toBeVisible();
-    
-    await numberInput.fill('100');
-    await numberInput.dispatchEvent('change');
-    await expect(page.locator('text=donation_amount=100').first()).toBeVisible();
-    
+    await prepopPage.expectGeneratedLinkContains('donation_amount=25');
+
+    await prepopPage.fillFieldToken('Donation Amount', '100');
+    await prepopPage.expectGeneratedLinkContains('donation_amount=100');
+
     // Test clearing field unchecks checkbox
-    await numberInput.fill('');
-    await numberInput.dispatchEvent('change');
+    await prepopPage.fillFieldToken('Donation Amount', '');
     await expect(checkbox).not.toBeChecked();
-    
+
     // Test that negative numbers don't work (should be cleared by oninput)
-    await numberInput.fill('-5');
+    await prepopPage.fieldToken('Donation Amount').fill('-5');
     // Should be cleared and checkbox unchecked
     await expect(checkbox).not.toBeChecked();
   });
 
-  test('should handle custom fields', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/petition');
-    
-    await page.getByRole('button', { name: 'Customise prepopulation fields' }).click();
-    
+  test('should handle custom fields', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/petition');
+
+    await prepopPage.openCustomiseFields();
+
     // Add a custom field
-    await page.getByRole('button', { name: 'Add a field' }).click();
-    
+    await prepopPage.addCustomField();
+
     // Find the custom field row
-    const customFieldRow = page.locator('tr').last();
-    const formKeyInput = customFieldRow.locator('input[placeholder="Impact Stack form key"]');
-    const tokenInput = customFieldRow.locator('input[placeholder*="Merge"]');
-    const checkbox = customFieldRow.locator('input[type="checkbox"]');
-    
+    const checkbox = prepopPage.fieldPrefillToggle('Custom field');
+
     // Initially should be checked (new fields start checked)
     await expect(checkbox).toBeChecked();
-    
+
     // Add form key and token
-    await formKeyInput.fill('organization');
-    await formKeyInput.dispatchEvent('change');
-    await tokenInput.fill('*|ORG|*');
-    await tokenInput.dispatchEvent('change');
-    
+    await prepopPage.fillCustomFieldFormKey('organization');
+    await prepopPage.fillFieldToken('Custom field', '*|ORG|*');
+
     // Should appear in URL
-    await expect(page.locator('text=organization=*|ORG|*').first()).toBeVisible();
+    await prepopPage.expectGeneratedLinkContains('organization=*|ORG|*');
   });
 
-  test('should handle field toggling with checkboxes', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/petition');
-    
-    await page.getByRole('button', { name: 'Customise prepopulation fields' }).click();
-    
+  test('should handle field toggling with checkboxes', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/petition');
+
+    await prepopPage.openCustomiseFields();
+
     // Find postcode field (should be unchecked by default)
-    const postcodeRow = page.locator('tr:has(td:text("postcode"))');
-    const postcodeCheckbox = postcodeRow.locator('input[type="checkbox"]');
-    const postcodeTokenInput = postcodeRow.locator('input[type="text"]');
-    
+    const postcodeCheckbox = prepopPage.fieldPrefillToggle('Postcode');
+
     // Initially, postcode field should not be in URL (unchecked and no token)
     await expect(postcodeCheckbox).not.toBeChecked();
-    
+
     // Enter a token value - should auto-check
-    await postcodeTokenInput.fill('custom_postcode_token');
-    await postcodeTokenInput.dispatchEvent('change');
+    await prepopPage.fillFieldToken('Postcode', 'custom_postcode_token');
     await expect(postcodeCheckbox).toBeChecked();
-    await expect(page.locator('text=postcode=custom_postcode_token').first()).toBeVisible();
-    
+    await prepopPage.expectGeneratedLinkContains('postcode=custom_postcode_token');
+
     // Clear the token - should auto-uncheck
-    await postcodeTokenInput.fill('');
-    await postcodeTokenInput.dispatchEvent('change');
+    await prepopPage.fillFieldToken('Postcode', '');
     await expect(postcodeCheckbox).not.toBeChecked();
   });
 
-  test('should have tracking link button that navigates to tracking page', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/petition');
-    
+  test('should have tracking link button that navigates to tracking page', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/petition');
+
     // Should have "Add tracking" button that links to tracking-link page
-    const trackingButton = page.getByRole('link', { name: 'Add tracking' });
-    await expect(trackingButton).toBeVisible();
-    
+    await expect(prepopPage.trackingLinkButton).toBeVisible();
+
     // Button should have correct href to tracking-link page with encoded URL
-    const href = await trackingButton.getAttribute('href');
+    const href = await prepopPage.trackingLinkButton.getAttribute('href');
     expect(href).toContain('/tracking-link?url=');
     expect(href).toContain(encodeURIComponent('https://act.test-org.org/petition#p:'));
   });
 
   test('should handle "Other" email provider', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test-org.org/petition');
-    
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test-org.org/petition');
+
     // Switch to "Other" provider
-    await page.getByRole('button', { name: 'Other' }).click();
-    
+    await prepopPage.switchProvider('Other');
+
     // Should automatically show customise fields
     await expect(page.locator('table')).toBeVisible();
     await expect(page.locator('text=Add the relevant token for each form field')).toBeVisible();
-    
+
     // Tokens should be empty
-    const emailRow = page.locator('tr:has(td:text("email"))');
-    const emailTokenInput = emailRow.locator('input[type="text"]');
+    const emailTokenInput = prepopPage.fieldToken('Email');
     await expect(emailTokenInput).toHaveValue('');
-    
+
     // Add custom tokens
-    await emailTokenInput.fill('{email}');
-    await emailTokenInput.dispatchEvent('change');
-    await expect(page.locator('text=email={email}').first()).toBeVisible();
+    await prepopPage.fillFieldToken('Email', '{email}');
+    await prepopPage.expectGeneratedLinkContains('email={email}');
   });
 
-  test('should validate URL input', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    
-    const actionPageInput = page.getByLabel('Enter your Impact Stack action URL');
-    
+  test('should validate URL input', async () => {
+    await prepopPage.goto();
+
     // Invalid URL should not show link generator
-    await actionPageInput.fill('not-a-url');
-    await expect(page.getByText('#p:', { exact: false })).not.toBeVisible();
-    
+    await prepopPage.fillActionPageUrl('not-a-url');
+    await prepopPage.expectGeneratedLinkNotContains('#p:');
+
     // Valid URL should show link generator
-    await actionPageInput.fill('https://act.example.org/test');
-    await expect(page.getByText('https://act.example.org/test#p:', { exact: false })).toBeVisible();
+    await prepopPage.fillActionPageUrl('https://act.example.org/test');
+    await prepopPage.expectGeneratedLinkContains('https://act.example.org/test#p:');
   });
 
-  test('should handle complex URL with existing parameters', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    
+  test('should handle complex URL with existing parameters', async () => {
+    await prepopPage.goto();
+
     // URL with existing query parameters
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test.org/petition?utm_source=email&utm_campaign=climate');
-    
+    await prepopPage.fillActionPageUrl('https://act.test.org/petition?utm_source=email&utm_campaign=climate');
+
     // Should preserve existing parameters and add fragment
-    await expect(page.locator('text=utm_source=email')).toBeVisible();
-    await expect(page.locator('text=first_name=*|FNAME|*')).toBeVisible();
+    await prepopPage.expectGeneratedLinkContains('utm_source=email');
+    await prepopPage.expectGeneratedLinkContains('first_name=*|FNAME|*');
   });
 
-  test('should update provider tokens when switching providers', async ({ page }) => {
-    await page.goto('/prepopulation-link');
-    await page.getByLabel('Enter your Impact Stack action URL').fill('https://act.test.org/petition');
-    
-    await page.getByRole('button', { name: 'Customise prepopulation fields' }).click();
-    
+  test('should update provider tokens when switching providers', async () => {
+    await prepopPage.goto();
+    await prepopPage.fillActionPageUrl('https://act.test.org/petition');
+
+    await prepopPage.openCustomiseFields();
+
     // Test provider switching updates tokens correctly
-    await expect(page.getByText('first_name=*|FNAME|*', { exact: false }).first()).toBeVisible(); // Mailchimp default
-    
+    await prepopPage.expectGeneratedLinkContains('first_name=*|FNAME|*'); // Mailchimp default
+
     // Switch to DotDigital
-    await page.getByRole('button', { name: 'DotDigital' }).first().click();
-    await expect(page.getByText('first_name=@FIRSTNAME@', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('last_name=@LASTNAME@', { exact: false }).first()).toBeVisible();
-    
+    await prepopPage.switchProvider('DotDigital');
+    await prepopPage.expectGeneratedLinkContains('first_name=@FIRSTNAME@');
+    await prepopPage.expectGeneratedLinkContains('last_name=@LASTNAME@');
+
     // Switch back to Mailchimp
-    await page.getByRole('button', { name: 'Mailchimp' }).first().click();
-    await expect(page.getByText('first_name=*|FNAME|*', { exact: false }).first()).toBeVisible();
-    await expect(page.getByText('last_name=*|LNAME|*', { exact: false }).first()).toBeVisible();
-    
+    await prepopPage.switchProvider('Mailchimp');
+    await prepopPage.expectGeneratedLinkContains('first_name=*|FNAME|*');
+    await prepopPage.expectGeneratedLinkContains('last_name=*|LNAME|*');
+
     // Test that custom field values are preserved when switching providers
-    const donationRow = page.locator('tr:has(td:text("donation_amount"))');
-    const donationInput = donationRow.locator('input[type="number"]');
-    const donationCheckbox = donationRow.locator('input[type="checkbox"]');
-    
-    await donationInput.fill('50');
-    await donationInput.dispatchEvent('change');
+    const donationCheckbox = prepopPage.fieldPrefillToggle('Donation Amount');
+
+    await prepopPage.fillFieldToken('Donation Amount', '50');
     await expect(donationCheckbox).toBeChecked();
-    await expect(page.locator('text=donation_amount=50').first()).toBeVisible();
-    
+    await prepopPage.expectGeneratedLinkContains('donation_amount=50');
+
     // Switch providers - custom values should be preserved
-    await page.getByRole('button', { name: 'DotDigital' }).first().click();
+    await prepopPage.switchProvider('DotDigital');
     await expect(donationCheckbox).toBeChecked(); // Value is preserved
-    await expect(page.getByText('donation_amount=50', { exact: false }).first()).toBeVisible();
+    await prepopPage.expectGeneratedLinkContains('donation_amount=50');
   });
 });

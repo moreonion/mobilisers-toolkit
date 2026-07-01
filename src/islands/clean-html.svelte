@@ -23,7 +23,7 @@
 </script>
 
 {#if processedHTML === ""}
-  <section>
+  <section aria-label="Enter HTML to clean">
     <div id="dirtyHTMLForm">
       <div>
         <label for="rawHTML"> Enter the HTML you want to clean</label>
@@ -51,7 +51,7 @@
 {/if}
 
 {#if processedHTML !== ""}
-  <section in:fade={{ delay: 100 }}>
+  <section in:fade={{ delay: 100 }} aria-label="Clean HTML output">
     <div>
       <label for="cleanHTML"> Here's the clean HTML </label>
       <textarea class="h-full" disabled id="cleanHTML">{processedHTML}</textarea
@@ -109,7 +109,7 @@
 
       <div class="mt-6">
         <label for="dirtyHTML"> Here's the original HTML </label>
-        <div id="dirtyHTML">
+        <div id="dirtyHTML" role="group" aria-label="Original HTML">
           {unprocessedHTML}
         </div>
       </div>

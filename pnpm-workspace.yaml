@@ -4,3 +4,4 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - astro@7.0.4
   - js-beautify@2.0.3
+  - svelte-unstyled-tags@0.1.1

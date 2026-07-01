@@ -28,7 +28,7 @@ export class CleanHtmlPage {
   }
 
   get cleanHtmlTextarea() {
-    return this.page.locator('#cleanHTML');
+    return this.page.getByLabel("Here's the clean HTML");
   }
 
   get copyButton() {
@@ -48,17 +48,16 @@ export class CleanHtmlPage {
   }
 
   get originalHtmlContent() {
-    return this.page.locator('#dirtyHTML');
+    return this.page.getByRole('group', { name: 'Original HTML' });
   }
 
   // Section containers to avoid strict mode violations
   get inputSection() {
-    return this.page.locator('#dirtyHTMLForm');
+    return this.page.getByRole('region', { name: 'Enter HTML to clean' });
   }
 
   get outputSection() {
-    // Target the section that contains the clean HTML output
-    return this.page.locator('section').filter({ has: this.page.locator('#cleanHTML') });
+    return this.page.getByRole('region', { name: 'Clean HTML output' });
   }
 
   // Actions
@@ -97,9 +96,11 @@ export class CleanHtmlPage {
   async expandOriginalHtmlDetails() {
     // Click the summary to expand details
     await this.originalHtmlDetails.click();
-    
-    // Wait a moment for any animation
-    await this.page.waitForTimeout(100);
+
+    // Wait for the details element to actually open (native <details> hides
+    // its children until the `open` attribute is set)
+    await expect(this.detailsElement).toHaveAttribute('open', '');
+    await this.originalHtmlContent.waitFor({ state: 'visible' });
   }
 
   // Helper method to process HTML end-to-end
@@ -171,16 +172,17 @@ export class CleanHtmlPage {
     return await this.rawHtmlTextarea.inputValue();
   }
 
-  // Debug helper
-  async debugCurrentState() {
-    console.log('=== Clean HTML Page Debug ===');
-    console.log('Input section visible:', await this.inputSection.isVisible().catch(() => 'error'));
-    console.log('Output section visible:', await this.outputSection.isVisible().catch(() => 'error'));
-    console.log('Clean textarea visible:', await this.cleanHtmlTextarea.isVisible().catch(() => 'error'));
-    console.log('Raw input value:', await this.getRawHtmlInput().catch(() => 'error'));
-    console.log('Clean output value:', await this.getCleanHtmlOutput().catch(() => 'error'));
-    console.log('================================');
-  }
+  // Debug helper — kept for local debugging, not live public API.
+  // Uncomment and call from a test when you need to inspect page state.
+  // async debugCurrentState() {
+  //   console.log('=== Clean HTML Page Debug ===');
+  //   console.log('Input section visible:', await this.inputSection.isVisible().catch(() => 'error'));
+  //   console.log('Output section visible:', await this.outputSection.isVisible().catch(() => 'error'));
+  //   console.log('Clean textarea visible:', await this.cleanHtmlTextarea.isVisible().catch(() => 'error'));
+  //   console.log('Raw input value:', await this.getRawHtmlInput().catch(() => 'error'));
+  //   console.log('Clean output value:', await this.getCleanHtmlOutput().catch(() => 'error'));
+  //   console.log('================================');
+  // }
 
   async expectInputFocused() {
     await expect(this.rawHtmlTextarea).toBeFocused();
