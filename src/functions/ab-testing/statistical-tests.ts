@@ -249,7 +249,7 @@ export function pairwiseComparisons(
  * @param variations - Array of test variations
  * @returns Same array but with conversionRate field populated
  */
-export function calculateConversionRates(variations: TestVariation[]): TestVariation[] {
+function calculateConversionRates(variations: TestVariation[]): TestVariation[] {
 	return variations.map((variation) => ({
 		...variation,
 		conversionRate: variation.conversions / variation.visitors

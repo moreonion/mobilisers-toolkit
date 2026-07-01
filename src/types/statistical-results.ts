@@ -92,51 +92,13 @@ export interface ChiSquareResult extends StatisticalTestResult {
 
 /**
  * Complete results for multi-variation A/B tests (3+ variations)
- * Includes overall significance test and pairwise comparisons
+ * Includes the overall significance test used by the technical details panel.
  */
 export interface MultiVariationResult {
 	/** Overall chi-square test to determine if any variations differ significantly */
 	overallTest: ChiSquareResult;
-	/**
-	 * Individual pairwise comparisons: When you have 3+ variations, you often want to know
-	 * which specific variations beat the control, not just "something is different"
-	 * This compares each variation individually against the control (Variation A vs Control, Variation B vs Control, etc.)
-	 * Each comparison is a separate two-proportion test
-	 */
-	pairwiseComparisons: TwoProportionResult[];
-	/** Whether Bonferroni correction was applied to adjust for multiple comparisons */
+	/** Whether multiple comparison correction was applied in the comprehensive analysis */
 	bonferroniCorrected: boolean;
-	/**
-	 * The stricter confidence level used for each individual test when Bonferroni correction is applied
-	 * Problem: When you do multiple tests, you're more likely to find false positives by chance
-	 * Solution: Bonferroni correction makes each individual test more strict to compensate
-	 * Example: For 95% overall confidence with 3 comparisons, each test uses 95%/3 = 98.33% confidence
-	 * This keeps your overall false positive rate at the desired 5%
-	 */
-	bonferroniAlpha?: number;
-	/**
-	 * Whether winners are shown with caveat (didn't survive Bonferroni but show practical advantage)
-	 * Used when overall test is significant but individual tests don't survive multiple comparison correction
-	 */
-	showWithCaveat?: boolean;
-	/** All winning variations (those with the highest significant improvement) */
-	winningVariations?: Array<{
-		/** Name of the winning variation */
-		name: string;
-		/** Conversion rate of the winning variation */
-		conversionRate: number;
-		/** Percentage improvement over control */
-		improvement: number;
-	}>;
-	/** The best performing variation if one exists (kept for backwards compatibility) */
-	winningVariation?: {
-		/** Name of the winning variation */
-		name: string;
-		/** Conversion rate of the winning variation */
-		conversionRate: number;
-		/** Percentage improvement over control */
-		improvement: number;
-	};
 }
 
 /**
@@ -149,19 +111,6 @@ export interface ValidationError {
 	message: string;
 	/** Error code for programmatic handling */
 	code: string;
-}
-
-/**
- * Error information for calculation failures
- * Provides context about what went wrong during statistical calculations
- */
-export interface CalculationError {
-	/** Type of error that occurred */
-	type: "validation" | "statistical" | "computation";
-	/** High-level error message for display to users */
-	message: string;
-	/** Detailed validation errors if type is 'validation' */
-	errors?: ValidationError[];
 }
 
 /**

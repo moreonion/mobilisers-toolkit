@@ -4,10 +4,8 @@
 		twoProportionTest,
 		formatTwoProportionData,
 		chiSquareTest,
-		pairwiseComparisons,
 		comprehensivePairwiseAnalysis
 	} from "@/functions/ab-testing/statistical-tests";
-	import { bonferroniCorrection } from "@/functions/ab-testing/bonferroni";
 	import { testVariationSchema } from "@/functions/ab-testing/validation";
 	import DevModePresets from "@/components/ab-testing/DevModePresets.svelte";
 	import type { TestPreset } from "@/functions/ab-testing/test-presets";
@@ -41,24 +39,6 @@
 			? (results as TwoProportionResult)
 			: null
 	);
-
-	// Properly typed derived variable for multi-variation results
-	const multiVariationResult = $derived(
-		results && isMultiVariation && "overallTest" in results
-			? (results as MultiVariationResult)
-			: null
-	);
-
-	// Helper for checking if winners are tied (within 1% relative improvement)
-	// Note: Currently unused but may be needed for future UI enhancements
-	// const areWinnersTied = $derived(
-	// 	multiVariationResult?.winningVariations && multiVariationResult.winningVariations.length > 1
-	// 		? multiVariationResult.winningVariations.every(
-	// 				(w) =>
-	// 					Math.abs(w.improvement - multiVariationResult.winningVariations![0].improvement) < 1.0
-	// 			)
-	// 		: false
-	// );
 
 	// Capture initial state on mount
 	let initialState: {
@@ -171,32 +151,12 @@
 				// Get comprehensive analysis with all pairwise comparisons
 				comprehensiveResults = comprehensivePairwiseAnalysis(allVariations, confidenceLevel);
 
-				// Also run traditional chi-square test for backwards compatibility
+				// Also run the overall chi-square test for the technical details panel
 				const overallTest = chiSquareTest(allVariations, confidenceLevel);
-				const pairwise = pairwiseComparisons(allVariations, confidenceLevel);
 
-				// Apply Bonferroni correction for backward compatibility
-				const correctedResults = bonferroniCorrection(
-					pairwise.map((result) => result.pValue),
-					1 - confidenceLevel
-				);
-
-				// Update significance based on corrected p-values
-				const correctedPairwise = pairwise.map((result, index) => ({
-					...result,
-					isSignificant: correctedResults[index].isSignificant,
-					pValue: correctedResults[index].correctedPValue
-				}));
-
-				// For backwards compatibility, keep the traditional result structure
 				results = {
 					overallTest,
-					pairwiseComparisons: correctedPairwise,
-					bonferroniCorrected: true,
-					bonferroniAlpha: correctedResults[0].correctedAlpha,
-					showWithCaveat: false,
-					winningVariations: [],
-					winningVariation: undefined
+					bonferroniCorrected: true
 				};
 			} else {
 				// Two-proportion test - clear comprehensive results
@@ -440,9 +400,6 @@
 								twoProportionResult.isSignificant &&
 								twoProportionResult.improvement.relative !== null &&
 								twoProportionResult.improvement.relative > 0) ||
-								multiVariationResult?.winningVariations?.some(
-									(w) => w.name === variationData.name
-								) ||
 								false,
 							additionalVariations.length > 0,
 							removeVariation1,
@@ -454,8 +411,7 @@
 						{#each additionalVariations as variation, index (variation.name)}
 							{@render variantRow(
 								variation,
-								multiVariationResult?.winningVariations?.some((w) => w.name === variation.name) ||
-									false,
+								false,
 								true,
 								() => removeVariation(index),
 								"e.g. 50000",
@@ -545,32 +501,7 @@
 						{/if}
 					</div>
 				{:else if "overallTest" in results}
-					<!-- Fallback Traditional Multi-variation Results -->
-					<div class="callout {results.overallTest.isSignificant ? 'success' : 'secondary'}">
-						<h4>
-							{results.overallTest.isSignificant ? "✅ Significant result!" : "❌ Not significant"}
-						</h4>
-						{#if results.overallTest.isSignificant}
-							<p>
-								Your test found meaningful differences between your variants - at least one version
-								is genuinely performing differently than the others.
-							</p>
-						{:else}
-							<p>
-								The differences you're seeing could just be random chance. When testing multiple
-								variants together, we need stronger evidence to be confident in the results.
-							</p>
-							{#if multiVariationResult?.pairwiseComparisons.some((r: TwoProportionResult) => r.isSignificant)}
-								<p>
-									<small
-										><strong>Note:</strong> While some individual comparisons might appear
-										significant, the overall pattern isn't strong enough to declare clear winners
-										when accounting for multiple testing. <!-- TODO: Link to resource explaining multiple comparison problem --></small
-									>
-								</p>
-							{/if}
-						{/if}
-					</div>
+					<!-- Multi-variation results are displayed through comprehensiveResults. -->
 				{:else}
 					<!-- Two-proportion Results -->
 					<div class="callout {results.isSignificant ? 'success' : 'secondary'}">

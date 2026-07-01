@@ -68,13 +68,6 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		const oneClickResult = bonferroniResults.find((r) => r.variation.name === "One-Click");
 		expect(oneClickResult).toBeDefined();
 		expect(oneClickResult!.isSignificant).toBe(true); // Strong effect survives correction
-
-		// Document the complete workflow results
-		console.log("Multi-Variation Test Results:");
-		console.log(`Overall chi-square p-value: ${overallTest.pValue.toFixed(6)}`);
-		console.log(`Significant before Bonferroni: ${significantBefore}/3`);
-		console.log(`Significant after Bonferroni: ${significantAfter}/3`);
-		console.log(`Corrected alpha threshold: ${bonferroniResults[0].correctedAlpha.toFixed(4)}`);
 	});
 
 	/**
@@ -97,10 +90,7 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		];
 		const confidenceLevel = 0.95;
 
-		// STEP 1: Overall test
-		// const overallTest = chiSquareTest(variations, confidenceLevel);
-
-		// STEP 2: Pairwise comparisons
+		// STEP 1: Pairwise comparisons
 		const pairwiseResults = pairwiseComparisons(variations, confidenceLevel);
 		const significantBefore = pairwiseResults.filter((r) => r.isSignificant).length;
 
@@ -110,12 +100,6 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 
 		// VERIFICATION: Bonferroni should be more conservative
 		expect(significantAfter).toBeLessThanOrEqual(significantBefore);
-
-		// With moderate effects and smaller samples, might have no significant results after correction
-		console.log("Moderate Effects Test:");
-		console.log(`Before Bonferroni: ${significantBefore}/3 significant`);
-		console.log(`After Bonferroni: ${significantAfter}/3 significant`);
-		console.log(`Correction reduced false positives by: ${significantBefore - significantAfter}`);
 	});
 
 	/**
@@ -188,14 +172,6 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		const winner = significantResults[0];
 		expect(winner.pValue).toBeLessThan(winner.correctedAlpha);
 		expect(winner.correctedPValue).toBeLessThan(0.05); // Adjusted p-value still significant
-
-		console.log("Single Winner Test:");
-		console.log(`Winner: ${winner.variation.name}`);
-		console.log(`Original p-value: ${winner.originalPValue.toFixed(6)}`);
-		console.log(`Corrected p-value: ${winner.correctedPValue.toFixed(6)}`);
-		console.log(
-			`Improvement: ${winner.improvement.relative !== null ? winner.improvement.relative.toFixed(1) + "%" : "N/A"}`
-		);
 	});
 
 	/**
@@ -213,7 +189,6 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		];
 		const confidenceLevel = 0.95;
 
-		// const overallTest = chiSquareTest(variations, confidenceLevel);
 		const pairwiseResults = pairwiseComparisons(variations, confidenceLevel);
 		const bonferroniResults = applyBonferroniToTests(pairwiseResults, 0.05);
 
@@ -224,13 +199,6 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 			if (result.improvement.relative !== null) {
 				expect(result.improvement.relative).toBeLessThan(0);
 			}
-		});
-
-		console.log("All Variations Worse Test:");
-		bonferroniResults.forEach((result) => {
-			console.log(
-				`${result.variation.name}: ${result.improvement.relative !== null ? result.improvement.relative.toFixed(1) + "% change" : "N/A"}`
-			);
 		});
 	});
 });
