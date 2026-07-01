@@ -25,12 +25,12 @@ export const testVariationSchema = z
 		conversions: z
 			.number()
 			.int("Please enter a whole number for conversions (no decimals)")
-			.min(0, "Conversions can't be negative - enter 0 if no one converted"),
+			.min(0, "Conversions can't be negative. Enter 0 if no one converted"),
 
 		conversionRate: z.number().optional()
 	})
 	.refine((data) => data.conversions <= data.visitors, {
-		message: "Conversions can't be higher than sample size - please check your numbers",
+		message: "Conversions can't be higher than sample size. Please check your numbers",
 		path: ["conversions"]
 	});
 
@@ -47,7 +47,7 @@ export const abTestInputSchema = z.object({
 
 	confidenceLevel: z
 		.number()
-		.min(0.8, "We recommend at least 80% confidence - anything lower isn't reliable")
+		.min(0.8, "We recommend at least 80% confidence. Anything lower isn't reliable")
 		.max(0.99, "99% is the highest confidence level we support")
 		.refine((level) => [0.8, 0.85, 0.9, 0.95, 0.99].includes(level), {
 			message: "Please choose a standard confidence level: 80%, 85%, 90%, 95%, or 99%"
@@ -85,11 +85,11 @@ export const twoProportionTestDataSchema = z
 			.max(0.99, "Maximum confidence level is 99%")
 	})
 	.refine((data) => data.x1 <= data.n1, {
-		message: "Control conversions can't be higher than control sample size - please double-check",
+		message: "Control conversions can't be higher than control sample size. Please double-check",
 		path: ["x1"]
 	})
 	.refine((data) => data.x2 <= data.n2, {
-		message: "Test conversions can't be higher than test sample size - please double-check",
+		message: "Test conversions can't be higher than test sample size. Please double-check",
 		path: ["x2"]
 	});
 
@@ -209,7 +209,7 @@ export function validateStatisticalRequirements(data: ABTestInput): string[] {
 		const conversionRate = variation.conversions / variation.visitors;
 		if (conversionRate < 0.005) {
 			warnings.push(
-				`${label} has a ${(conversionRate * 100).toFixed(2)}% conversion rate. Very low rates need much larger sample sizes - consider running your test longer or checking if your tracking is working correctly.`
+				`${label} has a ${(conversionRate * 100).toFixed(2)}% conversion rate. Very low rates need much larger sample sizes. Consider running your test longer or checking if your tracking is working correctly.`
 			);
 		}
 
