@@ -741,7 +741,7 @@
 		<form onsubmit={handleFormSubmit}>
 			<!-- Data Input Table using Foundation classes -->
 			<div class="table-scroll">
-				<table class="hover stack" aria-label="A/B test data input">
+				<table class="hover stack data-entry-table" aria-label="A/B test data input">
 					<thead>
 						<tr>
 							<th>
@@ -988,6 +988,38 @@
 
 	table {
 		margin-bottom: 0;
+	}
+
+	.data-entry-table {
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.data-entry-table th:nth-child(1),
+	.data-entry-table td:nth-child(1) {
+		width: 27%;
+	}
+
+	.data-entry-table th:nth-child(2),
+	.data-entry-table td:nth-child(2) {
+		width: 25%;
+	}
+
+	.data-entry-table th:nth-child(3),
+	.data-entry-table td:nth-child(3) {
+		width: 22%;
+	}
+
+	.data-entry-table th:nth-child(4),
+	.data-entry-table td:nth-child(4) {
+		width: 18%;
+	}
+
+	.data-entry-table .variant-input,
+	.data-entry-table .number-input {
+		box-sizing: border-box;
+		min-width: 0;
+		width: 100%;
 	}
 
 	thead th {
