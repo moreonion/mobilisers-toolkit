@@ -473,9 +473,11 @@
 		<td>
 			<span class="mobile-cell-label" aria-hidden="true">Sample size</span>
 			<input
-				type="text"
+				type="number"
 				bind:value={variantData.visitors}
 				min="1"
+				step="1"
+				inputmode="numeric"
 				class="number-input"
 				aria-label="Sample size"
 				placeholder={visitorPlaceholder}
@@ -484,10 +486,12 @@
 		<td>
 			<span class="mobile-cell-label" aria-hidden="true">Conversions</span>
 			<input
-				type="text"
+				type="number"
 				bind:value={variantData.conversions}
 				min="0"
 				max={variantData.visitors}
+				step="1"
+				inputmode="numeric"
 				class="number-input"
 				aria-label="Number of conversions"
 				placeholder={conversionPlaceholder}
@@ -731,7 +735,7 @@
 	</details>
 {/snippet}
 
-<section>
+<div class="ab-testing-section">
 	<div class="ab-testing-wrapper">
 		<!-- Data Input Form -->
 		<form onsubmit={handleFormSubmit}>
@@ -965,7 +969,7 @@
 			</div>
 		</details>
 	</div>
-</section>
+</div>
 
 <style>
 	.ab-testing-wrapper {
