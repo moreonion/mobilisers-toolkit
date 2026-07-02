@@ -1417,10 +1417,20 @@
 		/* Make inputs more mobile-friendly */
 		.variant-input,
 		.number-input {
+			box-sizing: border-box;
 			padding: 0.75rem 0.5rem;
 			font-size: 16px; /* Prevents zoom on iOS */
-			min-width: 80px;
-			max-width: 120px;
+			min-width: 0;
+		}
+
+		.variant-input {
+			width: 100%;
+			max-width: none;
+		}
+
+		.number-input {
+			width: 8rem;
+			max-width: 8rem;
 		}
 
 		/* Better conversion rate display on mobile */
