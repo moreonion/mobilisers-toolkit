@@ -4,13 +4,13 @@ import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [svelte()],
-  compressHTML: true,
-  vite: {
-    css: {
-      lightningcss: {
-        errorRecovery: true
-      }
-    }
-  }
+	integrations: [svelte()],
+	compressHTML: true,
+	vite: {
+		css: {
+			lightningcss: {
+				errorRecovery: true
+			}
+		}
+	}
 });

@@ -1,6 +1,6 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
 
 type Props = {
 	title: string;
@@ -12,26 +12,30 @@ const { title, link, image, imageAlt } = Astro.props;
 ---
 
 <article class="card h-full">
-	{ image && (
-	<div class="card-image">
-		{ link ? (
-		<a href={link}>
-			<Image src={image} alt={imageAlt} />
-		</a>
-		) : (
-		<Image src={image} alt={imageAlt} />
-		) }
-	</div>
-	) }
+	{
+		image && (
+			<div class="card-image">
+				{link ? (
+					<a href={link}>
+						<Image src={image} alt={imageAlt} />
+					</a>
+				) : (
+					<Image src={image} alt={imageAlt} />
+				)}
+			</div>
+		)
+	}
 
 	<div class="card-section">
-		{ link ? (
-		<h2>
-			<a href={link}>{title}</a>
-		</h2>
-		) : (
-		<h2>{title}</h2>
-		) }
+		{
+			link ? (
+				<h2>
+					<a href={link}>{title}</a>
+				</h2>
+			) : (
+				<h2>{title}</h2>
+			)
+		}
 		<slot />
 	</div>
 </article>

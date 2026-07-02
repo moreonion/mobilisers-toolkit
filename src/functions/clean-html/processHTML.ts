@@ -5,12 +5,10 @@ const sanitise = (text: string) => {
 	const unwantedTags = ["span", "div"]; // Add other unwanted tags to this array
 
 	const sanitised = sanitizeHtml(text, {
-		allowedTags: sanitizeHtml.defaults.allowedTags.filter(
-			(tag) => !unwantedTags.includes(tag)
-		),
+		allowedTags: sanitizeHtml.defaults.allowedTags.filter((tag) => !unwantedTags.includes(tag)),
 		allowedAttributes: {
 			...sanitizeHtml.defaults.allowedAttributes,
-			a: ["href"],
+			a: ["href"]
 		},
 		transformTags: {
 			b: "strong",
@@ -19,26 +17,26 @@ const sanitise = (text: string) => {
 				if (style.includes("font-weight:700")) {
 					return {
 						tagName: "strong",
-						attribs: {},
+						attribs: {}
 					};
 				}
 				if (style.includes("font-style:italic")) {
 					return {
 						tagName: "em",
-						attribs: {},
+						attribs: {}
 					};
 				}
 				if (style.includes("text-decoration:underline")) {
 					return {
 						tagName: "u",
-						attribs: {},
+						attribs: {}
 					};
 				}
 				return {
 					tagName: "",
-					attribs: {},
+					attribs: {}
 				};
-			},
+			}
 		},
 		textFilter: (text) => {
 			return text.replace(/\s+/g, " ");
@@ -49,7 +47,7 @@ const sanitise = (text: string) => {
 			}
 			frame.text = frame.text.replace(/\s+/g, " ").trim();
 			return false;
-		},
+		}
 	});
 
 	return sanitised;
@@ -60,9 +58,7 @@ const cleanupGoogleRedirectURLs = (text: string): string => {
 	return text.replace(anchorTagRegex, (_match, href, linkText) => {
 		// Extract the original URL from Google's wrapped URL
 		const originalURLMatch = href.match(/url\?q=([^&]*)/);
-		const originalURL = originalURLMatch
-			? decodeURIComponent(originalURLMatch[1])
-			: href;
+		const originalURL = originalURLMatch ? decodeURIComponent(originalURLMatch[1]) : href;
 
 		return `<a href="${originalURL}">${linkText}</a>`;
 	});
@@ -71,7 +67,7 @@ const cleanupGoogleRedirectURLs = (text: string): string => {
 export const prettify = (text: string): string => {
 	return beautify.html(text, {
 		max_preserve_newlines: 0,
-		preserve_newlines: false,
+		preserve_newlines: false
 	});
 };
 

@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import TrackingLinkIsland from "@/islands/tracking-link.svelte";
 import Feedback from "@/components/Feedback.astro";
+import ImpactStackPlug from "@/components/ImpactStackPlug.astro";
 ---
 
 <BaseLayout
@@ -11,15 +12,17 @@ import Feedback from "@/components/Feedback.astro";
 >
 	<div id="toolDescription">
 		<p>
-			Create UTM tracking links to help you see how your supporters arrived on
-			your action pages
+			Create UTM tracking links to help you see how your supporters arrived on your action pages
 		</p>
 	</div>
 
-	<div
-		id="islandWrapper"
-		class="mt-6"
-	>
+	<ImpactStackPlug>
+		Brought to you by campaigning and fundraising platform <a
+			href="https://www.impact-stack.org">Impact&nbsp;Stack</a
+		>
+	</ImpactStackPlug>
+
+	<div id="islandWrapper" class="mt-6">
 		<TrackingLinkIsland client:load />
 	</div>
 	<Feedback />

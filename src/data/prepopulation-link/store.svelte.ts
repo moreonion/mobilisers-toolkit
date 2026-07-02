@@ -1,10 +1,8 @@
 import { persisted } from "svelte-persisted-store";
-import type {
-	EmailMarketingProviders,
-} from "@/data/prepopulation-link/emailMarketingTokens";
+import type { EmailMarketingProviders } from "@/data/prepopulation-link/emailMarketingTokens";
 
 export const prepopulationState = $state({
-	customiseFields: false,
+	customiseFields: false
 });
 
 export type PrefillFormFieldsType = {
@@ -26,11 +24,13 @@ export type PrepopulationLinkStoreType = {
 	actionPageURL: string;
 };
 
-
-export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>("prepopulationLinkStore", {
-	selectedEmailProvider: "Mailchimp",
-	actionPageURL: "",
-});
+export const prepopulationLinkStore = persisted<PrepopulationLinkStoreType>(
+	"prepopulationLinkStore",
+	{
+		selectedEmailProvider: "Mailchimp",
+		actionPageURL: ""
+	}
+);
 
 /**
  * Initial state for prefillFormFields reactive state
@@ -41,21 +41,21 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 		label: "First Name",
 		formKey: "first_name",
 		prefilled: true,
-		token: "",
+		token: ""
 	},
 	{
 		id: 2,
 		label: "Last Name",
 		formKey: "last_name",
 		prefilled: true,
-		token: "",
+		token: ""
 	},
 	{
 		id: 3,
 		label: "Email",
 		formKey: "email",
 		prefilled: true,
-		token: "",
+		token: ""
 	},
 	{
 		id: 4,
@@ -64,7 +64,7 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 		prefilled: false,
 		token: "",
 		fieldType: "select",
-		options: ["Single", "Monthly", "Annual"],
+		options: ["Single", "Monthly", "Annual"]
 	},
 	{
 		id: 5,
@@ -74,65 +74,65 @@ const initialPrefillFormFields: PrefillFormFieldsType[] = [
 		token: "",
 		fieldType: "number",
 		validation: {
-			min: 1,
-		},
+			min: 1
+		}
 	},
 	{
 		id: 6,
 		label: "Postcode",
 		formKey: "postcode",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 7,
 		label: "Street Address",
 		formKey: "street_address",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 8,
 		label: "City",
 		formKey: "city",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 9,
 		label: "Country",
 		formKey: "country",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 10,
 		label: "Title",
 		formKey: "title",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 11,
 		label: "Phone Number",
 		formKey: "phone_number",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 12,
 		label: "Mobile Number",
 		formKey: "mobile_number",
 		prefilled: false,
-		token: "",
+		token: ""
 	},
 	{
 		id: 13,
 		label: "State",
 		formKey: "state",
 		prefilled: false,
-		token: "",
-	},
+		token: ""
+	}
 ];
 
 /**
@@ -145,8 +145,6 @@ export const basePrefillFormFields = [...initialPrefillFormFields];
 export function createInitialFormFields(): PrefillFormFieldsType[] {
 	return basePrefillFormFields.map((field) => ({
 		...field,
-		token: "", // Will be populated by the component
+		token: "" // Will be populated by the component
 	}));
 }
-
-
