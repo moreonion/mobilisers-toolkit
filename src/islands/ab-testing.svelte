@@ -18,9 +18,21 @@
 		ComprehensiveAnalysisResult
 	} from "@/types/statistical-results";
 
+	type VariationFormData = {
+		name: string;
+		visitors: number;
+		conversions: number;
+	};
+
+	const toVariationFormData = (variation: TestVariation): VariationFormData => ({
+		name: variation.name,
+		visitors: variation.visitors,
+		conversions: variation.conversions
+	});
+
 	// State management using Svelte 5 runes
-	let controlData = $state({ name: "A", visitors: 0, conversions: 0 });
-	let variationData = $state({ name: "B", visitors: 0, conversions: 0 });
+	let controlData = $state<VariationFormData>({ name: "A", visitors: 0, conversions: 0 });
+	let variationData = $state<VariationFormData>({ name: "B", visitors: 0, conversions: 0 });
 	let additionalVariations = $state<TestVariation[]>([]);
 	let confidenceLevel = $state(0.95);
 	let results = $state<TwoProportionResult | MultiVariationResult | null>(null);
@@ -203,11 +215,12 @@
 	};
 
 	const removeControl = (): void => {
-		if (additionalVariations.length > 0) {
+		const nextVariation = additionalVariations[0];
+		if (nextVariation) {
 			// Move variation B to control position
 			controlData = { ...variationData };
 			// Move first additional variation to variation B position
-			variationData = { ...additionalVariations[0] };
+			variationData = toVariationFormData(nextVariation);
 			// Remove the first additional variation
 			additionalVariations = additionalVariations.slice(1);
 			// Clear results since data structure changed
@@ -217,9 +230,10 @@
 	};
 
 	const removeVariation1 = (): void => {
-		if (additionalVariations.length > 0) {
+		const nextVariation = additionalVariations[0];
+		if (nextVariation) {
 			// Move first additional variation to variation B position
-			variationData = { ...additionalVariations[0] };
+			variationData = toVariationFormData(nextVariation);
 			// Remove the first additional variation
 			additionalVariations = additionalVariations.slice(1);
 			// Clear results since data structure changed
@@ -385,8 +399,10 @@
 			.flatMap((tier) => tier.variations)
 			.sort((a, b) => b.conversionRate - a.conversionRate);
 
-		if (hasHighPerformers && sorted.length >= 2) {
-			const guide = getVariantGapGuide(sorted[0], sorted[1]);
+		const firstSortedVariant = sorted[0];
+		const secondSortedVariant = sorted[1];
+		if (hasHighPerformers && firstSortedVariant && secondSortedVariant) {
+			const guide = getVariantGapGuide(firstSortedVariant, secondSortedVariant);
 			if (guide) {
 				guides.push({
 					label: "Pick between the top variants",
@@ -408,8 +424,9 @@
 			}
 		}
 
-		if (hasNoClearWinner && guides.length === 0 && sorted.length >= 2) {
-			const guide = getVariantGapGuide(sorted[0], sorted[sorted.length - 1]);
+		const lastSortedVariant = sorted[sorted.length - 1];
+		if (hasNoClearWinner && guides.length === 0 && firstSortedVariant && lastSortedVariant) {
+			const guide = getVariantGapGuide(firstSortedVariant, lastSortedVariant);
 			if (guide) {
 				guides.push({
 					label: "Check the largest observed gap",
@@ -428,17 +445,12 @@
 		validationErrors = [];
 
 		// Load preset data
-		controlData = { ...preset.controlVariation };
+		const [firstVariation, ...remainingVariations] = preset.variations;
+		if (!firstVariation) return;
 
-		if (preset.variations.length === 1) {
-			// Two-variation test
-			variationData = { ...preset.variations[0] };
-			additionalVariations = [];
-		} else {
-			// Multi-variation test
-			variationData = { ...preset.variations[0] };
-			additionalVariations = preset.variations.slice(1).map((v) => ({ ...v }));
-		}
+		controlData = toVariationFormData(preset.controlVariation);
+		variationData = toVariationFormData(firstVariation);
+		additionalVariations = remainingVariations.map((v) => ({ ...v }));
 
 		confidenceLevel = preset.confidenceLevel;
 	};
@@ -584,6 +596,7 @@
 							);
 						}
 						const topTier = comprehensiveResults.performanceGroups[0];
+						if (!topTier) return false;
 						const lowerTierVariants = comprehensiveResults.performanceGroups
 							.slice(1)
 							.flatMap((tier) => tier.variations);
@@ -664,8 +677,8 @@
 				{:else if estimateSampleSizePerVariant( { rateA: resultData.variation.conversionRate, rateB: resultData.control.conversionRate, confidenceLevel } )}
 					<p>
 						<strong>Sample size needed</strong>
-						The gap is {formatPercentagePoints(resultData.improvement.absolute)} percentage points.
-						Detecting whether a gap that size is significant takes about {formatSampleSizeEstimate(
+						The gap is {formatPercentagePoints(resultData.improvement.absolute)} percentage points. Detecting
+						whether a gap that size is significant takes about {formatSampleSizeEstimate(
 							estimateSampleSizePerVariant({
 								rateA: resultData.variation.conversionRate,
 								rateB: resultData.control.conversionRate,

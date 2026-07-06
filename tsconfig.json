@@ -4,6 +4,10 @@
 	"exclude": ["dist"],
 	"compilerOptions": {
 		"baseUrl": ".",
+		"moduleDetection": "force",
+		"noImplicitOverride": true,
+		"exactOptionalPropertyTypes": true,
+		"noUncheckedIndexedAccess": true,
 		"paths": {
 			"@/*": ["src/*"]
 		}

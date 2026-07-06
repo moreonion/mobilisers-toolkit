@@ -20,6 +20,8 @@
 
 		// If no item found, just return without making any changes
 		if (indexToUpdate === -1) return;
+		const existingField = formFields[indexToUpdate];
+		if (!existingField) return;
 
 		// Validate number fields with Zod - but always allow updates
 		let validatedToken = field.token;
@@ -44,13 +46,13 @@
 
 		const updatedField: PrefillFormFieldsType = custom
 			? {
-					...formFields[indexToUpdate],
+					...existingField,
 					token: validatedToken,
 					formKey: field.formKey,
 					prefilled: shouldBePrefilled
 				}
 			: {
-					...formFields[indexToUpdate],
+					...existingField,
 					token: validatedToken,
 					prefilled: shouldBePrefilled
 				};

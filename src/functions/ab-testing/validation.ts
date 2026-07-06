@@ -2,6 +2,7 @@ import { z } from "zod";
 import type {
 	ABTestInput,
 	MultiVariationTestData,
+	TestVariation,
 	TwoProportionTestData
 } from "../../types/ab-testing";
 
@@ -124,9 +125,10 @@ export function formatValidationErrors(error: z.ZodError): string[] {
 			friendlyField = fieldPath.replace("controlVariation.", "Control ");
 		} else if (fieldPath.includes("variations")) {
 			const match = fieldPath.match(/variations\.(\d+)\.(.+)/);
-			if (match) {
-				const variationNum = parseInt(match[1]) + 1;
-				friendlyField = `Variation ${variationNum} ${match[2]}`;
+			const [, variationIndex, fieldName] = match ?? [];
+			if (variationIndex && fieldName) {
+				const variationNum = parseInt(variationIndex) + 1;
+				friendlyField = `Variation ${variationNum} ${fieldName}`;
 			}
 		}
 
@@ -143,7 +145,7 @@ export function validateABTestInput(
 	const result = abTestInputSchema.safeParse(input);
 
 	if (result.success) {
-		return { success: true, data: result.data };
+		return { success: true, data: normaliseABTestInput(result.data) };
 	} else {
 		return { success: false, errors: formatValidationErrors(result.error) };
 	}
@@ -167,10 +169,37 @@ export function validateMultiVariationTestData(
 	const result = multiVariationTestDataSchema.safeParse(input);
 
 	if (result.success) {
-		return { success: true, data: result.data };
+		return { success: true, data: normaliseMultiVariationTestData(result.data) };
 	} else {
 		return { success: false, errors: formatValidationErrors(result.error) };
 	}
+}
+
+function normaliseVariation(variation: z.output<typeof testVariationSchema>): TestVariation {
+	return {
+		name: variation.name,
+		visitors: variation.visitors,
+		conversions: variation.conversions,
+		...(variation.conversionRate !== undefined ? { conversionRate: variation.conversionRate } : {})
+	};
+}
+
+function normaliseABTestInput(data: z.output<typeof abTestInputSchema>): ABTestInput {
+	return {
+		controlVariation: normaliseVariation(data.controlVariation),
+		variations: data.variations.map(normaliseVariation),
+		confidenceLevel: data.confidenceLevel
+	};
+}
+
+function normaliseMultiVariationTestData(
+	data: z.output<typeof multiVariationTestDataSchema>
+): MultiVariationTestData {
+	return {
+		variations: data.variations.map(normaliseVariation),
+		confidenceLevel: data.confidenceLevel,
+		bonferroniCorrection: data.bonferroniCorrection
+	};
 }
 
 /**
@@ -272,7 +301,7 @@ function sanitiseVariation(input: unknown): unknown {
 		name: typeof inputObj.name === "string" ? inputObj.name.trim() : inputObj.name,
 		visitors: sanitiseNumber(inputObj.visitors),
 		conversions: sanitiseNumber(inputObj.conversions),
-		conversionRate: inputObj.conversionRate
+		...(inputObj.conversionRate !== undefined ? { conversionRate: inputObj.conversionRate } : {})
 	};
 }
 

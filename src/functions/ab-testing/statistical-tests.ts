@@ -3,6 +3,22 @@ import type { TwoProportionResult, ChiSquareResult } from "../../types/statistic
 import type { TestVariation, TwoProportionTestData } from "../../types/ab-testing";
 import { bonferroniCorrection } from "./bonferroni";
 
+type RatedVariation = TestVariation & { conversionRate: number };
+
+type PerformanceGroup = {
+	tier: number;
+	label: string;
+	variations: RatedVariation[];
+};
+
+function requireItem<T>(items: readonly T[], index: number, message: string): T {
+	const item = items[index];
+	if (item === undefined) {
+		throw new Error(message);
+	}
+	return item;
+}
+
 /**
  * Performs a two-proportion z-test to compare conversion rates between control and variation
  *
@@ -140,6 +156,10 @@ export function chiSquareTest(
 	variations: TestVariation[],
 	confidenceLevel: number
 ): ChiSquareResult {
+	if (variations.length < 3) {
+		throw new Error("Chi-square test requires at least 3 variations");
+	}
+
 	const totalVisitors = variations.reduce((sum, v) => sum + v.visitors, 0);
 	const totalConversions = variations.reduce((sum, v) => sum + v.conversions, 0);
 	const overallConversionRate = totalConversions / totalVisitors; // what we'd expect if all groups were the same
@@ -166,13 +186,15 @@ export function chiSquareTest(
 
 	for (let i = 0; i < observed.length; i++) {
 		const rowResiduals: number[] = [];
-		for (let j = 0; j < observed[i].length; j++) {
-			const expectedValue = expected[i][j];
-			const observedValue = observed[i][j];
+		const observedRow = requireItem(observed, i, "Missing observed frequency row");
+		const expectedRow = requireItem(expected, i, "Missing expected frequency row");
+
+		observedRow.forEach((observedValue, j) => {
+			const expectedValue = requireItem(expectedRow, j, "Missing expected frequency cell");
 
 			if (expectedValue === 0) {
 				rowResiduals.push(0);
-				continue;
+				return;
 			}
 
 			// Standardised residual: (observed - expected) / √expected
@@ -183,7 +205,7 @@ export function chiSquareTest(
 			// Chi-square contribution: (observed - expected)² / expected
 			// This is the classic chi-square formula
 			chiSquareStatistic += Math.pow(observedValue - expectedValue, 2) / expectedValue;
-		}
+		});
 		residuals.push(rowResiduals);
 	}
 
@@ -232,6 +254,10 @@ export function pairwiseComparisons(
 	confidenceLevel: number
 ): TwoProportionResult[] {
 	const control = variations[0]; // first variation should be the control group
+	if (!control) {
+		throw new Error("Missing control variation");
+	}
+
 	const testVariations = variations.slice(1); // all the others are test variations
 
 	return testVariations.map((variation) => {
@@ -249,7 +275,7 @@ export function pairwiseComparisons(
  * @param variations - Array of test variations
  * @returns Same array but with conversionRate field populated
  */
-function calculateConversionRates(variations: TestVariation[]): TestVariation[] {
+function calculateConversionRates(variations: TestVariation[]): RatedVariation[] {
 	return variations.map((variation) => ({
 		...variation,
 		conversionRate: variation.conversions / variation.visitors
@@ -278,15 +304,19 @@ export function comprehensivePairwiseAnalysis(
 	variations: TestVariation[],
 	confidenceLevel: number
 ) {
+	if (variations.length < 3) {
+		throw new Error("Comprehensive pairwise analysis requires at least 3 variations");
+	}
+
 	// Calculate conversion rates for all variations
 	const variationsWithRates = calculateConversionRates(variations);
 
 	// Perform all possible pairwise comparisons
 	const allComparisons: TwoProportionResult[] = [];
-	for (let i = 0; i < variations.length; i++) {
-		for (let j = i + 1; j < variations.length; j++) {
-			const data = formatTwoProportionData(variations[i], variations[j], confidenceLevel);
-			const result = twoProportionTest(data, variations[i].name, variations[j].name);
+	for (const [i, firstVariation] of variations.entries()) {
+		for (const secondVariation of variations.slice(i + 1)) {
+			const data = formatTwoProportionData(firstVariation, secondVariation, confidenceLevel);
+			const result = twoProportionTest(data, firstVariation.name, secondVariation.name);
 			allComparisons.push(result);
 		}
 	}
@@ -298,12 +328,20 @@ export function comprehensivePairwiseAnalysis(
 	);
 
 	// Update comparisons with corrected significance
-	const correctedComparisons = allComparisons.map((result, index) => ({
-		...result,
-		isSignificant: bonferroniResults[index].isSignificant,
-		pValue: bonferroniResults[index].correctedPValue,
-		originalPValue: bonferroniResults[index].originalPValue
-	}));
+	const correctedComparisons = allComparisons.map((result, index) => {
+		const bonferroniResult = requireItem(
+			bonferroniResults,
+			index,
+			"Missing Bonferroni result for comparison"
+		);
+
+		return {
+			...result,
+			isSignificant: bonferroniResult.isSignificant,
+			pValue: bonferroniResult.correctedPValue,
+			originalPValue: bonferroniResult.originalPValue
+		};
+	});
 
 	// Calculate evidence strength for confidence-based labeling
 	const significantCount = correctedComparisons.filter((c) => c.isSignificant).length;
@@ -311,7 +349,7 @@ export function comprehensivePairwiseAnalysis(
 
 	// Group variations by performance tiers with evidence strength
 	const performanceGroups = groupVariationsByPerformance(
-		variationsWithRates as (TestVariation & { conversionRate: number })[],
+		variationsWithRates,
 		correctedComparisons,
 		evidenceStrength
 	);
@@ -324,7 +362,7 @@ export function comprehensivePairwiseAnalysis(
 		performanceGroups,
 		insights,
 		bonferroniCorrected: true,
-		correctedAlpha: bonferroniResults[0].correctedAlpha
+		correctedAlpha: requireItem(bonferroniResults, 0, "Missing Bonferroni result").correctedAlpha
 	};
 }
 
@@ -337,10 +375,10 @@ export function comprehensivePairwiseAnalysis(
  * @returns Performance groups (high, medium, low performers) or single group if no significant differences
  */
 function groupVariationsByPerformance(
-	variations: (TestVariation & { conversionRate: number })[],
+	variations: RatedVariation[],
 	comparisons: TwoProportionResult[],
 	evidenceStrength: number
-) {
+): PerformanceGroup[] {
 	// Check if there are ANY significant differences
 	const hasSignificantDifferences = comparisons.some((c) => c.isSignificant);
 
@@ -363,15 +401,10 @@ function groupVariationsByPerformance(
 	const confidencePrefix = isStrongEvidence ? "" : "Tentative ";
 
 	// Create initial empty performance tiers
-	const performanceTiers: Array<{
-		tier: number;
-		label: string;
-		variations: (TestVariation & { conversionRate: number })[];
-	}> = [];
+	const performanceTiers: PerformanceGroup[] = [];
 
 	// Group all variations based on statistical differences
-	for (let i = 0; i < sortedVariations.length; i++) {
-		const currentVariation = sortedVariations[i];
+	for (const currentVariation of sortedVariations) {
 		let placedInTier = false;
 
 		// Check if this variation is statistically similar to ALL variations in any existing tier
@@ -423,11 +456,7 @@ function groupVariationsByPerformance(
  * @returns Evidence strength based on meaningful tier-crossing comparisons
  */
 function calculateTierCrossingEvidence(
-	performanceGroups: Array<{
-		tier: number;
-		label: string;
-		variations: (TestVariation & { conversionRate: number })[];
-	}>,
+	performanceGroups: PerformanceGroup[],
 	comparisons: TwoProportionResult[]
 ): number {
 	if (performanceGroups.length <= 1) {
@@ -437,7 +466,7 @@ function calculateTierCrossingEvidence(
 	}
 
 	// Get top tier and all lower tier variants
-	const topTier = performanceGroups[0];
+	const topTier = requireItem(performanceGroups, 0, "Missing performance tier");
 	const lowerTierVariants = performanceGroups.slice(1).flatMap((tier) => tier.variations);
 
 	if (lowerTierVariants.length === 0) {
@@ -478,11 +507,7 @@ function calculateTierCrossingEvidence(
  * @returns Array of actionable business insights
  */
 function generateBusinessInsights(
-	performanceGroups: Array<{
-		tier: number;
-		label: string;
-		variations: (TestVariation & { conversionRate: number })[];
-	}>,
+	performanceGroups: PerformanceGroup[],
 	comparisons: TwoProportionResult[]
 ) {
 	const insights: Array<{
@@ -501,12 +526,16 @@ function generateBusinessInsights(
 
 	// Performance tier analysis with confidence-based messaging
 	if (performanceGroups.length > 1) {
-		const topTier = performanceGroups[0];
-		const bottomTier = performanceGroups[performanceGroups.length - 1];
+		const topTier = requireItem(performanceGroups, 0, "Missing top performance tier");
+		const bottomTier = requireItem(
+			performanceGroups,
+			performanceGroups.length - 1,
+			"Missing bottom performance tier"
+		);
 
 		if (topTier.variations.length === 1 && bottomTier.variations.length === 1) {
-			const topVariation = topTier.variations[0];
-			const bottomVariation = bottomTier.variations[0];
+			const topVariation = requireItem(topTier.variations, 0, "Missing top variation");
+			const bottomVariation = requireItem(bottomTier.variations, 0, "Missing bottom variation");
 			const improvement =
 				((topVariation.conversionRate - bottomVariation.conversionRate) /
 					bottomVariation.conversionRate) *
@@ -566,7 +595,7 @@ function generateBusinessInsights(
 		});
 	} else if (!isStrongEvidence) {
 		// Calculate tier-crossing specifics for messaging
-		const topTier = performanceGroups[0];
+		const topTier = requireItem(performanceGroups, 0, "Missing top performance tier");
 		const lowerTierVariants = performanceGroups.slice(1).flatMap((tier) => tier.variations);
 		const tierCrossingComparisons = topTier.variations.length * lowerTierVariants.length;
 		const significantTierCrossings = Math.round(evidenceStrength * tierCrossingComparisons);
@@ -588,7 +617,7 @@ function generateBusinessInsights(
 		}
 	} else {
 		// Calculate tier-crossing specifics for messaging
-		const topTier = performanceGroups[0];
+		const topTier = requireItem(performanceGroups, 0, "Missing top performance tier");
 		const lowerTierVariants = performanceGroups.slice(1).flatMap((tier) => tier.variations);
 		const tierCrossingComparisons = topTier.variations.length * lowerTierVariants.length;
 		const significantTierCrossings = Math.round(evidenceStrength * tierCrossingComparisons);

@@ -3,6 +3,14 @@ import { chiSquareTest, pairwiseComparisons } from "../statistical-tests";
 import { applyBonferroniToTests } from "../bonferroni";
 import type { TestVariation } from "../../../types/ab-testing";
 
+function expectItem<T>(items: readonly T[], index: number): T {
+	const item = items[index];
+	if (item === undefined) {
+		throw new Error(`Expected item at index ${index}`);
+	}
+	return item;
+}
+
 /**
  * Integration tests for complete multi-variation A/B testing workflow
  *
@@ -56,7 +64,7 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		const bonferroniResults = applyBonferroniToTests(pairwiseResults, 0.05);
 
 		// Check Bonferroni adjustment
-		expect(bonferroniResults[0].correctedAlpha).toBeCloseTo(0.05 / 3, 4); // ≈ 0.0167
+		expect(expectItem(bonferroniResults, 0).correctedAlpha).toBeCloseTo(0.05 / 3, 4); // ≈ 0.0167
 
 		// STEP 4: Final significance after correction
 		const significantAfter = bonferroniResults.filter((r) => r.isSignificant).length;
@@ -166,10 +174,10 @@ describe("Multi-Variation A/B Testing - Complete Workflow", () => {
 		// After Bonferroni, only strong winner should survive
 		const significantResults = bonferroniResults.filter((r) => r.isSignificant);
 		expect(significantResults).toHaveLength(1);
-		expect(significantResults[0].variation.name).toBe("Strong Winner");
+		const winner = expectItem(significantResults, 0);
+		expect(winner.variation.name).toBe("Strong Winner");
 
 		// Verify the winner has genuinely low p-value even after correction
-		const winner = significantResults[0];
 		expect(winner.pValue).toBeLessThan(winner.correctedAlpha);
 		expect(winner.correctedPValue).toBeLessThan(0.05); // Adjusted p-value still significant
 	});

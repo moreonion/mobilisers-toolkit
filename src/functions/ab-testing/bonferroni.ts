@@ -23,7 +23,7 @@
  * @param alpha - Desired family-wise error rate (default: 0.05 for 95% confidence)
  * @returns Array of results with original p-values, adjusted thresholds, and significance decisions
  */
-export function bonferroniCorrection(pValues: number[], alpha: number = 0.05) {
+export function bonferroniCorrection(pValues: number[], alpha: number = 0.05): BonferroniResult[] {
 	const numTests = pValues.length;
 	const correctedAlpha = alpha / numTests;
 
@@ -66,12 +66,19 @@ export function applyBonferroniToTests<T extends { pValue: number; isSignificant
 	const pValues = testResults.map((result) => result.pValue);
 	const bonferroniResults = bonferroniCorrection(pValues, alpha);
 
-	return testResults.map((result, index) => ({
-		...result,
-		...bonferroniResults[index],
-		// Override the original significance with Bonferroni-corrected significance
-		isSignificant: bonferroniResults[index].isSignificant
-	}));
+	return testResults.map((result, index) => {
+		const bonferroniResult = bonferroniResults[index];
+		if (!bonferroniResult) {
+			throw new Error("Missing Bonferroni result for test result");
+		}
+
+		return {
+			...result,
+			...bonferroniResult,
+			// Override the original significance with Bonferroni-corrected significance
+			isSignificant: bonferroniResult.isSignificant
+		};
+	});
 }
 
 /**

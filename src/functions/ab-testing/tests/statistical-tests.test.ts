@@ -2,10 +2,19 @@ import { describe, it, expect } from "vitest";
 import {
 	twoProportionTest,
 	chiSquareTest,
+	comprehensivePairwiseAnalysis,
 	formatTwoProportionData,
 	pairwiseComparisons
 } from "../statistical-tests";
 import type { TestVariation } from "../../../types/ab-testing";
+
+function expectItem<T>(items: readonly T[], index: number): T {
+	const item = items[index];
+	if (item === undefined) {
+		throw new Error(`Expected item at index ${index}`);
+	}
+	return item;
+}
 
 /**
  * Academic-quality unit tests for A/B testing statistical functions
@@ -309,6 +318,18 @@ describe("Two-Proportion Z-Test", () => {
 });
 
 describe("Chi-Square Test for Multi-Variation", () => {
+	it("rejects tests with fewer than 3 variations", () => {
+		expect(() =>
+			chiSquareTest(
+				[
+					{ name: "Control", visitors: 100, conversions: 10 },
+					{ name: "Variation", visitors: 100, conversions: 12 }
+				],
+				0.95
+			)
+		).toThrow("Chi-square test requires at least 3 variations");
+	});
+
 	/**
 	 * TEST CASE 1: Three-Group A/B/C Test
 	 * Source: Manual calculation with expected chi-square distribution
@@ -414,6 +435,22 @@ describe("Chi-Square Test for Multi-Variation", () => {
 });
 
 describe("Helper Functions", () => {
+	it("rejects pairwise comparisons without a control variation", () => {
+		expect(() => pairwiseComparisons([], 0.95)).toThrow("Missing control variation");
+	});
+
+	it("rejects comprehensive pairwise analysis with fewer than 3 variations", () => {
+		expect(() =>
+			comprehensivePairwiseAnalysis(
+				[
+					{ name: "Control", visitors: 100, conversions: 10 },
+					{ name: "Variation", visitors: 100, conversions: 12 }
+				],
+				0.95
+			)
+		).toThrow("Comprehensive pairwise analysis requires at least 3 variations");
+	});
+
 	it("should correctly format data for two-proportion tests", () => {
 		const control: TestVariation = { name: "Control", visitors: 1000, conversions: 100 };
 		const variation: TestVariation = { name: "Test", visitors: 1200, conversions: 150 };
@@ -438,17 +475,20 @@ describe("Helper Functions", () => {
 
 		expect(results).toHaveLength(2); // 2 comparisons (A vs Control, B vs Control)
 
+		const first = expectItem(results, 0);
+		const second = expectItem(results, 1);
+
 		// First comparison: Variation A vs Control
-		expect(results[0].control.name).toBe("Control");
-		expect(results[0].variation.name).toBe("Variation A");
-		expect(results[0].control.conversionRate).toBeCloseTo(0.1, 2);
-		expect(results[0].variation.conversionRate).toBeCloseTo(0.12, 2);
+		expect(first.control.name).toBe("Control");
+		expect(first.variation.name).toBe("Variation A");
+		expect(first.control.conversionRate).toBeCloseTo(0.1, 2);
+		expect(first.variation.conversionRate).toBeCloseTo(0.12, 2);
 
 		// Second comparison: Variation B vs Control
-		expect(results[1].control.name).toBe("Control");
-		expect(results[1].variation.name).toBe("Variation B");
-		expect(results[1].control.conversionRate).toBeCloseTo(0.1, 2);
-		expect(results[1].variation.conversionRate).toBeCloseTo(0.09, 2);
+		expect(second.control.name).toBe("Control");
+		expect(second.variation.name).toBe("Variation B");
+		expect(second.control.conversionRate).toBeCloseTo(0.1, 2);
+		expect(second.variation.conversionRate).toBeCloseTo(0.09, 2);
 	});
 });
 

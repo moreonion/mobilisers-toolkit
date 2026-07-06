@@ -9,6 +9,25 @@ import {
 } from "../validation";
 import type { ABTestInput } from "../../../types/ab-testing";
 
+function expectIssueMessage(
+	error: { issues: readonly { message: string }[] },
+	index: number
+): string {
+	const issue = error.issues[index];
+	if (!issue) {
+		throw new Error(`Expected validation issue at index ${index}`);
+	}
+	return issue.message;
+}
+
+function expectItem<T>(items: readonly T[], index: number): T {
+	const item = items[index];
+	if (item === undefined) {
+		throw new Error(`Expected item at index ${index}`);
+	}
+	return item;
+}
+
 describe("testVariationSchema", () => {
 	it("validates correct test variation data", () => {
 		const validVariation = {
@@ -34,7 +53,7 @@ describe("testVariationSchema", () => {
 		const result = testVariationSchema.safeParse(invalidVariation);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("Please give this variation a name");
+			expect(expectIssueMessage(result.error, 0)).toContain("Please give this variation a name");
 		}
 	});
 
@@ -48,7 +67,7 @@ describe("testVariationSchema", () => {
 		const result = testVariationSchema.safeParse(invalidVariation);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain(
+			expect(expectIssueMessage(result.error, 0)).toContain(
 				"Conversions can't be higher than sample size"
 			);
 		}
@@ -64,8 +83,8 @@ describe("testVariationSchema", () => {
 		const result = testVariationSchema.safeParse(invalidVariation);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("Sample size must be at least 1");
-			expect(result.error.issues[0].message).toContain("remove any variant with 0");
+			expect(expectIssueMessage(result.error, 0)).toContain("Sample size must be at least 1");
+			expect(expectIssueMessage(result.error, 0)).toContain("remove any variant with 0");
 		}
 	});
 
@@ -79,7 +98,7 @@ describe("testVariationSchema", () => {
 		const result = testVariationSchema.safeParse(invalidVariation);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("Conversions can't be negative");
+			expect(expectIssueMessage(result.error, 0)).toContain("Conversions can't be negative");
 		}
 	});
 
@@ -140,7 +159,7 @@ describe("abTestInputSchema", () => {
 		const result = abTestInputSchema.safeParse(invalidTest);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("We recommend at least 80% confidence");
+			expect(expectIssueMessage(result.error, 0)).toContain("We recommend at least 80% confidence");
 		}
 	});
 
@@ -153,7 +172,9 @@ describe("abTestInputSchema", () => {
 		const result = abTestInputSchema.safeParse(invalidTest);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("Please choose a standard confidence level");
+			expect(expectIssueMessage(result.error, 0)).toContain(
+				"Please choose a standard confidence level"
+			);
 		}
 	});
 
@@ -166,7 +187,7 @@ describe("abTestInputSchema", () => {
 		const result = abTestInputSchema.safeParse(invalidTest);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("You need at least one test variation");
+			expect(expectIssueMessage(result.error, 0)).toContain("You need at least one test variation");
 		}
 	});
 
@@ -185,7 +206,7 @@ describe("abTestInputSchema", () => {
 		const result = abTestInputSchema.safeParse(invalidTest);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain("Testing more than 10 variations");
+			expect(expectIssueMessage(result.error, 0)).toContain("Testing more than 10 variations");
 		}
 	});
 });
@@ -216,7 +237,7 @@ describe("twoProportionTestDataSchema", () => {
 		const result = twoProportionTestDataSchema.safeParse(invalidData);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain(
+			expect(expectIssueMessage(result.error, 0)).toContain(
 				"Control conversions can't be higher than control sample size"
 			);
 		}
@@ -234,7 +255,7 @@ describe("twoProportionTestDataSchema", () => {
 		const result = twoProportionTestDataSchema.safeParse(invalidData);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0].message).toContain(
+			expect(expectIssueMessage(result.error, 0)).toContain(
 				"Test conversions can't be higher than test sample size"
 			);
 		}
@@ -263,6 +284,33 @@ describe("validateABTestInput helper function", () => {
 		expect(result.success).toBe(true);
 		if (result.success) {
 			expect(result.data).toEqual(validInput);
+		}
+	});
+
+	it("omits optional conversion rates when they are unset", () => {
+		const input = {
+			controlVariation: {
+				name: "Control",
+				visitors: 1000,
+				conversions: 50,
+				conversionRate: undefined
+			},
+			variations: [
+				{
+					name: "Test A",
+					visitors: 1000,
+					conversions: 65,
+					conversionRate: undefined
+				}
+			],
+			confidenceLevel: 0.95
+		};
+
+		const result = validateABTestInput(input);
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(Object.hasOwn(result.data.controlVariation, "conversionRate")).toBe(false);
+			expect(Object.hasOwn(expectItem(result.data.variations, 0), "conversionRate")).toBe(false);
 		}
 	});
 

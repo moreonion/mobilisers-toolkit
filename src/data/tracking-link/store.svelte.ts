@@ -56,7 +56,9 @@ export function getOutputLinkToTrack(): string {
 
 	// If the input URL has put the query parameters after the hash then they will be in the hash. We need to move them to the search params
 	if (linkAsURLObject.hash.includes("?")) {
-		const [cleanHash, hashParams] = linkAsURLObject.hash.split("?");
+		const separatorIndex = linkAsURLObject.hash.indexOf("?");
+		const cleanHash = linkAsURLObject.hash.slice(0, separatorIndex);
+		const hashParams = linkAsURLObject.hash.slice(separatorIndex + 1);
 		linkAsURLObject.hash = cleanHash;
 
 		const hashQueryParams = new SvelteURLSearchParams(hashParams);

@@ -13,6 +13,14 @@ import { bonferroniCorrection, applyBonferroniToTests, bonferroniSummary } from 
  * 3. Verification against PRD specification (lines 170-182)
  */
 
+function expectItem<T>(items: readonly T[], index: number): T {
+	const item = items[index];
+	if (item === undefined) {
+		throw new Error(`Expected item at index ${index}`);
+	}
+	return item;
+}
+
 describe("Bonferroni Correction", () => {
 	/**
 	 * TEST CASE 1: Basic Three-Test Scenario
@@ -29,24 +37,27 @@ describe("Bonferroni Correction", () => {
 		const expectedCorrectedAlpha = 0.05 / 3;
 
 		expect(results).toHaveLength(3);
+		const first = expectItem(results, 0);
+		const second = expectItem(results, 1);
+		const third = expectItem(results, 2);
 
 		// Test 1: p=0.01, should be significant (0.01 < 0.0167)
-		expect(results[0].originalPValue).toBe(0.01);
-		expect(results[0].correctedPValue).toBe(0.03); // 0.01 × 3
-		expect(results[0].isSignificant).toBe(true);
-		expect(results[0].correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
+		expect(first.originalPValue).toBe(0.01);
+		expect(first.correctedPValue).toBe(0.03); // 0.01 × 3
+		expect(first.isSignificant).toBe(true);
+		expect(first.correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
 
 		// Test 2: p=0.03, should NOT be significant (0.03 > 0.0167)
-		expect(results[1].originalPValue).toBe(0.03);
-		expect(results[1].correctedPValue).toBe(0.09); // 0.03 × 3
-		expect(results[1].isSignificant).toBe(false);
-		expect(results[1].correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
+		expect(second.originalPValue).toBe(0.03);
+		expect(second.correctedPValue).toBe(0.09); // 0.03 × 3
+		expect(second.isSignificant).toBe(false);
+		expect(second.correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
 
 		// Test 3: p=0.08, should NOT be significant (0.08 > 0.0167)
-		expect(results[2].originalPValue).toBe(0.08);
-		expect(results[2].correctedPValue).toBe(0.24); // 0.08 × 3
-		expect(results[2].isSignificant).toBe(false);
-		expect(results[2].correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
+		expect(third.originalPValue).toBe(0.08);
+		expect(third.correctedPValue).toBe(0.24); // 0.08 × 3
+		expect(third.isSignificant).toBe(false);
+		expect(third.correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
 	});
 
 	/**
@@ -63,11 +74,11 @@ describe("Bonferroni Correction", () => {
 		const expectedCorrectedAlpha = 0.01; // 0.05 / 5
 
 		// Only first test should be significant (0.005 < 0.01)
-		expect(results[0].isSignificant).toBe(true); // 0.005 < 0.01
-		expect(results[1].isSignificant).toBe(false); // 0.015 > 0.01
-		expect(results[2].isSignificant).toBe(false); // 0.025 > 0.01
-		expect(results[3].isSignificant).toBe(false); // 0.035 > 0.01
-		expect(results[4].isSignificant).toBe(false); // 0.045 > 0.01
+		expect(expectItem(results, 0).isSignificant).toBe(true); // 0.005 < 0.01
+		expect(expectItem(results, 1).isSignificant).toBe(false); // 0.015 > 0.01
+		expect(expectItem(results, 2).isSignificant).toBe(false); // 0.025 > 0.01
+		expect(expectItem(results, 3).isSignificant).toBe(false); // 0.035 > 0.01
+		expect(expectItem(results, 4).isSignificant).toBe(false); // 0.045 > 0.01
 
 		// All should have same corrected alpha
 		results.forEach((result) => {
@@ -87,9 +98,9 @@ describe("Bonferroni Correction", () => {
 
 		// Corrected p-values would be: 0.8×3=2.4, 0.9×3=2.7, 0.7×3=2.1
 		// But should be capped at 1.0
-		expect(results[0].correctedPValue).toBe(1.0); // capped from 2.4
-		expect(results[1].correctedPValue).toBe(1.0); // capped from 2.7
-		expect(results[2].correctedPValue).toBe(1.0); // capped from 2.1
+		expect(expectItem(results, 0).correctedPValue).toBe(1.0); // capped from 2.4
+		expect(expectItem(results, 1).correctedPValue).toBe(1.0); // capped from 2.7
+		expect(expectItem(results, 2).correctedPValue).toBe(1.0); // capped from 2.1
 
 		// None should be significant
 		results.forEach((result) => {
@@ -108,10 +119,11 @@ describe("Bonferroni Correction", () => {
 		const results = bonferroniCorrection(pValues, alpha);
 
 		expect(results).toHaveLength(1);
-		expect(results[0].originalPValue).toBe(0.03);
-		expect(results[0].correctedPValue).toBe(0.03); // 0.03 × 1 = 0.03
-		expect(results[0].isSignificant).toBe(true); // 0.03 < 0.05
-		expect(results[0].correctedAlpha).toBe(0.05); // 0.05 / 1 = 0.05
+		const result = expectItem(results, 0);
+		expect(result.originalPValue).toBe(0.03);
+		expect(result.correctedPValue).toBe(0.03); // 0.03 × 1 = 0.03
+		expect(result.isSignificant).toBe(true); // 0.03 < 0.05
+		expect(result.correctedAlpha).toBe(0.05); // 0.05 / 1 = 0.05
 	});
 
 	/**
@@ -127,9 +139,9 @@ describe("Bonferroni Correction", () => {
 		const expectedCorrectedAlpha = 0.01 / 3; // ≈ 0.0033
 
 		// Only first test should be significant (0.001 < 0.0033)
-		expect(results[0].isSignificant).toBe(true); // 0.001 < 0.0033
-		expect(results[1].isSignificant).toBe(false); // 0.005 > 0.0033
-		expect(results[2].isSignificant).toBe(false); // 0.01 > 0.0033
+		expect(expectItem(results, 0).isSignificant).toBe(true); // 0.001 < 0.0033
+		expect(expectItem(results, 1).isSignificant).toBe(false); // 0.005 > 0.0033
+		expect(expectItem(results, 2).isSignificant).toBe(false); // 0.01 > 0.0033
 
 		results.forEach((result) => {
 			expect(result.correctedAlpha).toBeCloseTo(expectedCorrectedAlpha, 4);
@@ -153,20 +165,24 @@ describe("Bonferroni Application to Test Results", () => {
 
 		expect(results).toHaveLength(3);
 
+		const first = expectItem(results, 0);
+		const second = expectItem(results, 1);
+		const third = expectItem(results, 2);
+
 		// Original properties should be preserved
-		expect(results[0].testName).toBe("Variation A");
-		expect(results[1].testName).toBe("Variation B");
-		expect(results[2].testName).toBe("Variation C");
+		expect(first.testName).toBe("Variation A");
+		expect(second.testName).toBe("Variation B");
+		expect(third.testName).toBe("Variation C");
 
 		// Bonferroni properties should be added
-		expect(results[0].originalPValue).toBe(0.01);
-		expect(results[0].correctedPValue).toBe(0.03);
-		expect(results[0].correctedAlpha).toBeCloseTo(0.0167, 3);
+		expect(first.originalPValue).toBe(0.01);
+		expect(first.correctedPValue).toBe(0.03);
+		expect(first.correctedAlpha).toBeCloseTo(0.0167, 3);
 
 		// Significance should be updated based on Bonferroni correction
-		expect(results[0].isSignificant).toBe(true); // 0.01 < 0.0167
-		expect(results[1].isSignificant).toBe(false); // 0.03 > 0.0167 (was true, now false)
-		expect(results[2].isSignificant).toBe(false); // 0.08 > 0.0167
+		expect(first.isSignificant).toBe(true); // 0.01 < 0.0167
+		expect(second.isSignificant).toBe(false); // 0.03 > 0.0167 (was true, now false)
+		expect(third.isSignificant).toBe(false); // 0.08 > 0.0167
 	});
 });
 
