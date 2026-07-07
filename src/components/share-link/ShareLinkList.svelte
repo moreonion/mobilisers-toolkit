@@ -84,23 +84,6 @@
 				</label>
 			{/if}
 
-			{#if platform === "LinkedIn"}
-				<label class="mt-6">
-					<small>Add template text (optional – link already added)</small>
-					<textarea
-						rows="3"
-						bind:value={shareLinkState.LinkedInParameters.text}
-						placeholder="Enter template text for LinkedIn"
-						aria-label="LinkedIn template text"></textarea>
-				</label>
-				<p>
-					<small
-						>LinkedIn appears to change the format of its share links quite often. Let us know if a
-						LinkedIn link stops working.
-					</small>
-				</p>
-			{/if}
-
 			{#if platform === "Threads"}
 				<div class="mt-6">
 					<label>

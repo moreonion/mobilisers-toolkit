@@ -34,9 +34,6 @@ export const shareLinkState = $state({
 	BlueSkyParameters: {
 		text: ""
 	},
-	LinkedInParameters: {
-		text: ""
-	},
 	ThreadsParameters: {
 		text: "",
 		url: ""
@@ -105,15 +102,6 @@ function getBlueSkyParametersPartOfURL(): string {
 	return encodeURIComponent(textContent);
 }
 
-function getLinkedInParametersPartOfURL(): string {
-	const textContent =
-		shareLinkState.LinkedInParameters.text !== ""
-			? `${shareLinkState.LinkedInParameters.text}\n\n${getPrefixedLinkToShare()}`
-			: `${getPrefixedLinkToShare()}`;
-
-	return encodeURIComponent(textContent);
-}
-
 function getThreadsParametersPartOfURL(): string {
 	let parametersURL = "";
 
@@ -158,8 +146,10 @@ export function getAllShareLinks(): ShareLinkSchemaType {
 			shareLink: `https://bsky.app/intent/compose?text=${getBlueSkyParametersPartOfURL()}`
 		},
 		{
+			// URL-only: the composer link that carries custom text doesn't open on
+			// mobile, so we use share-offsite, which builds the preview from the page.
 			platform: "LinkedIn",
-			shareLink: `https://www.linkedin.com/feed/?shareActive=true&text=${getLinkedInParametersPartOfURL()}`
+			shareLink: `https://www.linkedin.com/sharing/share-offsite/?url=${getEncodedLinkToShare()}`
 		},
 		{
 			platform: "Threads",
