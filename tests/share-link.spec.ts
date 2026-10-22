@@ -148,24 +148,31 @@ test.describe("Share Link Generator", () => {
 		);
 	});
 
-	test("should handle LinkedIn text input", async ({ page }) => {
+	test("should generate a CMS-compatible LinkedIn URL with tracking parameters", async () => {
 		await sharePage.goto();
-		await sharePage.fillLinkToShare("https://act.test-org.org/petition");
-
-		await expect(sharePage.linkedInSection).toBeVisible();
-		await expect(sharePage.linkedInTextarea).toBeVisible();
-
-		// Add text
-		const testText = "Professional networks can drive change too!";
-		await sharePage.fillLinkedInText(testText);
-
-		// Should see LinkedIn URL with the text and link included
-		expect(await sharePage.getUrlParam(sharePage.linkedInLink, "text")).toBe(
-			`${testText}\n\nhttps://act.test-org.org/petition`
+		await sharePage.fillLinkToShare(
+			"https://www.more-onion.com/land/roadblock-survey26?utm_source=share"
 		);
 
-		// Should show LinkedIn warning message
-		await expect(page.locator("text=LinkedIn appears to change the format")).toBeVisible();
+		await expect(sharePage.linkedInLink).toHaveText(
+			"https://www.linkedin.com/sharing/share-offsite?url=https%3A%2F%2Fwww.more-onion.com%2Fland%2Froadblock-survey26%3Futm_source%3Dshare"
+		);
+	});
+
+	test("should include the CMS-compatible LinkedIn URL in button HTML", async ({ page }) => {
+		await page.goto("/share-link-buttons");
+		await page
+			.locator('astro-island[component-url="/src/islands/share-link-buttons.svelte"]:not([ssr])')
+			.waitFor();
+		await page
+			.getByLabel("Enter the link you want to be shareable")
+			.fill("https://www.more-onion.com/land/roadblock-survey26?utm_source=share");
+
+		await expect
+			.poll(() => page.getByLabel("Generated share buttons HTML markup").inputValue())
+			.toContain(
+				'href="https://www.linkedin.com/sharing/share-offsite?url=https%3A%2F%2Fwww.more-onion.com%2Fland%2Froadblock-survey26%3Futm_source%3Dshare"'
+			);
 	});
 
 	test("should handle Threads text input", async () => {
