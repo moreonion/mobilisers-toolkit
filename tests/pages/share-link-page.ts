@@ -112,7 +112,7 @@ export class ShareLinkPage {
 	}
 
 	get linkedInLink() {
-		return this.linkedInSection.locator("p", { hasText: "linkedin.com/feed" });
+		return this.linkedInSection.locator("p", { hasText: "linkedin.com/sharing/share-offsite" });
 	}
 
 	get threadsLink() {

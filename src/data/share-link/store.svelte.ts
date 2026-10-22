@@ -149,7 +149,7 @@ export function getAllShareLinks(): ShareLinkSchemaType {
 			// URL-only: the composer link that carries custom text doesn't open on
 			// mobile, so we use share-offsite, which builds the preview from the page.
 			platform: "LinkedIn",
-			shareLink: `https://www.linkedin.com/sharing/share-offsite/?url=${getEncodedLinkToShare()}`
+			shareLink: `https://www.linkedin.com/sharing/share-offsite?url=${getEncodedLinkToShare()}`
 		},
 		{
 			platform: "Threads",
